@@ -3,11 +3,13 @@ package cn.edu.xmu.order.service;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.order.dao.OrderDao;
 import cn.edu.xmu.order.dao.OrderItemDao;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.vo.NewOrderItemVo;
 import cn.edu.xmu.order.model.vo.NewOrderRetVo;
 import cn.edu.xmu.order.model.vo.NewOrderVo;
+import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +26,10 @@ public class OrderService {
     private OrderItemDao orderItemDao;
 
     @Autowired
+    private OrderDao orderDao;
+    @Autowired
     private FreightDao freightDao;
+
     @Transactional
     public ReturnObject<VoObject> addNewOrder(NewOrderVo vo){
         ReturnObject<VoObject> returnObject=null;
@@ -66,9 +71,13 @@ public class OrderService {
 
         newOrderRetVo.createdByVo(vo);
 
-
-
         returnObject=new ReturnObject<>((VoObject) newOrderRetVo);
         return returnObject;
+    }
+
+    @Transactional
+    public ReturnObject<PageInfo<VoObject>> getAllSimpleOrders(String orderSn, Integer state, String beginTime, String endTime, Integer page, Integer pageSize){
+
+        return orderDao.getAllSimpleOrders(orderSn,state,beginTime,endTime,page,pageSize);
     }
 }
