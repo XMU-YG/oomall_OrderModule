@@ -76,7 +76,7 @@ public class OrderController {
     public Object getAllSimpleOrders(
             @RequestParam String orderSn,
             @RequestParam Integer state,
-            @RequestParam String beginTime,
+            @RequestParam String ime,
             @RequestParam String endTime,
             @RequestParam Integer page,
             @RequestParam Integer pageSize){
