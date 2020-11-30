@@ -6,6 +6,12 @@ import cn.edu.xmu.order.model.po.OrderPo;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * 订单信息的BO对象，包含订单的详细信息
+ * author Gang Ye
+ * create 2020/11/26
+ * modify 2020/11/26 by Gang Ye
+ */
 public class Order implements VoObject {
 
     private Long id;
@@ -13,18 +19,18 @@ public class Order implements VoObject {
     //顾客信息
     private Long customerId;
 
-    private Long customerUserName;
+    private String customerUserName;
 
-    private Long customerRealName;
+    private String customerRealName;
 
     //店铺信息
     private Long shopId;
 
-    private Long shopName;
+    private String shopName;
 
-    private Long shopGmtCreate;
+    private LocalDateTime shopGmtCreate;
 
-    private Long shopGmtModified;
+    private LocalDateTime shopGmtModified;
 
     private String orderSn;
 
@@ -106,23 +112,27 @@ public class Order implements VoObject {
         return null;
     }
 
-    public void setCustomerUserName(Long customerUserName) {
+    public void setCustomerUserName(String customerUserName) {
         this.customerUserName = customerUserName;
     }
 
-    public void setCustomerRealName(Long customerRealName) {
+    public void setCustomerRealName(String customerRealName) {
         this.customerRealName = customerRealName;
     }
 
-    public void setShopName(Long shopName) {
+    public void setShopName(String shopName) {
         this.shopName = shopName;
     }
 
-    public void setShopGmtCreate(Long shopGmtCreate) {
+    public void setShopGmtCreate(LocalDateTime shopGmtCreate) {
         this.shopGmtCreate = shopGmtCreate;
     }
 
-    public void setShopGmtModified(Long shopGmtModified) {
+    public void setShopGmtModified(LocalDateTime shopGmtModified) {
         this.shopGmtModified = shopGmtModified;
+    }
+
+    public void setSimpleOrderItemList(List<SimpleOrderItem> simpleOrderItemList) {
+        this.simpleOrderItemList = simpleOrderItemList;
     }
 }

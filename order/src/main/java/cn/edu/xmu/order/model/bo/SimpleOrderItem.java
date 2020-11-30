@@ -3,6 +3,12 @@ package cn.edu.xmu.order.model.bo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 
+/**
+ * BO对象，简单OrderItem对象
+ * author Gang Ye
+ * create 2020/11/26
+ * modify 2020/11/26 by Gang Ye
+ */
 public class SimpleOrderItem implements VoObject {
     private Long goods_sku_id;
     private Integer quantity;

@@ -5,6 +5,12 @@ import cn.edu.xmu.order.model.po.OrderPo;
 
 import java.time.LocalDateTime;
 
+/**
+ * BO对象，包含订单概要信息
+ * author Gang Ye
+ * create 2020/11/26
+ * modify 2020/11/26 by Gang Ye
+ */
 public class SimpleOrder implements VoObject {
     private Long id;
     private Long customerId;
@@ -19,7 +25,7 @@ public class SimpleOrder implements VoObject {
     private Long freightPrice;
 
     /**
-     * 由OrderPo构造RetVo
+     * 由OrderPo构造BO
      * @param orderPo
      */
     public SimpleOrder(OrderPo orderPo) {

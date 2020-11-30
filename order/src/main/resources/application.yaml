@@ -5,22 +5,22 @@ management:
         include: "*"
 
 server:
-  port: 8080
+  port: 8082
   tomcat:
     threads:
       max: 1000
 
 spring:
   application:
-    name: privilege-service
+    name: order-service
   profiles:
     active: dev
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
     initialization-mode: always
-    schema: classpath:schema.sql
-    data: classpath:testdata.sql
+#    schema: classpath:schema.sql
+#    data: classpath:testdata.sql
     druid:
       #初始化时建立物理连接的个数
       initial-size: 3

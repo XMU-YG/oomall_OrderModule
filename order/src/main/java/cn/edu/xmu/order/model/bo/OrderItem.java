@@ -6,6 +6,9 @@ import org.springframework.cglib.core.TinyBitSet;
 
 import java.time.LocalDateTime;
 
+/**
+ * OrderItem详细信息
+ */
 @Data
 public class OrderItem implements VoObject {
     private Long goods_sku_id;
