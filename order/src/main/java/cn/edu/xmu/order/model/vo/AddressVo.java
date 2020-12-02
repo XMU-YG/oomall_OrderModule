@@ -2,13 +2,22 @@ package cn.edu.xmu.order.model.vo;
 
 import cn.edu.xmu.order.model.po.OrderPo;
 
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 /**
  * 买家修改订单地址信息Vo对象
  */
 public class AddressVo {
+    @NotBlank(message = "收货人不能为空")
     private String consignee;
+    @NotNull(message = "地区不能为空")
     private Long regionId;
+    @NotBlank(message = "地址不能为空")
     private String address;
+
     private String mobile;
 
     public AddressVo(String consignee, Long regionId, String address, String mobile) {

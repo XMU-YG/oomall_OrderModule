@@ -2,6 +2,9 @@ package cn.edu.xmu.order.model.bo;
 
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.order.model.po.OrderPo;
+import cn.edu.xmu.order.model.vo.OrderRetVo;
+import cn.edu.xmu.order.model.vo.SimpleOrderRetVo;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,6 +15,7 @@ import java.util.List;
  * create 2020/11/26
  * modify 2020/11/26 by Gang Ye
  */
+@Data
 public class Order implements VoObject {
 
     private Long id;
@@ -104,12 +108,132 @@ public class Order implements VoObject {
         this.gmtModified=po.getGmtModified();
     }
     @Override
-    public Object createVo() {
-        return null;
+    public OrderRetVo createVo() {
+        return new OrderRetVo(this);
     }
     @Override
     public Object createSimpleVo() {
         return null;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Long getCustomerId() {
+        return customerId;
+    }
+
+    public String getCustomerUserName() {
+        return customerUserName;
+    }
+
+    public String getCustomerRealName() {
+        return customerRealName;
+    }
+
+    public Long getShopId() {
+        return shopId;
+    }
+
+    public String getShopName() {
+        return shopName;
+    }
+
+    public LocalDateTime getShopGmtCreate() {
+        return shopGmtCreate;
+    }
+
+    public LocalDateTime getShopGmtModified() {
+        return shopGmtModified;
+    }
+
+    public String getOrderSn() {
+        return orderSn;
+    }
+
+    public Long getPid() {
+        return pid;
+    }
+
+    public String getConsignee() {
+        return consignee;
+    }
+
+    public Long getRegionId() {
+        return regionId;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public String getMobile() {
+        return mobile;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public Byte getOrderType() {
+        return orderType;
+    }
+
+    public Long getFreightPrice() {
+        return freightPrice;
+    }
+
+    public Long getCouponId() {
+        return couponId;
+    }
+
+    public Long getDiscountPrice() {
+        return discountPrice;
+    }
+
+    public Long getOriginPrice() {
+        return originPrice;
+    }
+
+    public Long getPresaleId() {
+        return presaleId;
+    }
+
+    public Long getGrouponDiscount() {
+        return grouponDiscount;
+    }
+
+    public Integer getRebateNum() {
+        return rebateNum;
+    }
+
+    public LocalDateTime getConfirmTime() {
+        return confirmTime;
+    }
+
+    public String getShipmentSn() {
+        return shipmentSn;
+    }
+
+    public Byte getState() {
+        return state;
+    }
+
+    public Byte getSubstate() {
+        return substate;
+    }
+
+    public LocalDateTime getGmtCreated() {
+        return gmtCreated;
+    }
+
+    public LocalDateTime getGmtModified() {
+        return gmtModified;
+    }
+
+    public List<SimpleOrderItem> getSimpleOrderItemList() {
+        return simpleOrderItemList;
     }
 
     public void setCustomerUserName(String customerUserName) {

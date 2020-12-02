@@ -24,6 +24,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @Repository
@@ -32,7 +33,7 @@ public class OrderDao {
     private  static  final Logger logger = LoggerFactory.getLogger(OrderDao.class);
     @Autowired
     private OrderPoMapper orderPoMapper;
-
+    @Autowired
     private OrderItemPoMapper orderItemPoMapper;
 
     /**
@@ -106,8 +107,8 @@ public class OrderDao {
      * @created 2020/11/27
      * @modified 2020/11/30 by Gang Ye 增加orderItem插入
      */
-    public ReturnObject getOrderById(Long customerId,Long orderId){
-        ReturnObject<Order> orderReturnObject=null;
+    public ReturnObject<VoObject> getOrderById(Long customerId,Long orderId){
+        ReturnObject<VoObject> orderReturnObject=null;
 
         OrderPo orderPo=null;
         try{
@@ -116,9 +117,9 @@ public class OrderDao {
             logger.error("getOrderById:  DataAccessException:  "+e.getMessage());
             return  new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
         }
-        if (orderPo==null||orderPo.getBeDeleted().equals(1)){
+        if (orderPo==null&&orderPo.getBeDeleted().equals(1)){
             logger.debug("customer getOrderById error: it's empty!  orderId:  "+orderId+"   customerId:  "+customerId);
-            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST,"订单号不存在");
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单号不存在");
 
         }
         else if(orderPo.getCustomerId().equals(customerId)){
@@ -141,9 +142,10 @@ public class OrderDao {
                 SimpleOrderItem simpleOrderItem=new SimpleOrderItem(orderItemPo);
                 simpleOrderItems.add(simpleOrderItem);
             }
-            order.setSimpleOrderItemList(simpleOrderItems);
 
+            order.setSimpleOrderItemList(simpleOrderItems);
             orderReturnObject=new ReturnObject<>(order);
+
             return orderReturnObject;
         }
         else{
@@ -177,7 +179,7 @@ public class OrderDao {
 
         }
         else if(orderPo.getCustomerId().equals(customerId)){
-            if (orderPo.getState().equals(0)){  //0为未发货
+            if (orderPo.getState().equals(15)){  //15为未发货
                 logger.debug("customer modifySelfOrderAddressById success！  orderId:  "+orderId+"   customerId:  "+customerId);
                 OrderPo po=vo.createPo();
                 po.setGmtModified(LocalDateTime.now());
@@ -224,10 +226,11 @@ public class OrderDao {
 
         }
         else if(orderPo.getCustomerId().equals(customerId)){
-            if (orderPo.getState().equals(0)){  //0为未发货
+            if (orderPo.getState().equals(15)){  //15为待发货
                 logger.debug("customer deleteSelfOrderById success！  orderId:  "+orderId+"   customerId:  "+customerId);
                 orderPo.setGmtModified(LocalDateTime.now());
                 orderPo.setBeDeleted((byte) 1);
+                orderPo.setState((byte) 0);//0为订单取消
                 orderPoMapper.updateByPrimaryKeySelective(orderPo);
                 orderReturnObject=new ReturnObject(ResponseCode.OK,"订单取消成功");
                 return orderReturnObject;
@@ -269,10 +272,10 @@ public class OrderDao {
 
         }
         else if(orderPo.getCustomerId().equals(customerId)){
-            if (orderPo.getState().equals(1)){  //1为待收货
+            if (orderPo.getState().equals(17)){  //17为待收货
                 logger.debug("customer confirmSelfOrderById success！  orderId:  "+orderId+"   customerId:  "+customerId);
                 orderPo.setGmtModified(LocalDateTime.now());
-                orderPo.setState((byte)2);//2为已收货
+                orderPo.setState((byte)18);//18为已收货
                 orderPoMapper.updateByPrimaryKeySelective(orderPo);
                 orderReturnObject=new ReturnObject(ResponseCode.OK,"订单确认收货成功");
                 return orderReturnObject;
@@ -286,6 +289,229 @@ public class OrderDao {
         else{
             logger.debug("customer deleteSelfOrderById error: don't have privilege!   orderId:  "+orderId+"   customerId:  "+customerId);
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"订单无权取消，不是自己订单");
+        }
+    }
+
+    public ReturnObject transLateGroToNor(Long customerId, Long id) {
+        OrderPo orderPo=null;
+        try{
+            OrderPoExample example=new OrderPoExample();
+            OrderPoExample.Criteria criteria=example.createCriteria();
+            criteria.andIdEqualTo(id);
+            criteria.andCustomerIdEqualTo(customerId);
+            orderPo=(OrderPo) orderPoMapper.selectByExample(example);
+        }catch (DataAccessException e){
+            logger.error("transLateGroToNor:  DataAccessException:  "+e.getMessage());
+            return  new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+        if (orderPo==null){
+            logger.debug("customer transLateGroToNor error: it's empty!  orderId:  "+id+"   customerId:  "+customerId);
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST,"订单号不存在");
+        }
+        else{
+            if (orderPo.getState().equals(9)){
+                //9未成团
+                orderPo.setOrderType((byte) 0);
+                orderPoMapper.updateByPrimaryKeySelective(orderPo);
+
+                return new ReturnObject(ResponseCode.OK,"订单确认收货成功");
+            }
+            else{
+                logger.debug("customer transLateGroToNor error！the order state: "+orderPo.getState());
+                return new ReturnObject(ResponseCode.ORDER_STATENOTALLOW,"订单状态禁止");
+            }
+        }
+    }
+
+    public ReturnObject<PageInfo<VoObject>> getShopSelfSimpleOrders(Long shopId, Long customerId, String orderSn, String beginTime, String endTime, Integer page, Integer pageSize) {
+        //设置查询条件
+        OrderPoExample example=new OrderPoExample();
+        OrderPoExample.Criteria criteria=example.createCriteria();
+        criteria.andCustomerIdEqualTo(customerId);
+        criteria.andShopIdEqualTo(shopId);
+        criteria.andOrderSnEqualTo(orderSn);
+        //转换日期格式 String-》LocalDateTime
+        LocalDateTime begin=LocalDateTime.parse(beginTime);
+        LocalDateTime end=LocalDateTime.parse(endTime);
+        criteria.andConfirmTimeBetween(begin,end);
+        List<OrderPo> orderPos=null;
+        try{
+            orderPos=orderPoMapper.selectByExample(example);
+        }catch (DataAccessException e){
+            logger.error("getShopSelfSimpleOrders:  DataAccessException:  "+e.getMessage());
+            return  new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+
+        List<VoObject> ret=new ArrayList<>(orderPos.size());
+        for(OrderPo po:orderPos){
+            SimpleOrder simpleOrder=new SimpleOrder(po);
+            logger.debug("getShopSelfSimpleOrders: shopId: "+shopId);
+            ret.add(simpleOrder);
+        }
+
+        /**
+         * ret 分页内容，其内容为bo（实现VoObject接口）对象
+         * simpleOrderPoPage可以看做分页的大容器，由po构造
+         * simpleOrderPage 是返回的分页对象，由ret构造，大小由simpleOrderPoPage确定
+         */
+        PageHelper.startPage(page,pageSize);
+        PageInfo<OrderPo> simpleOrderPoPage=PageInfo.of(orderPos);
+        PageInfo<VoObject> simpleOrderPage=new PageInfo<>(ret);
+        simpleOrderPage.setPages(simpleOrderPoPage.getPages());
+        simpleOrderPage.setPageNum(simpleOrderPoPage.getPageNum());
+        simpleOrderPage.setPageSize(simpleOrderPoPage.getPageSize());
+        simpleOrderPage.setTotal(simpleOrderPoPage.getTotal());
+        return new ReturnObject<>(simpleOrderPage);
+    }
+
+    public ReturnObject<VoObject> getShopSelfOrder(Long shopId, Long id) {
+        ReturnObject<VoObject> orderReturnObject=null;
+
+        OrderPo orderPo=null;
+        try{
+            orderPo=orderPoMapper.selectByPrimaryKey(id);
+        }catch (DataAccessException e){
+            logger.error("getShopSelfOrder:  DataAccessException:  "+e.getMessage());
+            return  new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+        if (orderPo==null){
+            logger.debug("shop getOrderById error: it's empty!  orderId:  "+id+"   shopId:  "+shopId);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单号不存在");
+
+        }
+        else if(orderPo.getShopId().equals(shopId)){
+            logger.debug("shop getSelfOrder success！  orderId:  "+id+"   shopId:  "+shopId);
+            Order order=new Order(orderPo);
+
+            order.setCustomerUserName("123");
+            order.setCustomerRealName("123");
+            order.setShopName("123");
+            LocalDateTime time=LocalDateTime.of(1,1,1,1,1,1);
+            order.setShopGmtCreate(time);
+            order.setShopGmtModified(time);
+
+            OrderItemPoExample itemPoExample=new OrderItemPoExample();
+            OrderItemPoExample.Criteria criteria=itemPoExample.createCriteria();
+            criteria.andOrderIdEqualTo(id);
+            List<OrderItemPo> orderItemPos=orderItemPoMapper.selectByExample(itemPoExample);
+            ArrayList<SimpleOrderItem> simpleOrderItems=new ArrayList<>(orderItemPos.size());
+            for (OrderItemPo orderItemPo : orderItemPos){
+                SimpleOrderItem simpleOrderItem=new SimpleOrderItem(orderItemPo);
+                simpleOrderItems.add(simpleOrderItem);
+            }
+
+            order.setSimpleOrderItemList(simpleOrderItems);
+            orderReturnObject=new ReturnObject<>(order);
+
+            return orderReturnObject;
+        }
+        else{
+            logger.debug("shop getSelfOrder error: don't have privilege!   orderId:  "+id+"   shopId:  "+shopId);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"订单无权访问，不是本店订单");
+        }
+    }
+
+    public ReturnObject modifyOrderMessage(Long shopId, Long orderId, String message) {
+        ReturnObject orderReturnObject=null;
+
+        OrderPo orderPo=null;
+        try{
+            orderPo=orderPoMapper.selectByPrimaryKey(orderId);
+        }catch (DataAccessException e){
+            logger.error("modifyOrderMessage:  DataAccessException:  "+e.getMessage());
+            return  new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+        if (orderPo==null){
+            logger.debug("modifyOrderMessage error: it's empty!  orderId:  "+orderId+"   customerId:  "+shopId);
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST,"订单号不存在");
+
+        }
+        else if(orderPo.getShopId().equals(shopId)){
+            logger.debug("modifyOrderMessage success！  orderId:  "+orderId+"   orderId:  "+orderId);
+            orderPo.setGmtModified(LocalDateTime.now());
+            orderPo.setMessage(message);
+            orderPoMapper.updateByPrimaryKeySelective(orderPo);
+            orderReturnObject=new ReturnObject(ResponseCode.OK,"订单留言成功");
+            return orderReturnObject;
+
+        }
+        else{
+            logger.debug("modifyOrderMessage error: don't have privilege!   orderId:  "+orderId+"   shopId:  "+shopId);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"订单无权修改，不是自己订单");
+        }
+    }
+
+    public ReturnObject deleteShopOrder(Long shopId, Long orderId) {
+        ReturnObject orderReturnObject=null;
+
+        OrderPo orderPo=null;
+        try{
+            orderPo=orderPoMapper.selectByPrimaryKey(orderId);
+        }catch (DataAccessException e){
+            logger.error("deleteSelfOrderById:  DataAccessException:  "+e.getMessage());
+            return  new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+        if (orderPo==null){
+            logger.debug("customer deleteSelfOrderById error: it's empty!  orderId:  "+orderId+"   customerId:  "+customerId);
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST,"订单号不存在");
+
+        }
+        else if(orderPo.getShopId().equals(shopId)){
+            if (orderPo.getState().equals(15)){  //15为待发货
+                logger.debug("deleteShopOrder success！  orderId:  "+orderId+"   shopId:  "+shopId);
+                orderPo.setGmtModified(LocalDateTime.now());
+                orderPo.setBeDeleted((byte) 1);
+                orderPo.setState((byte) 0);//0为订单取消
+                orderPoMapper.updateByPrimaryKeySelective(orderPo);
+                orderReturnObject=new ReturnObject(ResponseCode.OK,"订单取消成功");
+                return orderReturnObject;
+            }
+            else {
+                logger.debug("deleteShopOrder error！the order state: "+orderPo.getState());
+                return new ReturnObject(ResponseCode.ORDER_STATENOTALLOW,"订单已发货");
+            }
+
+        }
+        else{
+            logger.debug("deleteShopOrder error: don't have privilege!   orderId:  "+orderId+"   shopId:  "+shopId);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"订单无权取消，不是自己订单");
+        }
+    }
+
+    public ReturnObject deliverShopOrder(Long shopId, Long orderId, String freightSn) {
+        ReturnObject orderReturnObject=null;
+
+        OrderPo orderPo=null;
+        try{
+            orderPo=orderPoMapper.selectByPrimaryKey(orderId);
+        }catch (DataAccessException e){
+            logger.error("deliverShopOrder:  DataAccessException:  "+e.getMessage());
+            return  new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+        if (orderPo==null){
+            logger.debug("deliverShopOrder error: it's empty!  orderId:  "+orderId+"   shopId:  "+shopId);
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST,"订单号不存在");
+
+        }
+        else if(orderPo.getShopId().equals(shopId)){
+            if (orderPo.getState().equals(15)||orderPo.getState().equals(16)){  //15为待发货
+                logger.debug("deliverShopOrder success！  orderId:  "+orderId+"   shopId:  "+shopId);
+                orderPo.setGmtModified(LocalDateTime.now());
+                //orderPo.setFreightSn(freightSn);
+                orderPo.setState((byte)16);//16为已发货
+                orderPoMapper.updateByPrimaryKeySelective(orderPo);
+                orderReturnObject=new ReturnObject(ResponseCode.OK,"订单发货成功");
+                return orderReturnObject;
+            }
+            else {
+                logger.debug("deliverShopOrder error！the order state: "+orderPo.getState());
+                return new ReturnObject(ResponseCode.ORDER_STATENOTALLOW,"订单状态禁止");
+            }
+
+        }
+        else{
+            logger.debug("deliverShopOrder error: don't have privilege!   orderId:  "+orderId+"   shopId:  "+shopId);
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"订单无权修改，不是自己订单");
         }
     }
 }

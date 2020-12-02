@@ -6,6 +6,7 @@ import java.util.List;
 
 @Data
 public class NewOrderVo {
+
     private List<NewOrderItemVo> orderItems;
     private String consignee;
     private Long regionId;

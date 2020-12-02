@@ -2,6 +2,8 @@ package cn.edu.xmu.order.model.bo;
 
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.order.model.po.OrderPo;
+import cn.edu.xmu.order.model.vo.SimpleOrderRetVo;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
@@ -11,6 +13,7 @@ import java.time.LocalDateTime;
  * create 2020/11/26
  * modify 2020/11/26 by Gang Ye
  */
+@Data
 public class SimpleOrder implements VoObject {
     private Long id;
     private Long customerId;
@@ -42,9 +45,53 @@ public class SimpleOrder implements VoObject {
         this.shopId=orderPo.getShopId();
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public Long getCustomerId() {
+        return customerId;
+    }
+
+    public Long getShopId() {
+        return shopId;
+    }
+
+    public Long getPid() {
+        return pid;
+    }
+
+    public Byte getOrderType() {
+        return orderType;
+    }
+
+    public Byte getState() {
+        return state;
+    }
+
+    public Byte getSubState() {
+        return subState;
+    }
+
+    public LocalDateTime getGmtCreate() {
+        return gmtCreate;
+    }
+
+    public Long getOriginPrice() {
+        return originPrice;
+    }
+
+    public Long getDiscountPrice() {
+        return discountPrice;
+    }
+
+    public Long getFreightPrice() {
+        return freightPrice;
+    }
+
     @Override
-    public Object createVo() {
-        return null;
+    public SimpleOrderRetVo createVo() {
+        return new SimpleOrderRetVo(this);
     }
 
     @Override

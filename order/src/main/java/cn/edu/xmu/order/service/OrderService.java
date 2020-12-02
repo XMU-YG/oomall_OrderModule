@@ -87,7 +87,7 @@ public class OrderService {
 
 
     @Transactional
-    public ReturnObject getOrderById(Long customerId,Long orderId){
+    public ReturnObject<VoObject> getOrderById(Long customerId,Long orderId){
         return orderDao.getOrderById(customerId,orderId);
     }
 
@@ -104,5 +104,33 @@ public class OrderService {
     @Transactional
     public ReturnObject confirmSelfOrderById(Long customerId, Long orderId) {
         return orderDao.confirmSelfOrderById(customerId,orderId);
+    }
+
+    @Transactional
+    public ReturnObject translateGroToNor(Long customerId, Long id) {
+        return orderDao.transLateGroToNor(customerId,id);
+    }
+
+    @Transactional
+    public ReturnObject<PageInfo<VoObject>> getShopSelfSimpleOrders(Long shopId, Long customerId, String orderSn, String beginTime, String endTime, Integer page, Integer pageSize) {
+        return orderDao.getShopSelfSimpleOrders(shopId,customerId,orderSn,beginTime,endTime,page,pageSize);
+    }
+
+    @Transactional
+    public ReturnObject<VoObject> getShopSelfOrder(Long shopId, Long id) {
+        return orderDao.getShopSelfOrder(shopId,id);
+    }
+
+    @Transactional
+    public ReturnObject modifyOrderMessage(Long shopId, Long orderId, String message) {
+        return orderDao.modifyOrderMessage(shopId,orderId,message);
+    }
+
+    public ReturnObject deleteShopOrder(Long shopId, Long orderId) {
+        return orderDao.deleteShopOrder(shopId,orderId);
+    }
+
+    public ReturnObject deliverShopOrder(Long shopId, Long orderId, String freightSn) {
+        return orderDao.deliverShopOrder(shopId,orderId,freightSn);
     }
 }
