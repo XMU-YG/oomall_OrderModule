@@ -14,6 +14,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -111,6 +112,56 @@ public class FreightDao {
         } else {
             logger.debug("findPieceItemsById error: don't have privilege!   shopid:  " + shopid + "   id:  " + id);
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, "运费模板不属于该店铺");
+        }
+    }
+
+    /**
+     * 店家或管理员删除重量运费模板明细
+     * 需要登陆
+     * @param shopId
+     * @param id
+     * @author ShiYu Liao
+     * @created 2020/12/7
+     */
+    public ReturnObject deleteWeightItem(Long shopId, Long id) {
+
+        WeightFreightPo weightFreightPo=null;
+        try{
+            weightFreightPo=weightFreightPoMapper.selectByPrimaryKey(id);
+        }catch (DataAccessException e){
+            logger.error("deleteWeightItem:  DataAccessException:  "+e.getMessage());
+            return  new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,"失败");
+        }
+        if (weightFreightPo==null){
+            logger.debug("shop deleteWeightItem error: it's empty!  id:  "+id+"   shopId:  "+shopId);
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST,"运费明细不存在");
+
+        }
+        else {
+            FreightPo freightPo =freightPoMapper.selectByPrimaryKey(weightFreightPo.getFreightModelId());
+            if(freightPo==null)
+            {
+                logger.error("null");
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            }
+            else if(freightPo.getShopId()!=shopId)
+            {
+                logger.error("没有删除该模板的权限");
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+            }
+            else
+            {
+                if(weightFreightPoMapper.deleteByPrimaryKey(id)==1)
+                {
+                    logger.debug("shop deleteWeightItem success！  shopId:  "+shopId+"   id:  "+id);
+                    return new ReturnObject(ResponseCode.OK,"删除重量运费模板明细成功");
+                }
+               else
+                {
+                    logger.debug("shop deleteWeightItem error: The deletion failed!  id:  "+id+"   shopId:  "+shopId);
+                    return new ReturnObject(ResponseCode.INTERNAL_SERVER_ERR,"删除重量运费明细失败");
+                }
+            }
         }
     }
 }

@@ -1,6 +1,8 @@
 package cn.edu.xmu.freight.controller;
 
 import cn.edu.xmu.freight.service.FreightService;
+import cn.edu.xmu.ooad.annotation.Audit;
+import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
@@ -88,5 +90,29 @@ public class FreightController {
             //ret=Common.decorateReturnObject(returnObject);
         }
         return ret;
+    }
+
+    /**
+     * 店家或管理员删除重量运费模板明细
+     * 需要登陆
+     * @param shopId
+     * @param id
+     * @author ShiYu Liao
+     * @created 2020/12/7
+     */
+    @ApiOperation(value = "店家或管理员删除重量运费模板明细")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(name="shopId", value="店铺id", required = true, dataType="int", paramType="path"),
+            @ApiImplicitParam(name="id", value="运费明细id", required = true, dataType="int", paramType="path"),
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+
+    })
+    //@Audit
+    @DeleteMapping("/shops/{shopId}/weightItems/{id}")
+    public Object deleteWeightItem(@PathVariable(name = "shopId") Long shopId,@PathVariable(name = "id") Long id){
+        return freightService.deleteWeightItem(shopId,id);
     }
 }
