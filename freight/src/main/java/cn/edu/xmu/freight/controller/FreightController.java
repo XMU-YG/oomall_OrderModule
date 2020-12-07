@@ -111,8 +111,32 @@ public class FreightController {
 
     })
     //@Audit
-    @DeleteMapping("/shops/{shopId}/weightItems/{id}")
+    @DeleteMapping("shops/{shopId}/weightItems/{id}")
     public Object deleteWeightItem(@PathVariable(name = "shopId") Long shopId,@PathVariable(name = "id") Long id){
         return freightService.deleteWeightItem(shopId,id);
+    }
+
+    /**
+     * 店家或管理员删除件数运费模板明细
+     * 需要登陆
+     * @param shopId
+     * @param id
+     * @author ShiYu Liao
+     * @created 2020/12/7
+     */
+    @ApiOperation(value = "店家或管理员删除件数运费模板明细")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(name="shopId", value="店铺id", required = true, dataType="int", paramType="path"),
+            @ApiImplicitParam(name="id", value="运费明细id", required = true, dataType="int", paramType="path"),
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+
+    })
+    //@Audit
+    @DeleteMapping("shops/{shopId}/pieceItems/{id}")
+    public Object deletePieceItem(@PathVariable(name = "shopId") Long shopId,@PathVariable(name = "id") Long id){
+        return freightService.deletePieceItem(shopId,id);
     }
 }

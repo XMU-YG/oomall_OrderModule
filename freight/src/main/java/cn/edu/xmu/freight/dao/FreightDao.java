@@ -164,4 +164,54 @@ public class FreightDao {
             }
         }
     }
+
+    /**
+     * 店家或管理员删除件数运费模板明细
+     * 需要登陆
+     * @param shopId
+     * @param id
+     * @author ShiYu Liao
+     * @created 2020/12/7
+     */
+    public ReturnObject deletePieceItem(Long shopId, Long id) {
+
+        PieceFreightPo pieceFreightPo=null;
+        try{
+            pieceFreightPo=pieceFreightPoMapper.selectByPrimaryKey(id);
+        }catch (DataAccessException e){
+            logger.error("deletePieceItem:  DataAccessException:  "+e.getMessage());
+            return  new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,"失败");
+        }
+        if (pieceFreightPo==null){
+            logger.debug("shop deletePieceItem error: it's empty!  id:  "+id+"   shopId:  "+shopId);
+            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST,"运费明细不存在");
+
+        }
+        else {
+            FreightPo freightPo =freightPoMapper.selectByPrimaryKey(pieceFreightPo.getFreightModelId());
+            if(freightPo==null)
+            {
+                logger.error("null");
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+            }
+            else if(freightPo.getShopId()!=shopId)
+            {
+                logger.error("没有删除该模板的权限");
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+            }
+            else
+            {
+                if(pieceFreightPoMapper.deleteByPrimaryKey(id)==1)
+                {
+                    logger.debug("shop deletePieceItem success！  shopId:  "+shopId+"   id:  "+id);
+                    return new ReturnObject(ResponseCode.OK,"删除件数运费模板明细成功");
+                }
+                else
+                {
+                    logger.debug("shop deletePieceItem error: The deletion failed!  id:  "+id+"   shopId:  "+shopId);
+                    return new ReturnObject(ResponseCode.INTERNAL_SERVER_ERR,"删除件数运费明细失败");
+                }
+            }
+        }
+    }
 }

@@ -31,4 +31,9 @@ public class FreightService {
     public ReturnObject deleteWeightItem(Long shopId, Long id) {
         return freightDao.deleteWeightItem(shopId,id);
     }
+
+    @Transactional
+    public ReturnObject deletePieceItem(Long shopId, Long id) {
+        return freightDao.deletePieceItem(shopId,id);
+    }
 }
