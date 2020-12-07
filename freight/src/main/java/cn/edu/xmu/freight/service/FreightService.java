@@ -25,12 +25,28 @@ public class FreightService {
 
     @Autowired
     private FreightDao freightDao;
+
+    /**
+     * 获取运费模板概要
+     * @author 胡曼珑
+     * @param shopId
+     * @param id
+     * @return
+     */
     @Transactional
     public ReturnObject<VoObject> getFreModelSummeryByModelId(Long shopId,Long id)
     {
         logger.info("id"+id+" shopId"+shopId);
         return freightDao.getFreModelSummeryByModelId(shopId,id);
     }
+
+    /**
+     * 定义运费模板
+     * @author 胡曼珑
+     * @param shopId
+     * @param vo
+     * @return
+     */
     @Transactional
     public ReturnObject<VoObject> createFreightModel(Long shopId, FreightInfoVo vo)
     {
@@ -51,6 +67,15 @@ public class FreightService {
         return retObj;
     }
 
+    /**
+     * 获得店铺的运费模板
+     * @author 胡曼珑
+     * @param id
+     * @param name
+     * @param page
+     * @param pageSize
+     * @return
+     */
     @Transactional
     public ReturnObject<PageInfo<VoObject>> getFreModelByShopId(Long id,String name,Integer page,Integer pageSize)
     {
@@ -58,6 +83,15 @@ public class FreightService {
         return returnObject;
     }
 
+
+    /**
+     * 修改运费模板
+     * @author 胡曼珑
+     * @param shopId
+     * @param id
+     * @param vo
+     * @return
+     */
     @Transactional
     public ReturnObject<VoObject> editFreightModel(Long shopId,Long id, FreightSimpInfoVo vo)
     {
@@ -71,6 +105,13 @@ public class FreightService {
 
     }
 
+    /**
+     * 设置店铺的默认运费模板
+     * @author 胡曼珑
+     * @param shopId
+     * @param id
+     * @return
+     */
     @Transactional
     public ReturnObject<VoObject> setDefaultModel(Long shopId,Long id)
     {
@@ -81,16 +122,5 @@ public class FreightService {
         ReturnObject<Freight> retObj=freightDao.setDefaultModel(freight);
         return new ReturnObject<>(retObj.getCode(),retObj.getErrmsg());
     }
-/*
-    @Transactional
-    public ReturnObject<VoObject> createPieceFreight(Long shopId, Long id, PieceModelItemVo vo)
-    {
-        PieceFreight pieceFreight=vo.createPieceFreight();
-        pieceFreight.setGmtCreate(LocalDateTime.now());
-        ReturnObject<PieceFreight> ret=freightDao.createPieceFreight(shopId,id,pieceFreight);
-        ReturnObject<VoObject> retObj=null;
-        return retObj;
-    }
 
- */
 }
