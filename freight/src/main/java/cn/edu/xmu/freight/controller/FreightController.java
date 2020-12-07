@@ -59,4 +59,34 @@ public class FreightController {
         return ret;
     }
 
+    /**
+     * 店家或管理员查询件数运费模板的明细
+     *
+     * @param shopId 店铺id
+     * @param id     运费模板id
+     * @return 运费模板详细信息
+     * @author ShiYu Liao
+     * @Create 2020/12/7
+     * @Modify 2020/12/7
+     */
+    @ApiOperation(value = "店家或管理员查询件数运费模板的明细")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "shopId", value = "店铺id", required = true, dataType = "int", paramType = "path"),
+            @ApiImplicitParam(name = "id", value = "运费模板id", required = true, dataType = "int", paramType = "path"),
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    @GetMapping("shops/{shopId}/freightmodels/{id}/pieceItems")
+    public Object getPieceItemsById(@PathVariable(name = "shopId") Long shopId, @PathVariable(name = "id") Long id) {
+        Object ret = null;
+        ReturnObject<List> returnObject = freightService.findPieceItemsById(shopId, id);
+        if (returnObject.getCode() == ResponseCode.OK) {
+            ret = Common.getListRetObject(returnObject);
+        } else {
+            ret = ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
+            //ret=Common.decorateReturnObject(returnObject);
+        }
+        return ret;
+    }
 }
