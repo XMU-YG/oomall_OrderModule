@@ -2,7 +2,10 @@ package cn.edu.xmu.freight.service;
 
 import cn.edu.xmu.freight.dao.FreightDao;
 import cn.edu.xmu.freight.model.bo.FreightItem;
+import cn.edu.xmu.freight.model.bo.PieceItem;
 import cn.edu.xmu.freight.model.po.FreightPo;
+import cn.edu.xmu.freight.model.po.PieceFreightPo;
+import cn.edu.xmu.freight.model.po.WeightFreightPo;
 import cn.edu.xmu.freight.model.vo.WeightItemVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,12 +29,26 @@ public class FreightService {
 
     @Transactional
     public ReturnObject<List> findFreightItemsById(Long shopId, Long id){
-        return freightDao.findFreightItemsById(shopId,id);
+        
+        List<WeightFreightPo> weightFreightPos = freightDao.findFreightItemsById(id);
+        ArrayList<FreightItem> freightItems = new ArrayList<>(weightFreightPos.size());
+        for (WeightFreightPo weightFreightPo : weightFreightPos) {
+            FreightItem freightItem = new FreightItem(weightFreightPo);
+            freightItems.add(freightItem);
+        }
+        return new ReturnObject<>(freightItems);
     }
 
     @Transactional
     public ReturnObject<List> findPieceItemsById(Long shopId, Long id){
-        return freightDao.findPieceItemsById(shopId,id);
+
+        List<PieceFreightPo> pieceFreightPos=freightDao.findPieceItemsById(id);
+        ArrayList<PieceItem> pieceItems = new ArrayList<>(pieceFreightPos.size());
+        for (PieceFreightPo pieceFreightPo : pieceFreightPos) {
+            PieceItem pieceItem = new PieceItem(pieceFreightPo);
+            pieceItems.add(pieceItem);
+        }
+        return new ReturnObject<>(pieceItems);
     }
 
     @Transactional
