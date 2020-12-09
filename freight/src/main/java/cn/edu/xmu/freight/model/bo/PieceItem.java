@@ -24,6 +24,42 @@ public class PieceItem implements VoObject {
     private LocalDateTime gmtCreate;
     private LocalDateTime gmtModified;
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setFreightModelId(Long freightModelId) {
+        this.freightModelId = freightModelId;
+    }
+
+    public void setRegionId(Long regionId) {
+        this.regionId = regionId;
+    }
+
+    public void setFirstItem(Integer firstItem) {
+        this.firstItem = firstItem;
+    }
+
+    public void setFirstItemPrice(Long firstItemPrice) {
+        this.firstItemPrice = firstItemPrice;
+    }
+
+    public void setAdditionalItems(Integer additionalItems) {
+        this.additionalItems = additionalItems;
+    }
+
+    public void setAdditionalItemsPrice(Long additionalItemsPrice) {
+        this.additionalItemsPrice = additionalItemsPrice;
+    }
+
+    public void setGmtCreate(LocalDateTime gmtCreate) {
+        this.gmtCreate = gmtCreate;
+    }
+
+    public void setGmtModified(LocalDateTime gmtModified) {
+        this.gmtModified = gmtModified;
+    }
+
     public Long getId() {
         return id;
     }
@@ -70,6 +106,8 @@ public class PieceItem implements VoObject {
         this.gmtCreate = po.getGmtCreate();
         this.gmtModified = po.getGmtModified();
     }
+
+    public PieceItem(){}
 
     @Override
     public Object createVo() {
