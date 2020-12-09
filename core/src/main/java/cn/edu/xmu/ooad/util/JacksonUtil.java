@@ -193,7 +193,16 @@ public class JacksonUtil {
         }
         return null;
     }
-
+    public static <T> T toObj(String data, Class<T> clazz){
+        ObjectMapper mapper = new ObjectMapper().registerModule(new Jdk8Module())
+                .registerModule(new JavaTimeModule());
+        try {
+            return mapper.readValue(data, clazz);
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+        }
+        return null;
+    }
     public static String toJson(Object data) {
         ObjectMapper mapper = new ObjectMapper().registerModule(new Jdk8Module())
                 .registerModule(new JavaTimeModule());
@@ -213,6 +222,22 @@ public class JacksonUtil {
         if (node != null) {
             return mapper.convertValue(node, new TypeReference<List<T>>() {
             });
+        }
+        return null;
+    }
+
+    public static String parseSubnodeToString(String body, String field) {
+        ObjectMapper mapper = new ObjectMapper().registerModule(new Jdk8Module())
+                .registerModule(new JavaTimeModule());
+        JsonNode node;
+        try {
+            node = mapper.readTree(body);
+            JsonNode leaf = node.at(field);
+            if (leaf != null) {
+                return leaf.toString();
+            }
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
         }
         return null;
     }

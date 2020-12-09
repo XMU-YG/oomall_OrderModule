@@ -1,6 +1,8 @@
 package cn.edu.xmu.order.model.vo;
 
+import cn.edu.xmu.order.model.bo.Customer;
 import cn.edu.xmu.order.model.bo.Order;
+import cn.edu.xmu.order.model.bo.Shop;
 import cn.edu.xmu.order.model.bo.SimpleOrderItem;
 import cn.edu.xmu.order.model.po.OrderPo;
 import lombok.Data;
@@ -13,20 +15,10 @@ public class OrderRetVo {
     private Long id;
 
     //顾客信息
-    private Long customerId;
-
-    private String customerUserName;
-
-    private String customerRealName;
+    private Customer customer;
 
     //店铺信息
-    private Long shopId;
-
-    private String shopName;
-
-    private LocalDateTime shopGmtCreate;
-
-    private LocalDateTime shopGmtModified;
+    private Shop shop;
 
     private String orderSn;
 
@@ -73,16 +65,8 @@ public class OrderRetVo {
 
     public OrderRetVo(Order bo){
         this.id=bo.getId();
-        //顾客信息
-        this.customerId=bo.getCustomerId();
-        this.customerRealName=bo.getCustomerRealName();
-        this.customerUserName=bo.getCustomerUserName();
-        //店铺信息
-        this.shopId=bo.getShopId();
-        this.shopName=bo.getShopName();
-        this.shopGmtCreate=bo.getShopGmtCreate();
-        this.shopGmtModified=bo.getShopGmtModified();
-
+        this.customer=bo.getCustomer();
+        this.shop=bo.getShop();
         this.orderSn=bo.getOrderSn();
         this.pid=bo.getPid();
         this.consignee=bo.getConsignee();

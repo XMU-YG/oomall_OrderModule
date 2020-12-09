@@ -1,31 +1,27 @@
 package cn.edu.xmu.order.model.vo;
 
+import cn.edu.xmu.order.model.po.OrderItemPo;
 import lombok.Data;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 @Data
 public class NewOrderItemVo {
-    private Long skuId;//新增订单信息
-    private int quantity;//新增订单信息
-    private Long couponActId;//新增订单信息
-    private Long OrderId;
-    private String name;
-    private Long price;
-    private Long discount;
-    private Long beSharedId;
+    @NotNull
+    private Long skuId;
+    @NotNull
+    private int quantity;
+    @NotNull
+    private Long couponActId;
 
-    public NewOrderItemVo(){
+    public OrderItemPo createOrderItemPo(){
+        OrderItemPo orderItemPo=new OrderItemPo();
+        orderItemPo.setCouponActivityId(this.couponActId);
+        orderItemPo.setQuantity(this.quantity);
+        orderItemPo.setGoodsSkuId(this.skuId);
 
+        return orderItemPo;
     }
 
-    public Long getCouponActId() {
-        return couponActId;
-    }
-
-    public Long getSkuId() {
-        return skuId;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
 }

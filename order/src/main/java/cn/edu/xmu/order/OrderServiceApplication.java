@@ -9,9 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @MapperScan("cn.edu.xmu.order.mapper")
 public class OrderServiceApplication {
 
-
     public static void main(String[] args) {
-        System.out.println("111");
         SpringApplication.run(OrderServiceApplication.class, args);
     }
 }

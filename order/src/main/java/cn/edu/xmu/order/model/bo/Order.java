@@ -13,28 +13,17 @@ import java.util.List;
  * 订单信息的BO对象，包含订单的详细信息
  * author Gang Ye
  * create 2020/11/26
- * modify 2020/11/26 by Gang Ye
+ * modify 2020/12/9 by Gang Ye
+ *                      修改顾客，店铺信息为类对象
  */
 @Data
 public class Order implements VoObject {
 
     private Long id;
 
-    //顾客信息
-    private Long customerId;
+    private Customer customer;
 
-    private String customerUserName;
-
-    private String customerRealName;
-
-    //店铺信息
-    private Long shopId;
-
-    private String shopName;
-
-    private LocalDateTime shopGmtCreate;
-
-    private LocalDateTime shopGmtModified;
+    private Shop shop;
 
     private String orderSn;
 
@@ -80,11 +69,12 @@ public class Order implements VoObject {
     private List<SimpleOrderItem> simpleOrderItemList;
 
     public Order(OrderPo po){
+        this.customer=new Customer();
+        this.shop=new Shop();
         this.id=po.getId();
-        //顾客信息
-        this.customerId=po.getCustomerId();
-        //店铺信息
-        this.shopId=po.getShopId();
+        this.customer.setCustomerId(po.getCustomerId());
+        this.shop.setShopId(po.getShopId());
+
         this.orderSn=po.getOrderSn();
         this.pid=po.getPid();
         this.consignee=po.getConsignee();
@@ -104,7 +94,7 @@ public class Order implements VoObject {
         this.shipmentSn=po.getShipmentSn();
         this.state=po.getState();
         this.substate=po.getSubstate();
-        this.gmtCreated=po.getGmtCreated();
+        this.gmtCreated=po.getGmtCreate();
         this.gmtModified=po.getGmtModified();
     }
     @Override
@@ -120,140 +110,196 @@ public class Order implements VoObject {
         return id;
     }
 
-    public Long getCustomerId() {
-        return customerId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public String getCustomerUserName() {
-        return customerUserName;
+    public Customer getCustomer() {
+        return customer;
     }
 
-    public String getCustomerRealName() {
-        return customerRealName;
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
     }
 
-    public Long getShopId() {
-        return shopId;
+    public Shop getShop() {
+        return shop;
     }
 
-    public String getShopName() {
-        return shopName;
-    }
-
-    public LocalDateTime getShopGmtCreate() {
-        return shopGmtCreate;
-    }
-
-    public LocalDateTime getShopGmtModified() {
-        return shopGmtModified;
+    public void setShop(Shop shop) {
+        this.shop = shop;
     }
 
     public String getOrderSn() {
         return orderSn;
     }
 
+    public void setOrderSn(String orderSn) {
+        this.orderSn = orderSn;
+    }
+
     public Long getPid() {
         return pid;
+    }
+
+    public void setPid(Long pid) {
+        this.pid = pid;
     }
 
     public String getConsignee() {
         return consignee;
     }
 
+    public void setConsignee(String consignee) {
+        this.consignee = consignee;
+    }
+
     public Long getRegionId() {
         return regionId;
+    }
+
+    public void setRegionId(Long regionId) {
+        this.regionId = regionId;
     }
 
     public String getAddress() {
         return address;
     }
 
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
     public String getMobile() {
         return mobile;
+    }
+
+    public void setMobile(String mobile) {
+        this.mobile = mobile;
     }
 
     public String getMessage() {
         return message;
     }
 
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     public Byte getOrderType() {
         return orderType;
+    }
+
+    public void setOrderType(Byte orderType) {
+        this.orderType = orderType;
     }
 
     public Long getFreightPrice() {
         return freightPrice;
     }
 
+    public void setFreightPrice(Long freightPrice) {
+        this.freightPrice = freightPrice;
+    }
+
     public Long getCouponId() {
         return couponId;
+    }
+
+    public void setCouponId(Long couponId) {
+        this.couponId = couponId;
     }
 
     public Long getDiscountPrice() {
         return discountPrice;
     }
 
+    public void setDiscountPrice(Long discountPrice) {
+        this.discountPrice = discountPrice;
+    }
+
     public Long getOriginPrice() {
         return originPrice;
+    }
+
+    public void setOriginPrice(Long originPrice) {
+        this.originPrice = originPrice;
     }
 
     public Long getPresaleId() {
         return presaleId;
     }
 
+    public void setPresaleId(Long presaleId) {
+        this.presaleId = presaleId;
+    }
+
     public Long getGrouponDiscount() {
         return grouponDiscount;
+    }
+
+    public void setGrouponDiscount(Long grouponDiscount) {
+        this.grouponDiscount = grouponDiscount;
     }
 
     public Integer getRebateNum() {
         return rebateNum;
     }
 
+    public void setRebateNum(Integer rebateNum) {
+        this.rebateNum = rebateNum;
+    }
+
     public LocalDateTime getConfirmTime() {
         return confirmTime;
+    }
+
+    public void setConfirmTime(LocalDateTime confirmTime) {
+        this.confirmTime = confirmTime;
     }
 
     public String getShipmentSn() {
         return shipmentSn;
     }
 
+    public void setShipmentSn(String shipmentSn) {
+        this.shipmentSn = shipmentSn;
+    }
+
     public Byte getState() {
         return state;
+    }
+
+    public void setState(Byte state) {
+        this.state = state;
     }
 
     public Byte getSubstate() {
         return substate;
     }
 
+    public void setSubstate(Byte substate) {
+        this.substate = substate;
+    }
+
     public LocalDateTime getGmtCreated() {
         return gmtCreated;
+    }
+
+    public void setGmtCreated(LocalDateTime gmtCreated) {
+        this.gmtCreated = gmtCreated;
     }
 
     public LocalDateTime getGmtModified() {
         return gmtModified;
     }
 
+    public void setGmtModified(LocalDateTime gmtModified) {
+        this.gmtModified = gmtModified;
+    }
+
     public List<SimpleOrderItem> getSimpleOrderItemList() {
         return simpleOrderItemList;
-    }
-
-    public void setCustomerUserName(String customerUserName) {
-        this.customerUserName = customerUserName;
-    }
-
-    public void setCustomerRealName(String customerRealName) {
-        this.customerRealName = customerRealName;
-    }
-
-    public void setShopName(String shopName) {
-        this.shopName = shopName;
-    }
-
-    public void setShopGmtCreate(LocalDateTime shopGmtCreate) {
-        this.shopGmtCreate = shopGmtCreate;
-    }
-
-    public void setShopGmtModified(LocalDateTime shopGmtModified) {
-        this.shopGmtModified = shopGmtModified;
     }
 
     public void setSimpleOrderItemList(List<SimpleOrderItem> simpleOrderItemList) {

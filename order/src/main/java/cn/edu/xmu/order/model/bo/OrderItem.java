@@ -21,8 +21,6 @@ public class OrderItem implements VoObject {
     private Long coupon_id;
     private Long coupon_activity_id;
     private Long be_share_id;
-    private LocalDateTime gmt_created;
-    private LocalDateTime gmt_modified;
 
     @Override
     public Object createVo() {

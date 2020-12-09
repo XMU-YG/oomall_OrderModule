@@ -6,6 +6,8 @@ management:
 
 server:
   port: 8082
+  servlet:
+    context-path: /order
   tomcat:
     threads:
       max: 1000
@@ -19,8 +21,8 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
     initialization-mode: always
-#    schema: classpath:schema.sql
-#    data: classpath:testdata.sql
+    schema: classpath:schema.sql
+    data: classpath:data.sql
     druid:
       #初始化时建立物理连接的个数
       initial-size: 3

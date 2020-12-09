@@ -1,11 +1,15 @@
 package cn.edu.xmu.order.dao;
 
 import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.ooad.util.Common;
+import cn.edu.xmu.ooad.util.RandomCaptcha;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.order.mapper.OrderItemPoMapper;
+import cn.edu.xmu.order.mapper.OrderMapper;
 import cn.edu.xmu.order.mapper.OrderPoMapper;
 import cn.edu.xmu.order.model.bo.Order;
+import cn.edu.xmu.order.model.bo.OrderState;
 import cn.edu.xmu.order.model.bo.SimpleOrder;
 import cn.edu.xmu.order.model.bo.SimpleOrderItem;
 import cn.edu.xmu.order.model.po.OrderItemPo;
@@ -13,19 +17,27 @@ import cn.edu.xmu.order.model.po.OrderItemPoExample;
 import cn.edu.xmu.order.model.po.OrderPo;
 import cn.edu.xmu.order.model.po.OrderPoExample;
 import cn.edu.xmu.order.model.vo.AddressVo;
+
+import cn.edu.xmu.order.util.OrderStatus;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.stereotype.Repository;
 
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 @Repository
 public class OrderDao {
@@ -35,6 +47,13 @@ public class OrderDao {
     private OrderPoMapper orderPoMapper;
     @Autowired
     private OrderItemPoMapper orderItemPoMapper;
+    @Autowired
+    private OrderMapper orderMapper;
+
+    @Autowired
+    private RedisTemplate<String, Serializable> redisTemplate;
+
+    private int timeout=30;
 
     /**
      * 分页查询顾客所有订单概要信息
@@ -48,26 +67,32 @@ public class OrderDao {
      * @return 订单概要视图
      * @author Gang Ye
      * @created 2020/11/26
-     * @modified 2020/11/26 by Gang Ye
+     * @modified 2020/12/8 by Gang Ye 解决String转换LocalDate异常
      */
-    public ReturnObject<PageInfo<VoObject>> getAllSimpleOrders(Long customerId,String orderSn, Integer state, String beginTime, String endTime, Integer page, Integer pageSize){
+    public ReturnObject<PageInfo<VoObject>> getAllSimpleOrders(Long customerId,String orderSn, Integer state, LocalDateTime beginTime, LocalDateTime endTime, Integer page, Integer pageSize){
 
+        //System.out.println("DAO:"+customerId+" "+orderSn+" "+state+" "+beginTime+" "+endTime+" "+page+" "+pageSize);
         //设置查询条件
         OrderPoExample example=new OrderPoExample();
         OrderPoExample.Criteria criteria=example.createCriteria();
         criteria.andCustomerIdEqualTo(customerId);
         criteria.andBeDeletedEqualTo((byte) 0);//未逻辑删除
-        criteria.andOrderSnEqualTo(orderSn);
-        criteria.andStateEqualTo(state.byteValue());
-        //转换日期格式 String-》LocalDateTime
-        DateTimeFormatter df=DateTimeFormatter.ofPattern("yyyy-mm-dd hh-mm-ss");
-        LocalDateTime begin=LocalDateTime.parse(beginTime,df);
-        LocalDateTime end=LocalDateTime.parse(endTime,df);
-        criteria.andConfirmTimeBetween(begin,end);
-
+        if (orderSn!=null){
+            criteria.andOrderSnEqualTo(orderSn);
+        }
+        if (state!=null){
+            criteria.andStateEqualTo(state.byteValue());
+        }
+        if (beginTime!=null){
+            criteria.andGmtCreateGreaterThanOrEqualTo(beginTime);
+        }
+        if (endTime!=null){
+            criteria.andGmtCreateLessThanOrEqualTo(endTime);
+        }
         List<OrderPo> orderPos=null;
         try{
             orderPos=orderPoMapper.selectByExample(example);
+
         }catch (DataAccessException e){
             logger.error("getAllSimpleOrders:  DataAccessException:  "+e.getMessage());
             return  new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
@@ -106,6 +131,7 @@ public class OrderDao {
      * @author Gang Ye
      * @created 2020/11/27
      * @modified 2020/11/30 by Gang Ye 增加orderItem插入
+     *             2020/12/8 Gang Ye 将顾客与店铺信息设置移到Service层
      */
     public ReturnObject<VoObject> getOrderById(Long customerId,Long orderId){
         ReturnObject<VoObject> orderReturnObject=null;
@@ -117,7 +143,7 @@ public class OrderDao {
             logger.error("getOrderById:  DataAccessException:  "+e.getMessage());
             return  new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
         }
-        if (orderPo==null&&orderPo.getBeDeleted().equals(1)){
+        if (orderPo==null||orderPo.getBeDeleted()== 1){
             logger.debug("customer getOrderById error: it's empty!  orderId:  "+orderId+"   customerId:  "+customerId);
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单号不存在");
 
@@ -125,14 +151,6 @@ public class OrderDao {
         else if(orderPo.getCustomerId().equals(customerId)){
             logger.debug("customer getOrderById success！  orderId:  "+orderId+"   customerId:  "+customerId);
             Order order=new Order(orderPo);
-
-            order.setCustomerUserName("123");
-            order.setCustomerRealName("123");
-            order.setShopName("123");
-            LocalDateTime time=LocalDateTime.of(1,1,1,1,1,1);
-            order.setShopGmtCreate(time);
-            order.setShopGmtModified(time);
-
             OrderItemPoExample itemPoExample=new OrderItemPoExample();
             OrderItemPoExample.Criteria criteria=itemPoExample.createCriteria();
             criteria.andOrderIdEqualTo(orderId);
@@ -226,13 +244,20 @@ public class OrderDao {
 
         }
         else if(orderPo.getCustomerId().equals(customerId)){
-            if (orderPo.getState().equals(15)){  //15为待发货
-                logger.debug("customer deleteSelfOrderById success！  orderId:  "+orderId+"   customerId:  "+customerId);
+            if (orderPo.getState().intValue()<=15){  //15为待发货
+                logger.debug("customer cancelSelfOrderById success！  orderId:  "+orderId+"   customerId:  "+customerId+" state: "+orderPo.getState());
                 orderPo.setGmtModified(LocalDateTime.now());
-                orderPo.setBeDeleted((byte) 1);
                 orderPo.setState((byte) 0);//0为订单取消
                 orderPoMapper.updateByPrimaryKeySelective(orderPo);
                 orderReturnObject=new ReturnObject(ResponseCode.OK,"订单取消成功");
+                return orderReturnObject;
+            }
+            else if (orderPo.getState().equals((byte)18)){
+                logger.debug("customer deleteSelfOrderById success！  orderId:  "+orderId+"   customerId:  "+customerId+" state: "+orderPo.getState());
+                orderPo.setGmtModified(LocalDateTime.now());
+                orderPo.setBeDeleted((byte) 1);//1为订单逻辑删除
+                orderPoMapper.updateByPrimaryKeySelective(orderPo);
+                orderReturnObject=new ReturnObject(ResponseCode.OK,"订单删除成功");
                 return orderReturnObject;
             }
             else {
@@ -323,17 +348,21 @@ public class OrderDao {
         }
     }
 
-    public ReturnObject<PageInfo<VoObject>> getShopSelfSimpleOrders(Long shopId, Long customerId, String orderSn, String beginTime, String endTime, Integer page, Integer pageSize) {
+    public ReturnObject<PageInfo<VoObject>> getShopSelfSimpleOrders(Long shopId, Long customerId, String orderSn, LocalDateTime beginTime, LocalDateTime endTime, Integer page, Integer pageSize) {
         //设置查询条件
         OrderPoExample example=new OrderPoExample();
         OrderPoExample.Criteria criteria=example.createCriteria();
         criteria.andCustomerIdEqualTo(customerId);
         criteria.andShopIdEqualTo(shopId);
-        criteria.andOrderSnEqualTo(orderSn);
-        //转换日期格式 String-》LocalDateTime
-        LocalDateTime begin=LocalDateTime.parse(beginTime);
-        LocalDateTime end=LocalDateTime.parse(endTime);
-        criteria.andConfirmTimeBetween(begin,end);
+        if (orderSn!=null){
+            criteria.andOrderSnEqualTo(orderSn);
+        }
+        if (beginTime!=null){
+            criteria.andGmtCreateGreaterThanOrEqualTo(beginTime);
+        }
+        if (endTime!=null){
+            criteria.andGmtCreateLessThanOrEqualTo(endTime);
+        }
         List<OrderPo> orderPos=null;
         try{
             orderPos=orderPoMapper.selectByExample(example);
@@ -364,6 +393,15 @@ public class OrderDao {
         return new ReturnObject<>(simpleOrderPage);
     }
 
+    /**
+     * 卖家获得订单详情
+     * @param shopId
+     * @param id
+     * @return 订单详情
+     * @author Gang Ye
+     * @modify 2020/12/9 by Gang Ye
+     *                      将顾客信息与店铺信息查询移到Service
+     */
     public ReturnObject<VoObject> getShopSelfOrder(Long shopId, Long id) {
         ReturnObject<VoObject> orderReturnObject=null;
 
@@ -383,12 +421,8 @@ public class OrderDao {
             logger.debug("shop getSelfOrder success！  orderId:  "+id+"   shopId:  "+shopId);
             Order order=new Order(orderPo);
 
-            order.setCustomerUserName("123");
-            order.setCustomerRealName("123");
-            order.setShopName("123");
+
             LocalDateTime time=LocalDateTime.of(1,1,1,1,1,1);
-            order.setShopGmtCreate(time);
-            order.setShopGmtModified(time);
 
             OrderItemPoExample itemPoExample=new OrderItemPoExample();
             OrderItemPoExample.Criteria criteria=itemPoExample.createCriteria();
@@ -448,11 +482,11 @@ public class OrderDao {
         try{
             orderPo=orderPoMapper.selectByPrimaryKey(orderId);
         }catch (DataAccessException e){
-            logger.error("deleteSelfOrderById:  DataAccessException:  "+e.getMessage());
+            logger.error("deleteShopOrderById:  DataAccessException:  "+e.getMessage());
             return  new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
         }
         if (orderPo==null){
-            logger.debug("customer deleteSelfOrderById error: it's empty!  orderId:  "+orderId+"   customerId:  "+customerId);
+            logger.debug("deleteShopOrder error: it's empty!  orderId:  "+orderId+"   shopId:  "+shopId);
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST,"订单号不存在");
 
         }
@@ -513,5 +547,107 @@ public class OrderDao {
             logger.debug("deliverShopOrder error: don't have privilege!   orderId:  "+orderId+"   shopId:  "+shopId);
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"订单无权修改，不是自己订单");
         }
+    }
+
+    public int deductStock(Long skuId, Integer quantity) {
+        String key="sku_"+skuId;
+        String value= RandomCaptcha.getRandomString(11);
+        boolean flag=redisTemplate.opsForValue().setIfAbsent(key,value,Common.addRandomTime(timeout),TimeUnit.SECONDS);
+        if (flag){
+            logger.debug("redis lock successful!  key:  "+key);
+            Integer stock=(Integer) redisTemplate.opsForValue().get(skuId.toString());
+            if (stock>quantity){
+                redisTemplate.opsForValue().decrement(String.valueOf(skuId),quantity);
+                String lockValue= (String) redisTemplate.opsForValue().get(key);
+                if (lockValue.equals(value)){
+                    redisTemplate.delete(key);
+                    logger.debug("redis unlock! key:  "+key);
+                }
+                return 1;
+            }
+            String lockValue= (String) redisTemplate.opsForValue().get(key);
+            if (lockValue.equals(value)){
+                redisTemplate.delete(key);
+                logger.debug("redis unlock! key:  "+key);
+            }
+            return -1;
+
+        }
+        return 0;
+    }
+
+    public boolean loadGoodsStock(Long skuId, Integer stock) {
+        if (timeout <= 0) {
+            timeout = 60;
+        }
+
+        long min = 1;
+        long max = timeout / 5;
+        try {
+            //增加随机数，防止雪崩
+            timeout += (long) new Random().nextDouble() * (max - min);
+            redisTemplate.opsForValue().set(String.valueOf(skuId), stock, timeout, TimeUnit.SECONDS);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean haveOrderSn(String orderSn) {
+        List<String> orderSns=orderMapper.getAllOrderSn();
+        return orderSns.contains(orderSn);
+    }
+
+    public ReturnObject<Long> insertOrder(OrderPo orderPo) {
+        ReturnObject<Long> returnObject=null;
+        try{
+            Long orderId=(long)orderPoMapper.insert(orderPo);
+            logger.debug("insertOrder:  orderId:"+orderId+"    customerId: "+orderPo.getCustomerId());
+            returnObject=new ReturnObject<Long>(orderId);
+            return returnObject;
+        }catch (DataAccessException e){
+            logger.error("insertOrder:  DataAccessException:  "+e.getMessage());
+            return  new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+    }
+
+    public ReturnObject insertOrderItem(OrderItemPo orderItemPo) {
+        ReturnObject<Long> returnObject=null;
+        try{
+            orderItemPoMapper.insert(orderItemPo);
+            logger.debug("insertOrderItem:  orderId:"+orderItemPo.getOrderId());
+            returnObject=new ReturnObject<Long>();
+            return returnObject;
+        }catch (DataAccessException e){
+            logger.error("insertOrderItem:  DataAccessException:  "+e.getMessage());
+            return  new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+    }
+
+    /**
+     * 获得订单所有状态
+     * @param customerId
+     * @return 订单状态视图
+     * @author Gang Ye
+     */
+    public ReturnObject<List> getOrderAllStates(Long customerId) {
+        ReturnObject<List> returnObject=null;
+        try{
+            List<Byte> states=orderMapper.getAllOrderStatesByCusId(customerId);
+            ArrayList<OrderState> orderStates=new ArrayList<>(states.size());
+            for (Byte state:states) {
+                OrderState orderState=new OrderState();
+                orderState.setCode(state);
+                orderState.setName("11");
+                orderStates.add(orderState);
+            }
+            returnObject=new ReturnObject<>(orderStates);
+            return returnObject;
+        }catch (DataAccessException e){
+            logger.error("getAllStates:  DataAccessException:  "+e.getMessage());
+            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+
     }
 }

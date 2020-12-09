@@ -36,7 +36,7 @@ public class SimpleOrder implements VoObject {
         this.customerId=orderPo.getCustomerId();
         this.discountPrice=orderPo.getDiscountPrice();
         this.freightPrice=orderPo.getFreightPrice();
-        this.gmtCreate=orderPo.getGmtCreated();
+        this.gmtCreate=orderPo.getGmtCreate();
         this.id=orderPo.getId();
         this.orderType=orderPo.getOrderType();
         this.pid=orderPo.getPid();

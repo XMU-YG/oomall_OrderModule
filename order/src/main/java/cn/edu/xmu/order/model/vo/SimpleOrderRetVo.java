@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class SimpleOrderRetVo {
-    private Long bo;
+    private Long id;
     private Long customerId;
     private Long shopId;
     private Long pid;
@@ -30,7 +30,7 @@ public class SimpleOrderRetVo {
         this.discountPrice= bo.getDiscountPrice();
         this.freightPrice= bo.getFreightPrice();
         this.gmtCreate= bo.getGmtCreate();
-        this.bo = bo.getId();
+        this.id = bo.getId();
         this.orderType= bo.getOrderType();
         this.pid= bo.getPid();
         this.originPrice= bo.getOriginPrice();
