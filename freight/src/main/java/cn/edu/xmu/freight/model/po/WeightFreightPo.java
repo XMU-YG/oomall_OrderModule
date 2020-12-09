@@ -398,4 +398,6 @@ public class WeightFreightPo {
     public void setGmtModified(LocalDateTime gmtModified) {
         this.gmtModified = gmtModified;
     }
+
+
 }
