@@ -73,7 +73,10 @@ public class ReturnObject<T> {
         return this.code;
     }
 
+
+
     public T getData() {
-        return this.data;
+        return data;
     }
+
 }
