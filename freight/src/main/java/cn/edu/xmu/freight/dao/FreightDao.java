@@ -261,4 +261,61 @@ public class FreightDao {
         }
         return retObj;
     }
+
+    /**
+     * 管理员定义件数模板明细
+     *缺少件数/重量的判断，暂时不加
+     * @param pieceItem
+     * @return
+     * @author 廖诗雨
+     */
+    public ReturnObject<PieceItem> createPieceItem(Long shopId, PieceItem pieceItem) {
+        //bo创建po
+        PieceFreightPo pieceFreightPo = pieceItem.getPieceFreightPo();
+
+        //校验
+        FreightPo freightPo = freightPoMapper.selectByPrimaryKey(pieceFreightPo.getFreightModelId());
+        if (freightPo == null) {
+            logger.error("没有该运费模板");
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        } else if (freightPo.getShopId() != shopId) {
+            logger.error("没有查询该模板的权限");
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
+
+        PieceFreightPoExample pieceFreightPoExample = new PieceFreightPoExample();
+        PieceFreightPoExample.Criteria criteria = pieceFreightPoExample.createCriteria();
+        criteria.andRegionIdEqualTo(pieceFreightPo.getRegionId());
+        criteria.andFreightModelIdEqualTo(pieceFreightPo.getFreightModelId());
+        List<PieceFreightPo> pieceFreightPos = pieceFreightPoMapper.selectByExample(pieceFreightPoExample);
+        if (pieceFreightPos.size() != 0) {
+            logger.debug("createPieceItem: have same regionId = " + pieceFreightPo.getRegionId());
+            return new ReturnObject<>(ResponseCode.REGION_SAME, String.format("运费模板中该地区已经定义：" + pieceFreightPo.getRegionId()));
+        }
+
+        //修改数据库
+        ReturnObject<PieceItem> retObj = null;
+        try {
+            int ret = pieceFreightPoMapper.insertSelective(pieceFreightPo);
+            if (ret == 0) {
+                //插入失败
+                logger.error("createPieceItem freight fail");
+                retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("新增失败: " + pieceFreightPo.getId()));
+            } else {
+                //插入成功
+                logger.debug("createPieceItem:insert freight = " + pieceFreightPo.toString());
+                pieceItem.setId(pieceFreightPo.getId());
+                retObj = new ReturnObject<>(pieceItem);
+            }
+        } catch (DataAccessException e) {
+            // 其他数据库错误
+            logger.debug("other sql exception : " + e.getMessage());
+            retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        } catch (Exception e) {
+
+            logger.error("other exception : " + e.getMessage());
+            retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+        return retObj;
+    }
 }

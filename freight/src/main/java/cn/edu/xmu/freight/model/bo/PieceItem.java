@@ -109,6 +109,22 @@ public class PieceItem implements VoObject {
 
     public PieceItem(){}
 
+    public PieceFreightPo getPieceFreightPo()
+    {
+        PieceFreightPo pieceFreightPo=new PieceFreightPo();
+        pieceFreightPo.setId(id);
+        pieceFreightPo.setFreightModelId(freightModelId);
+        pieceFreightPo.setRegionId(regionId);
+        pieceFreightPo.setFirstItems(firstItem);
+        pieceFreightPo.setFirstItemsPrice(firstItemPrice);
+        pieceFreightPo.setAdditionalItems(additionalItems);
+        pieceFreightPo.setAdditionalItemsPrice(additionalItemsPrice);
+        pieceFreightPo.setGmtCreate(gmtCreate);
+        pieceFreightPo.setGmtModified(gmtModified);
+        return pieceFreightPo;
+    }
+
+
     @Override
     public Object createVo() {
         return new PieceFreightRetVo(this);

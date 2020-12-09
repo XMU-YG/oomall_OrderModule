@@ -6,6 +6,7 @@ import cn.edu.xmu.freight.model.bo.PieceItem;
 import cn.edu.xmu.freight.model.po.FreightPo;
 import cn.edu.xmu.freight.model.po.PieceFreightPo;
 import cn.edu.xmu.freight.model.po.WeightFreightPo;
+import cn.edu.xmu.freight.model.vo.PieceItemVo;
 import cn.edu.xmu.freight.model.vo.WeightItemVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -29,7 +30,7 @@ public class FreightService {
 
     @Transactional
     public ReturnObject<List> findFreightItemsById(Long shopId, Long id){
-        
+
         List<WeightFreightPo> weightFreightPos = freightDao.findFreightItemsById(id);
         ArrayList<FreightItem> freightItems = new ArrayList<>(weightFreightPos.size());
         for (WeightFreightPo weightFreightPo : weightFreightPos) {
@@ -70,6 +71,28 @@ public class FreightService {
         freightItem.setGmtCreate(LocalDateTime.now());
 
         ReturnObject<FreightItem> ret=freightDao.createFreightItem(shopId,freightItem);
+
+        ReturnObject<VoObject> retObj=null;
+        if(ret.getCode().equals(ResponseCode.OK))
+        {
+            retObj=new ReturnObject<>(ret.getData());
+        }
+        else
+        {
+            retObj=new ReturnObject<>(ret.getCode(),ret.getErrmsg());
+        }
+        return retObj;
+    }
+
+    @Transactional
+    public ReturnObject<VoObject> createPieceItem(Long shopId, Long id, PieceItemVo vo) {
+
+        //vo创建bo
+        PieceItem pieceItem=vo.createPieceItem();
+        pieceItem.setFreightModelId(id);
+        pieceItem.setGmtCreate(LocalDateTime.now());
+
+        ReturnObject<PieceItem> ret=freightDao.createPieceItem(shopId,pieceItem);
 
         ReturnObject<VoObject> retObj=null;
         if(ret.getCode().equals(ResponseCode.OK))

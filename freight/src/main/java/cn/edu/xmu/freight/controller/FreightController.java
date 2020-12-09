@@ -1,5 +1,6 @@
 package cn.edu.xmu.freight.controller;
 
+import cn.edu.xmu.freight.model.vo.PieceItemVo;
 import cn.edu.xmu.freight.model.vo.WeightItemVo;
 import cn.edu.xmu.freight.service.FreightService;
 import cn.edu.xmu.ooad.annotation.Audit;
@@ -180,4 +181,43 @@ public class FreightController {
 
         return ret;
     }
+
+    /**
+     * 管理员定义件数模板明细
+     * @author:廖诗雨
+     * @param shopId
+     * @param id
+     * @param vo
+     * @param bindingResult
+     * @return
+     */
+
+    @ApiOperation(value = "管理员定义件数模板明细")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(name="shopId", value="店铺id", required = true, dataType="int", paramType="path",example = "1"),
+            @ApiImplicitParam(name="id", value="明细id", required = true, dataType="int", paramType="path",example = "1"),
+            @ApiImplicitParam(name="vo", value="运费模板资料", required = true, dataType="PieceItemVo", paramType="body")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    //@Audit
+    @PostMapping("/shops/{shopId}/freightmodels/{id}/pieceItems")
+    public Object createPieceItem(@PathVariable(name="shopId") Long shopId, @PathVariable(name="id") Long id, @Validated @RequestBody PieceItemVo vo, BindingResult bindingResult){
+        logger.debug("create pieceItem by id:"+id);
+        //校验前端数据
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            logger.debug("validate fail");
+            return returnObject;
+        }
+        Object ret=null;
+        ReturnObject<VoObject> object=freightService.createPieceItem(shopId,id,vo);
+        logger.debug("createPieceItem by: id : "+id);
+        ret=Common.getRetObject(object);
+
+        return ret;
+    }
+
 }
