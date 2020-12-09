@@ -32,7 +32,7 @@ public class WeightFreightRetVo {
     private LocalDateTime gmtModified;
 
     public WeightFreightRetVo(FreightItem freightItem) {
-        this.id = id;
+        this.id = freightItem.getId();
         this.firstWeight = freightItem.getFirstWeight();
         this.firstWeightFreight = freightItem.getFirstWeightFreight();
         this.tenPrice = freightItem.getTenPrice();
