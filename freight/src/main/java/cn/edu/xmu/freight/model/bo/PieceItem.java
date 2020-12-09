@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class PieceItem implements VoObject {
 
     private Long id;
+    private Long freightModelId;
     private Long regionId;
     private Integer firstItem;
     private Long firstItemPrice;
@@ -25,6 +26,10 @@ public class PieceItem implements VoObject {
 
     public Long getId() {
         return id;
+    }
+
+    public Long getFreightModelId() {
+        return freightModelId;
     }
 
     public Long getRegionId() {

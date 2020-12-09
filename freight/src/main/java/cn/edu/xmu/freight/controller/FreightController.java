@@ -1,8 +1,10 @@
 package cn.edu.xmu.freight.controller;
 
+import cn.edu.xmu.freight.model.vo.WeightItemVo;
 import cn.edu.xmu.freight.service.FreightService;
 import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.annotation.LoginUser;
+import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
@@ -11,6 +13,8 @@ import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -138,5 +142,42 @@ public class FreightController {
     @DeleteMapping("shops/{shopId}/pieceItems/{id}")
     public Object deletePieceItem(@PathVariable(name = "shopId") Long shopId,@PathVariable(name = "id") Long id){
         return freightService.deletePieceItem(shopId,id);
+    }
+
+    /**
+     * 管理员定义重量模板明细
+     * @author:廖诗雨
+     * @param shopId
+     * @param id
+     * @param vo
+     * @param bindingResult
+     * @return
+     */
+    @ApiOperation(value = "管理员定义重量模板明细")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(name="shopId", value="店铺id", required = true, dataType="int", paramType="path",example = "1"),
+            @ApiImplicitParam(name="id", value="明细id", required = true, dataType="int", paramType="path",example = "1"),
+            @ApiImplicitParam(name="vo", value="运费模板资料", required = true, dataType="WeightItemVo", paramType="body")
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+    })
+    //@Audit
+    @PostMapping("/shops/{shopId}/freightmodels/{id}/weightItems")
+    public Object createWeightItem(@PathVariable(name="shopId") Long shopId, @PathVariable(name="id") Long id, @Validated @RequestBody WeightItemVo vo, BindingResult bindingResult){
+        logger.debug("create weightItem by id:"+id);
+        //校验前端数据
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            logger.debug("validate fail");
+            return returnObject;
+        }
+        Object ret=null;
+        ReturnObject<VoObject> object=freightService.createWeightItem(shopId,id,vo);
+        logger.debug("createWeightItem by: id : "+id);
+        ret=Common.getRetObject(object);
+
+        return ret;
     }
 }

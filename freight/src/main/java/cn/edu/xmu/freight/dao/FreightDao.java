@@ -17,6 +17,7 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class FreightDao {
@@ -32,14 +33,14 @@ public class FreightDao {
     /**
      * 店家或管理员查询某个（重量）运费模板的明细
      *
-     * @param shopid 店铺id
+     * @param shopId 店铺id
      * @param id     运费模板id
      * @return 运费模板详细信息
      * @author ShiYu Liao
      * @Create 2020/12/5
      * @Modify 2020/12/5
      */
-    public ReturnObject<List> findFreightItemsById(Long shopid, Long id) {
+    public ReturnObject<List> findFreightItemsById(Long shopId, Long id) {
 
         FreightPo freightPo = null;
         try {
@@ -49,11 +50,11 @@ public class FreightDao {
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
         }
         if (freightPo == null) {
-            logger.debug("findFreightItemsById error: it's empty!  shopid:  " + shopid + "   id:  " + id);
+            logger.debug("findFreightItemsById error: it's empty!  shopId:  " + shopId + "   id:  " + id);
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST, "运费模板号不存在");
 
-        } else if (freightPo.getShopId().equals(shopid)) {
-            logger.debug("findFreightItemsById success！  shopid:  " + shopid + "   id:  " + id);
+        } else if (freightPo.getShopId().equals(shopId)) {
+            logger.debug("findFreightItemsById success！  shopId:  " + shopId + "   id:  " + id);
 
             WeightFreightPoExample weightFreightPoExample=new  WeightFreightPoExample();
             WeightFreightPoExample.Criteria criteria= weightFreightPoExample.createCriteria();
@@ -67,7 +68,7 @@ public class FreightDao {
             return new ReturnObject<>(freightItems);
 
         } else {
-            logger.debug("findFreightItemsById error: don't have privilege!   shopid:  " + shopid + "   id:  " + id);
+            logger.debug("findFreightItemsById error: don't have privilege!   shopId:  " + shopId + "   id:  " + id);
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, "运费模板不属于该店铺");
         }
     }
@@ -75,14 +76,14 @@ public class FreightDao {
     /**
      * 店家或管理员查询件数运费模板的明细
      *
-     * @param shopid 店铺id
+     * @param shopId 店铺id
      * @param id     运费模板id
      * @return 运费模板详细信息
      * @author ShiYu Liao
      * @Create 2020/12/7
      * @Modify 2020/12/7
      */
-    public ReturnObject<List> findPieceItemsById(Long shopid, Long id) {
+    public ReturnObject<List> findPieceItemsById(Long shopId, Long id) {
 
         FreightPo freightPo = null;
         try {
@@ -92,11 +93,11 @@ public class FreightDao {
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
         }
         if (freightPo == null) {
-            logger.debug("findPieceItemsById error: it's empty!  shopid:  " + shopid + "   id:  " + id);
+            logger.debug("findPieceItemsById error: it's empty!  shopId:  " + shopId + "   id:  " + id);
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST, "运费模板号不存在");
 
-        } else if (freightPo.getShopId().equals(shopid)) {
-            logger.debug("findPieceItemsById success！  shopid:  " + shopid + "   id:  " + id);
+        } else if (freightPo.getShopId().equals(shopId)) {
+            logger.debug("findPieceItemsById success！  shopId:  " + shopId + "   id:  " + id);
 
             PieceFreightPoExample pieceFreightPoExample=new  PieceFreightPoExample();
             PieceFreightPoExample.Criteria criteria= pieceFreightPoExample.createCriteria();
@@ -110,7 +111,7 @@ public class FreightDao {
             return new ReturnObject<>(pieceItems);
 
         } else {
-            logger.debug("findPieceItemsById error: don't have privilege!   shopid:  " + shopid + "   id:  " + id);
+            logger.debug("findPieceItemsById error: don't have privilege!   shopId:  " + shopId + "   id:  " + id);
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, "运费模板不属于该店铺");
         }
     }
@@ -213,5 +214,72 @@ public class FreightDao {
                 }
             }
         }
+    }
+
+    /**
+     * 管理员定义重量模板明细
+     * @author 廖诗雨
+     * @param freightItem
+     * @return
+     */
+    public ReturnObject<FreightItem> createFreightItem(Long shopId,FreightItem freightItem)
+    {
+        //bo创建po
+        WeightFreightPo weightFreightPo=freightItem.getWeightFreightPo();
+
+        //校验
+        FreightPo freightPo =freightPoMapper.selectByPrimaryKey(weightFreightPo.getFreightModelId());
+        if(freightPo==null)
+        {
+            logger.error("没有该运费模板");
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+        else if(freightPo.getShopId()!=shopId)
+        {
+            logger.error("没有查询该模板的权限");
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
+
+        WeightFreightPoExample weightFreightPoExample=new  WeightFreightPoExample();
+        WeightFreightPoExample.Criteria criteria= weightFreightPoExample.createCriteria();
+        criteria.andRegionIdEqualTo(weightFreightPo.getRegionId());
+        criteria.andFreightModelIdEqualTo(weightFreightPo.getFreightModelId());
+        List<WeightFreightPo> weightFreightPos=weightFreightPoMapper.selectByExample(weightFreightPoExample);
+        if(weightFreightPos.size()!=0)
+        {
+            logger.debug("createFreightModel: have same regionId = " + weightFreightPo.getRegionId());
+            return new ReturnObject<>(ResponseCode.REGION_SAME, String.format("运费模板中该地区已经定义：" +  weightFreightPo.getRegionId()));
+        }
+
+        //修改数据库
+        ReturnObject<FreightItem> retObj=null;
+        try{
+            int ret=weightFreightPoMapper.insertSelective(weightFreightPo);
+            if(ret==0)
+            {
+                //插入失败
+                logger.error("createFreightItem freight fail");
+                retObj=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,String.format("新增失败: "+weightFreightPo.getId()));
+            }
+            else
+            {
+                //插入成功
+                logger.debug("createFreightItem:insert freight = "+weightFreightPo.toString());
+                freightItem.setId(weightFreightPo.getId());
+                retObj=new ReturnObject<>(freightItem);
+            }
+        }
+        catch (DataAccessException e) {
+                // 其他数据库错误
+                logger.debug("other sql exception : " + e.getMessage());
+                retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
+        }
+        catch (Exception e)
+        {
+
+            logger.error("other exception : "+e.getMessage());
+            retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("发生了严重的数据库错误：%s", e.getMessage()));
+        }
+        return retObj;
     }
 }
