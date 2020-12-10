@@ -4,7 +4,6 @@ import cn.edu.xmu.order.model.bo.Customer;
 import cn.edu.xmu.order.model.bo.Order;
 import cn.edu.xmu.order.model.bo.Shop;
 import cn.edu.xmu.order.model.bo.SimpleOrderItem;
-import cn.edu.xmu.order.model.po.OrderPo;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -61,7 +60,7 @@ public class OrderRetVo {
     private LocalDateTime gmtCreated;
 
     private LocalDateTime gmtModified;
-    private List<SimpleOrderItem> simpleOrderItemList;
+    private List<SimpleOrderItem> orderItems;
 
     public OrderRetVo(Order bo){
         this.id=bo.getId();
@@ -88,6 +87,6 @@ public class OrderRetVo {
         this.substate=bo.getSubstate();
         this.gmtCreated=bo.getGmtCreated();
         this.gmtModified=bo.getGmtModified();
-        this.simpleOrderItemList=bo.getSimpleOrderItemList();
+        this.orderItems =bo.getSimpleOrderItemList();
     }
 }

@@ -7,11 +7,13 @@ import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.order.factory.PostOrderFactory;
+import cn.edu.xmu.order.util.factory.PostOrderFactory;
 import cn.edu.xmu.order.model.vo.AddressVo;
 import cn.edu.xmu.order.model.vo.NewOrderVo;
+import cn.edu.xmu.order.model.vo.StateRetVo;
 import cn.edu.xmu.order.service.OrderService;
 import cn.edu.xmu.order.service.impl.PostOrderServiceImpl;
+import cn.edu.xmu.order.util.OrderStatus;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
@@ -27,6 +29,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -42,10 +45,13 @@ public class OrderController {
     @Autowired
     private HttpServletResponse httpServletResponse;
 
+    @Autowired
+    private PostOrderFactory postOrderFactory;
+
     /**
      * 新增订单
      * @param customerId
-     * @param vo
+     * @param orderInfo
      * @param bindingResult
      * @return
      * @throws NoSuchMethodException
@@ -65,18 +71,16 @@ public class OrderController {
     })
     @Audit
     @PostMapping("orders")
-    public Object addNewOrderByCustomer(@ApiIgnore @LoginUser Long customerId, @Validated @RequestBody NewOrderVo vo,BindingResult bindingResult) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    public Object addNewOrderByCustomer(@ApiIgnore @LoginUser Long customerId, @Validated @RequestBody NewOrderVo orderInfo,BindingResult bindingResult) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
             return returnObject;
         }
         Object ret=null;
-        Class c= PostOrderFactory.createService(vo);
-        Constructor a=c.getConstructor();
-        PostOrderServiceImpl postOrderService=(PostOrderServiceImpl)a.newInstance();
-
-        ReturnObject<VoObject> object=postOrderService.addNewOrderByCustomer(customerId,vo);
+        PostOrderServiceImpl postOrderService=postOrderFactory.createService(orderInfo);
+        logger.debug("addNewOrder.  customerId: "+customerId);
+        ReturnObject<VoObject> object=postOrderService.addNewOrderByCustomer(customerId,orderInfo);
 
         if (object.getCode().equals(ResponseCode.OK)){
             ret=Common.getRetObject(object);
@@ -85,6 +89,7 @@ public class OrderController {
             ret=Common.decorateReturnObject(object);
         }
         return ret;
+
     }
 
     /**
@@ -249,7 +254,7 @@ public class OrderController {
     /**
      * 客户对他本人的、状态为待收货的订单标记确认收货。
      * @param customerId
-     * @param orderId
+     * @param id
      * @return
      * @author Gang Ye
      * @created 2020/11/30
@@ -257,7 +262,7 @@ public class OrderController {
     @ApiOperation(value = "买家标记确认收货")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-            @ApiImplicitParam(name="orderId", value="订单号", required = true, dataType="int", paramType="path"),
+            @ApiImplicitParam(name="id", value="订单号", required = true, dataType="int", paramType="path"),
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
@@ -267,9 +272,11 @@ public class OrderController {
     })
     @Audit
     @PutMapping("orders/{id}/confirm")
-    public Object confirmSelfOrderById(@ApiIgnore @LoginUser Long customerId,@PathVariable Long orderId){
+    public Object confirmSelfOrderById(@ApiIgnore @LoginUser Long customerId,@PathVariable Long id){
         Object ret=null;
-        ReturnObject object=orderService.confirmSelfOrderById(customerId,orderId);
+
+        logger.debug("customer confirms order state. customerId: "+customerId+"  orderId: "+id);
+        ReturnObject object=orderService.confirmSelfOrderById(customerId,id);
         ret=Common.getNullRetObj(object,httpServletResponse);
         return ret;
     }
@@ -293,6 +300,7 @@ public class OrderController {
     @PostMapping("orders/{id}/groupon-normal")
     public Object translateGroToNor(@ApiIgnore @LoginUser Long customerId,@PathVariable Long id){
         Object ret=null;
+        logger.debug("translate groupon order to normal order. customerId: "+customerId+"  orderId: "+id);
         ReturnObject object=orderService.translateGroToNor(customerId,id);
         ret=Common.getNullRetObj(object,httpServletResponse);
         return ret;
@@ -313,7 +321,7 @@ public class OrderController {
     @ApiOperation(value = "店家查询顾客订单概要")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-            @ApiImplicitParam(name="shopId", value="商店id", required = false, dataType="int", paramType="path"),
+            @ApiImplicitParam(name="shopId", value="商店id", required = true, dataType="int", paramType="path"),
             @ApiImplicitParam(name="customerId", value="顾客ID", required = false, dataType="int", paramType="query"),
             @ApiImplicitParam(name="orderSn", value="订单编号", required = false, dataType="String", paramType="query"),
             @ApiImplicitParam(name="beginTime", value="订单开始时间", required = false, dataType="String", paramType="query"),
@@ -351,11 +359,12 @@ public class OrderController {
         }
         object=orderService.getShopSelfSimpleOrders(shopId,customerId,orderSn,begin,end,page,pageSize);
 
+
         if (object.getCode().equals(ResponseCode.OK)){
             return Common.getPageRetObject(object);
         }
         else{
-            return Common.getNullRetObj(new ReturnObject<>(object),httpServletResponse);
+            return Common.decorateReturnObject(object);
         }
     }
 
@@ -377,13 +386,14 @@ public class OrderController {
             @ApiResponse(code = 504, message = "订单号不存在"),
             @ApiResponse(code = 505, message = "该订单无权访问"),
     })
-    //@Audit
+    @Audit
     @GetMapping("shops/{shopId}/orders/{id}")
     public Object getShopSelfOrder(@PathVariable(name = "shopId") Long shopId, @PathVariable(name = "id") Long id){
         Object ret=null;
-
-        ReturnObject<VoObject> object=orderService.getShopSelfOrder(shopId,id);
         logger.debug("shop getOrderById: orderId : "+id+"   shopId:  "+shopId);
+        ReturnObject<VoObject> object=orderService.getShopSelfOrder(shopId,id);
+
+        System.out.println(object.getCode()+"   ***");
         if (object.getCode().equals(ResponseCode.OK)){
             ret=Common.getRetObject(object);
         }
@@ -406,7 +416,7 @@ public class OrderController {
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(name="shopId", value="店铺ID", required = true, dataType="int", paramType="path"),
             @ApiImplicitParam(name="id", value="订单ID", required = true, dataType="int", paramType="path"),
-            @ApiImplicitParam(name="message", value="留言", required = false, dataType="object", paramType="body"),
+            @ApiImplicitParam(name="message", value="留言", required = true, dataType="object", paramType="body"),
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
@@ -415,14 +425,14 @@ public class OrderController {
     })
     @Audit
     @PutMapping("shops/{shopId}/orders/{id}")
-    public Object modifyOrderMessage(@PathVariable(name = "shopId") Long shopId,@PathVariable(name = "id") Long orderId,@RequestBody(required = false) String message){
+    public Object modifyOrderMessage(@PathVariable(name = "shopId") Long shopId,@PathVariable(name = "id") Long orderId,@RequestBody(required = true) String message){
         Object ret=null;
         if (message==null){
             ret=Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
         }
         else{
             ReturnObject object=orderService.modifyOrderMessage(shopId,orderId,message);
-            ret=Common.getNullRetObj(object,httpServletResponse);
+            ret=Common.decorateReturnObject(object);
         }
         return ret;
     }
@@ -490,6 +500,12 @@ public class OrderController {
         return ret;
     }
 
+    /**
+     *
+     * 获得订单所有状态
+     * @return 状态视图列表
+     * @author Gang Ye
+     */
     @ApiOperation(value = "获得订单所有状态")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
@@ -499,19 +515,46 @@ public class OrderController {
     })
     @Audit
     @GetMapping("orders/states")
-    public Object getOrderAllStates(@ApiIgnore @LoginUser Long customerId){
-        ReturnObject<List> object=null;
+    public Object getOrderAllStates(){
+
+        logger.debug("customer get all order states.");
+        OrderStatus[] orderStatuses= OrderStatus.class.getEnumConstants();
+        List<StateRetVo> stateRetVos=new ArrayList<>(orderStatuses.length);
+        for (OrderStatus orderStatus:orderStatuses){
+            stateRetVos.add(new StateRetVo(orderStatus));
+        }
+        return ResponseUtil.ok(new ReturnObject<>(stateRetVos));
+    }
+
+    @ApiOperation(value = "管理员新增售后订单")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
+            @ApiImplicitParam(name="shopId", value="店铺ID", required = true, dataType="int", paramType="path"),
+            @ApiImplicitParam(name="orderInfo", value="订单信息", required = true, dataType="object", paramType="body")
+
+    })
+    @ApiResponses({
+            @ApiResponse(code = 0, message = "成功"),
+            @ApiResponse(code = 900, message = "商品库存不足")
+    })
+    @Audit
+    @PostMapping("/shops/{shopId}/orders")
+    public Object addNewAfterOrder(@ApiIgnore @PathVariable(name = "shopId") Long shopId,@Validated @RequestBody NewOrderVo vo,BindingResult bindingResult){
+        //校验前端数据
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            return returnObject;
+        }
         Object ret=null;
-        object=orderService.getOrderAllStates(customerId);
-        logger.debug("customer get all order states.  customer: "+customerId);
+
+        ReturnObject<VoObject> object=orderService.addNewAfterOrder(shopId,vo);
+
         if (object.getCode().equals(ResponseCode.OK)){
-            ret=Common.getListRetObject(object);
+            ret=Common.getRetObject(object);
         }
         else{
             ret=Common.decorateReturnObject(object);
         }
-
         return ret;
     }
-
 }

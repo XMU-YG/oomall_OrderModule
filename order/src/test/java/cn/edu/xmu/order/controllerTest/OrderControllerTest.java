@@ -73,7 +73,6 @@ public class OrderControllerTest {
 
         String responseString = null;
         String token=new JwtHelper().createToken(1l,-1l,6000);
-        System.out.println("**"+token);
         try {
             responseString = this.mvc.perform(get("/order/orders?orderSn=2016102378405&state=6&page=1&pageSize=10").header("authorization", token))
                     .andExpect(status().isOk())

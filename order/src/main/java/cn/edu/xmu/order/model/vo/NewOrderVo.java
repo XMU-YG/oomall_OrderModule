@@ -31,25 +31,34 @@ public class NewOrderVo {
     private String address;
     @NotBlank
     private String mobile;
-    @NotBlank
+
     private String message;
-    @NotNull
+
     private Long couponId;
-    @NotNull
+
     private Long presaleId;
-    @NotNull
+
     private Long grouponId;
 
     public OrderPo createOrderPo(){
         OrderPo orderPo=new OrderPo();
         orderPo.setConsignee(this.consignee);
         orderPo.setRegionId(this.regionId);
-        orderPo.setMessage(this.message);
+        if (this.message!=null){
+            orderPo.setMessage(this.message);
+        }
         orderPo.setAddress(this.address);
         orderPo.setMobile(this.mobile);
-        orderPo.setPresaleId(this.presaleId);
-        orderPo.setCouponId(this.couponId);
-        orderPo.setGrouponId(this.grouponId);
+        if (this.couponId!=null){
+            orderPo.setCouponId(this.couponId);
+        }
+        if (this.presaleId!=null){
+            orderPo.setPresaleId(this.presaleId);
+        }
+        if (this.grouponId!=null){
+            orderPo.setGrouponId(this.grouponId);
+        }
+
 
         return orderPo;
     }

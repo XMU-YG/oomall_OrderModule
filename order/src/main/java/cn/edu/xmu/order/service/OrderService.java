@@ -1,29 +1,37 @@
 package cn.edu.xmu.order.service;
 
 import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.order.dao.OrderDao;
 import cn.edu.xmu.order.dao.OrderItemDao;
 import cn.edu.xmu.order.model.bo.Customer;
 import cn.edu.xmu.order.model.bo.Order;
+import cn.edu.xmu.order.model.bo.OrderItem;
 import cn.edu.xmu.order.model.bo.Shop;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrderPo;
 import cn.edu.xmu.order.model.vo.AddressVo;
+import cn.edu.xmu.order.model.vo.NewOrderVo;
 import cn.edu.xmu.order.service.impl.DeductStockImpl;
 import cn.edu.xmu.order.service.impl.GoodsServiceImpl;
 import cn.edu.xmu.order.service.impl.OtherServiceImpl;
+import cn.edu.xmu.order.util.orderThrowable.OrderThrow;
 import com.github.pagehelper.PageInfo;
+import com.mysql.cj.exceptions.DataConversionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 订单模块服务层
@@ -46,19 +54,28 @@ public class OrderService implements DeductStockImpl{
 
     @Transactional
     public ReturnObject<VoObject> getOrderById(Long customerId,Long orderId){
+
         ReturnObject<VoObject> returnObject= orderDao.getOrderById(customerId,orderId);
-        Order order=(Order)returnObject.getData();
 
-        Customer customer=new Customer();
-        customer.setCustomerId(order.getCustomer().getCustomerId());
+        if (returnObject.getCode().equals(ResponseCode.OK)){
 
-        Shop shop=new Shop();
-        shop.setShopId(order.getShop().getShopId());
+            Order order=(Order)returnObject.getData();
 
-        order.setCustomer(customer);
-        order.setShop(shop);
+            Customer customer=new Customer();
+            customer.setCustomerId(order.getCustomer().getCustomerId());
 
-        return new ReturnObject<>(order);
+            Shop shop=new Shop();
+            shop.setShopId(order.getShop().getShopId());
+
+            order.setCustomer(customer);
+            order.setShop(shop);
+
+            return new ReturnObject<>(order);
+        }
+        else{
+            return returnObject;
+        }
+
     }
 
     @Transactional
@@ -89,18 +106,24 @@ public class OrderService implements DeductStockImpl{
     @Transactional
     public ReturnObject<VoObject> getShopSelfOrder(Long shopId, Long id) {
         ReturnObject<VoObject> returnObject= orderDao.getShopSelfOrder(shopId,id);
-        Order order=(Order)returnObject.getData();
 
-        Customer customer=new Customer();
-        customer.setCustomerId(order.getCustomer().getCustomerId());
+        if (returnObject.getCode().equals(ResponseCode.OK)){
+            Order order=(Order)returnObject.getData();
 
-        Shop shop=new Shop();
-        shop.setShopId(order.getShop().getShopId());
+            Customer customer=new Customer();
+            customer.setCustomerId(order.getCustomer().getCustomerId());
 
-        order.setCustomer(customer);
-        order.setShop(shop);
+            Shop shop=new Shop();
+            shop.setShopId(order.getShop().getShopId());
 
-        return new ReturnObject<>(order);
+            order.setCustomer(customer);
+            order.setShop(shop);
+            return new ReturnObject<>(order);
+        }
+        else{
+            return returnObject;
+        }
+
     }
 
     @Transactional
@@ -113,7 +136,7 @@ public class OrderService implements DeductStockImpl{
         return orderDao.deleteShopOrder(shopId,orderId);
     }
 
-    @Transactional
+    @Transactional()
     public ReturnObject deliverShopOrder(Long shopId, Long orderId, String freightSn) {
         return orderDao.deliverShopOrder(shopId,orderId,freightSn);
     }
@@ -139,28 +162,90 @@ public class OrderService implements DeductStockImpl{
         return false;
     }
 
-    public ReturnObject<List<OrderItemPo>> disposeNorOrderItemsPo(List<OrderItemPo> orderItemPos){
-        ArrayList<OrderItemPo> order_goodsList=new ArrayList<>(orderItemPos.size());
+    /**
+     * 处理普通商品订单明细
+     * 完善OrderItemPo，检查库存，扣库存(普通商品)
+     * @param orderItemPos
+     * @return
+     */
+    @Transactional
+    public ReturnObject<List<OrderItem>> disposeNorOrderItemsPo(List<OrderItemPo> orderItemPos)  {
+        ArrayList<OrderItem> order_goodsList=new ArrayList<>(orderItemPos.size());
+        //todo
         GoodsServiceImpl goodsService=null;
+        //todo
         OtherServiceImpl otherService=null;
         //检查库存
         for (OrderItemPo orderItemPo:orderItemPos) {
-            OrderItemPo order_goods=goodsService.findGoodsBySkuId(orderItemPo.getGoodsSkuId());
+            OrderItem order_goods=goodsService.findGoodsBySkuId(orderItemPo.getGoodsSkuId());
             if (orderItemPo.getQuantity()>order_goods.getQuantity()){
                 //库存不足
                 return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
             }
             order_goods.setQuantity(orderItemPo.getQuantity());
-            order_goods.setCouponActivityId(orderItemPo.getCouponActivityId());
-            order_goods.setBeShareId(otherService.getBeSharedIdBySkuId(orderItemPo.getGoodsSkuId()));
+            order_goods.setCoupon_activity_id(orderItemPo.getCouponActivityId());
+            //todo
+            // order_goods.setBeShareId(otherService.getBeSharedIdBySkuId(orderItemPo.getGoodsSkuId()));
 
             order_goodsList.add(order_goods);
         }
         //扣库存
+        //todo 商品模块扣库存
         DeductStockImpl goodsDeduct=null;
-        for (OrderItemPo order_goods:order_goodsList) {
-            if (!goodsDeduct.deductStock(order_goods.getGoodsSkuId(),order_goods.getQuantity())) {
+        Map<Long,Integer> map=new HashMap<>(order_goodsList.size());
+        for (OrderItem order_goods:order_goodsList) {
+            map.put(order_goods.getGoods_sku_id(),order_goods.getQuantity());
+            if (!goodsDeduct.deductStock(order_goods.getGoods_sku_id(),order_goods.getQuantity())) {
                 //库存不足
+                //库存回滚
+                map.forEach((k,v)->{
+                    goodsDeduct.deductStock(k,-v);
+                });
+                return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
+            }
+        }
+        return new ReturnObject<>(order_goodsList);
+    }
+
+    /**
+     * 处理秒杀商品订单明细
+     * 完善OrderItemPo，检查库存，扣库存(秒杀商品)
+     * @param orderItemPos
+     * @return
+     */
+    @Transactional
+    public ReturnObject<List<OrderItem>> disposeSecOrderItemsPo(List<OrderItemPo> orderItemPos) {
+        ArrayList<OrderItem> order_goodsList=new ArrayList<>(orderItemPos.size());
+        //todo
+        GoodsServiceImpl goodsService=null;
+        //todo
+        OtherServiceImpl otherService=null;
+        //检查库存
+        for (OrderItemPo orderItemPo:orderItemPos) {
+            OrderItem order_goods=goodsService.findGoodsBySkuId(orderItemPo.getGoodsSkuId());
+            if (orderItemPo.getQuantity()>order_goods.getQuantity()){
+                //库存不足
+                return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
+            }
+            order_goods.setQuantity(orderItemPo.getQuantity());
+            order_goods.setCoupon_activity_id(orderItemPo.getCouponActivityId());
+            //todo
+            // order_goods.setBeShareId(otherService.getBeSharedIdBySkuId(orderItemPo.getGoodsSkuId()));
+
+            order_goodsList.add(order_goods);
+        }
+        //扣库存
+        //todo 扣库存
+
+        Map<Long,Integer> map=new HashMap<>(order_goodsList.size());
+        for (OrderItem order_goods:order_goodsList) {
+            map.put(order_goods.getGoods_sku_id(),order_goods.getQuantity());
+            if (!this.deductStock(order_goods.getGoods_sku_id(),order_goods.getQuantity())) {
+                //库存不足
+                //库存回滚
+                map.forEach((k,v)->{
+                    this.deductStock(k,-v);
+                });
                 return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
             }
         }
@@ -216,32 +301,49 @@ public class OrderService implements DeductStockImpl{
         return orderDao.insertOrderItem(orderItemPo);
     }
 
-    public ReturnObject<List> getOrderAllStates(Long customerId) {
-        return orderDao.getOrderAllStates(customerId);
+    public ReturnObject<VoObject> addNewAfterOrder(Long shopId, NewOrderVo vo) {
+
+        return null;
     }
 
 
-//    void classifyOrders(){
-//        Map<Long,List<OrderGoods>> goodsMapByShop=new HashMap<>(goods.size());
-//        for (OrderGoods g :goods) {
-//            goodsMapByShop.computeIfAbsent(g.getShopId(),k->new ArrayList<OrderGoods>()).add(g);
-//        }
-//
-//        ArrayList<OrderPo> orderPos=new ArrayList<>(goodsMapByShop.size());
-//        //分单
-//        goodsMapByShop.forEach((k,v)->{
-//            //子订单
-//            OrderPo po=new OrderPo();
-//            po.setOrderSn(Common.genSeqNum());
-//            po.setShopId(k);
-//            po.setCustomerId(customerId);
-//            OrderServiceImpl freightService=null;
-//            po.setFreightPrice(freightService.calculateFreight(v));
-//            OrderServiceImpl otherService=null;
-//            po.setDiscountPrice(this.calculateDiscount());
-//            po.setRebateNum(otherService.calculateRebateNum(v,customerId));
-//
-//        });
-//    }
+    /**
+     * 分单
+     * @param orderPo 父订单
+     * @param orderItems 父订单对应orderItems(由OrderItemPo构造)
+     * @author Gang Ye
+     * @created 2020/12/10 2:22
+     */
+    public void classifyOrders(OrderPo orderPo,List<OrderItem> orderItems){
+
+        Map<Long,List<OrderItem>> goodsMapByShop=new HashMap<>(orderItems.size());
+        for (OrderItem orderItem :orderItems) {
+            goodsMapByShop.computeIfAbsent(orderItem.getShopId(),k->new ArrayList<>()).add(orderItem);
+        }
+        //分单
+        goodsMapByShop.forEach((k,v)->{
+            //子订单
+            OrderPo po=new OrderPo();
+            po.setOrderSn(Common.genSeqNum());
+            po.setShopId(k);
+            po.setCustomerId(orderPo.getCustomerId());
+
+            po.setOriginPrice(11l);
+            po.setFreightPrice(orderPo.getFreightPrice()*(po.getOriginPrice()/orderPo.getOriginPrice()));
+
+            po.setDiscountPrice(this.calculateDiscount());
+            //todo
+            po.setRebateNum(11);
+
+            Long orderId=orderDao.insertOrder(orderPo).getData();
+
+            v.forEach(x->{
+                OrderItemPo orderItemPo=orderItemDao.getOrderItemById(x.getId());
+                orderItemPo.setOrderId(orderId);
+                orderItemPo.setGmtModified(LocalDateTime.now());
+                orderItemDao.updateOrderItem(orderItemPo);
+            });
+        });
+    }
 
 }

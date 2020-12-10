@@ -1,5 +1,6 @@
 package cn.edu.xmu.order.service.impl;
 
+import cn.edu.xmu.order.model.bo.OrderItem;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 
 import java.util.List;
@@ -7,7 +8,7 @@ import java.util.List;
 public interface GoodsServiceImpl {
     public List<Object> findGoodsInfo(List<Object> objects);
 
-    public OrderItemPo findGoodsBySkuId(Long SkuId);
+    public OrderItem findGoodsBySkuId(Long SkuId);
 
     public Integer getGoodsStockBySkuId(Long skuId);
 

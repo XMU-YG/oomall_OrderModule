@@ -27,6 +27,7 @@ public enum OrderStatus {
 
     private int code;
     private String description;
+
     OrderStatus(int code, String description) {
         this.code = code;
         this.description = description;

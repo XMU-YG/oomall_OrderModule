@@ -12,12 +12,14 @@ public class NewOrderItemVo {
     private Long skuId;
     @NotNull
     private int quantity;
-    @NotNull
+
     private Long couponActId;
 
     public OrderItemPo createOrderItemPo(){
         OrderItemPo orderItemPo=new OrderItemPo();
-        orderItemPo.setCouponActivityId(this.couponActId);
+        if (this.couponActId!=null){
+            orderItemPo.setCouponActivityId(this.couponActId);
+        }
         orderItemPo.setQuantity(this.quantity);
         orderItemPo.setGoodsSkuId(this.skuId);
 
