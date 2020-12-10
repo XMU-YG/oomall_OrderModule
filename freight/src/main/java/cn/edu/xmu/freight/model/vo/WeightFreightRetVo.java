@@ -32,7 +32,11 @@ public class WeightFreightRetVo {
     private LocalDateTime gmtModified;
 
     public WeightFreightRetVo(FreightItem freightItem) {
+<<<<<<< Updated upstream
         this.id = id;
+=======
+        this.id = freightItem.getId();
+>>>>>>> Stashed changes
         this.firstWeight = freightItem.getFirstWeight();
         this.firstWeightFreight = freightItem.getFirstWeightFreight();
         this.tenPrice = freightItem.getTenPrice();

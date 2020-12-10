@@ -15,6 +15,10 @@ import java.time.LocalDateTime;
 public class PieceItem implements VoObject {
 
     private Long id;
+<<<<<<< Updated upstream
+=======
+    private Long freightModelId;
+>>>>>>> Stashed changes
     private Long regionId;
     private Integer firstItem;
     private Long firstItemPrice;
@@ -23,10 +27,56 @@ public class PieceItem implements VoObject {
     private LocalDateTime gmtCreate;
     private LocalDateTime gmtModified;
 
+<<<<<<< Updated upstream
+=======
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setFreightModelId(Long freightModelId) {
+        this.freightModelId = freightModelId;
+    }
+
+    public void setRegionId(Long regionId) {
+        this.regionId = regionId;
+    }
+
+    public void setFirstItem(Integer firstItem) {
+        this.firstItem = firstItem;
+    }
+
+    public void setFirstItemPrice(Long firstItemPrice) {
+        this.firstItemPrice = firstItemPrice;
+    }
+
+    public void setAdditionalItems(Integer additionalItems) {
+        this.additionalItems = additionalItems;
+    }
+
+    public void setAdditionalItemsPrice(Long additionalItemsPrice) {
+        this.additionalItemsPrice = additionalItemsPrice;
+    }
+
+    public void setGmtCreate(LocalDateTime gmtCreate) {
+        this.gmtCreate = gmtCreate;
+    }
+
+    public void setGmtModified(LocalDateTime gmtModified) {
+        this.gmtModified = gmtModified;
+    }
+
+>>>>>>> Stashed changes
     public Long getId() {
         return id;
     }
 
+<<<<<<< Updated upstream
+=======
+    public Long getFreightModelId() {
+        return freightModelId;
+    }
+
+>>>>>>> Stashed changes
     public Long getRegionId() {
         return regionId;
     }
@@ -66,6 +116,27 @@ public class PieceItem implements VoObject {
         this.gmtModified = po.getGmtModified();
     }
 
+<<<<<<< Updated upstream
+=======
+    public PieceItem(){}
+
+    public PieceFreightPo getPieceFreightPo()
+    {
+        PieceFreightPo pieceFreightPo=new PieceFreightPo();
+        pieceFreightPo.setId(id);
+        pieceFreightPo.setFreightModelId(freightModelId);
+        pieceFreightPo.setRegionId(regionId);
+        pieceFreightPo.setFirstItems(firstItem);
+        pieceFreightPo.setFirstItemsPrice(firstItemPrice);
+        pieceFreightPo.setAdditionalItems(additionalItems);
+        pieceFreightPo.setAdditionalItemsPrice(additionalItemsPrice);
+        pieceFreightPo.setGmtCreate(gmtCreate);
+        pieceFreightPo.setGmtModified(gmtModified);
+        return pieceFreightPo;
+    }
+
+
+>>>>>>> Stashed changes
     @Override
     public Object createVo() {
         return new PieceFreightRetVo(this);

@@ -16,6 +16,11 @@ public class FreightItem implements VoObject {
 
     private Long id;
 
+<<<<<<< Updated upstream
+=======
+    private  Long freightModelId;
+
+>>>>>>> Stashed changes
     private Long firstWeight;
 
     private Long firstWeightFreight;
@@ -36,10 +41,40 @@ public class FreightItem implements VoObject {
 
     private LocalDateTime gmtModified;
 
+<<<<<<< Updated upstream
+=======
+    public FreightItem()
+    {
+
+    }
+
+    public FreightItem(WeightFreightPo po){
+        this.id=po.getId();
+        this.freightModelId=po.getFreightModelId();
+        this.firstWeight=po.getFirstWeight();
+        this.firstWeightFreight=po.getFirstWeightFreight();
+        this.tenPrice=po.getTenPrice();
+        this.fiftyPrice=po.getFiftyPrice();
+        this.hundredPrice=po.getHundredPrice();
+        this.trihunPrice=po.getTrihunPrice();
+        this.abovePrice=po.getAbovePrice();
+        this.regionId=po.getRegionId();
+        this.gmtCreate=po.getGmtCreate();
+        this.gmtModified=po.getGmtModified();
+    }
+
+>>>>>>> Stashed changes
     public Long getId() {
         return id;
     }
 
+<<<<<<< Updated upstream
+=======
+    public Long getFreightModelId() {
+        return freightModelId;
+    }
+
+>>>>>>> Stashed changes
     public Long getFirstWeight() {
         return firstWeight;
     }
@@ -80,6 +115,7 @@ public class FreightItem implements VoObject {
         return gmtModified;
     }
 
+<<<<<<< Updated upstream
     public FreightItem(WeightFreightPo po){
         this.id=po.getId();
         this.firstWeight=po.getFirstWeight();
@@ -92,6 +128,73 @@ public class FreightItem implements VoObject {
         this.regionId=po.getRegionId();
         this.gmtCreate=po.getGmtCreate();
         this.gmtModified=po.getGmtModified();
+=======
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setFreightModelId(Long freightModelId) {
+        this.freightModelId = freightModelId;
+    }
+
+    public void setFirstWeight(Long firstWeight) {
+        this.firstWeight = firstWeight;
+    }
+
+    public void setFirstWeightFreight(Long firstWeightFreight) {
+        this.firstWeightFreight = firstWeightFreight;
+    }
+
+    public void setTenPrice(Long tenPrice) {
+        this.tenPrice = tenPrice;
+    }
+
+    public void setFiftyPrice(Long fiftyPrice) {
+        this.fiftyPrice = fiftyPrice;
+    }
+
+    public void setHundredPrice(Long hundredPrice) {
+        this.hundredPrice = hundredPrice;
+    }
+
+    public void setTrihunPrice(Long trihunPrice) {
+        this.trihunPrice = trihunPrice;
+    }
+
+    public void setAbovePrice(Long abovePrice) {
+        this.abovePrice = abovePrice;
+    }
+
+    public void setRegionId(Long regionId) {
+        this.regionId = regionId;
+    }
+
+    public void setGmtCreate(LocalDateTime gmtCreate) {
+        this.gmtCreate = gmtCreate;
+    }
+
+    public void setGmtModified(LocalDateTime gmtModified) {
+        this.gmtModified = gmtModified;
+    }
+
+    public WeightFreightPo getWeightFreightPo()
+    {
+        WeightFreightPo weightFreightPo=new WeightFreightPo();
+        weightFreightPo.setId(id);
+        weightFreightPo.setFreightModelId(freightModelId);
+        weightFreightPo.setFirstWeight(firstWeight);
+        weightFreightPo.setFirstWeightFreight(firstWeightFreight);
+        weightFreightPo.setTenPrice(tenPrice);
+        weightFreightPo.setFiftyPrice(fiftyPrice);
+        weightFreightPo.setHundredPrice(hundredPrice);
+        weightFreightPo.setTrihunPrice(trihunPrice);
+        weightFreightPo.setAbovePrice(abovePrice);
+        weightFreightPo.setRegionId(regionId);
+        weightFreightPo.setGmtCreate(gmtCreate);
+        weightFreightPo.setGmtModified(gmtModified);
+        return weightFreightPo;
+
+>>>>>>> Stashed changes
     }
 
     @Override
