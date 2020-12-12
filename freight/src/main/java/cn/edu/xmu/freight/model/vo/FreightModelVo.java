@@ -14,18 +14,6 @@ public class FreightModelVo {
     private LocalDateTime gmtCreate;
     private LocalDateTime gmtModified;
 
-    public FreightModelVo(){}
-    public FreightModelVo(Freight bo)
-    {
-this.id=bo.getId();
-this.name=bo.getName();
-this.type=bo.getType();
-this.unit=bo.getUnit();
-Byte defaultModel=bo.getDefaultModel();
-this.defaultModel=(defaultModel==null||defaultModel==0x00)?false:true;
-this.gmtCreate=bo.getGmtCreate();
-this.gmtModified=bo.getGmtModified();
-    }
     public Byte getType() {
         return type;
     }

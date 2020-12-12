@@ -15,7 +15,10 @@ import java.time.LocalDateTime;
 public class PieceItem implements VoObject {
 
     private Long id;
+<<<<<<< Updated upstream
+=======
     private Long freightModelId;
+>>>>>>> Stashed changes
     private Long regionId;
     private Integer firstItem;
     private Long firstItemPrice;
@@ -24,6 +27,8 @@ public class PieceItem implements VoObject {
     private LocalDateTime gmtCreate;
     private LocalDateTime gmtModified;
 
+<<<<<<< Updated upstream
+=======
     public void setId(Long id) {
         this.id = id;
     }
@@ -60,14 +65,18 @@ public class PieceItem implements VoObject {
         this.gmtModified = gmtModified;
     }
 
+>>>>>>> Stashed changes
     public Long getId() {
         return id;
     }
 
+<<<<<<< Updated upstream
+=======
     public Long getFreightModelId() {
         return freightModelId;
     }
 
+>>>>>>> Stashed changes
     public Long getRegionId() {
         return regionId;
     }
@@ -107,6 +116,8 @@ public class PieceItem implements VoObject {
         this.gmtModified = po.getGmtModified();
     }
 
+<<<<<<< Updated upstream
+=======
     public PieceItem(){}
 
     public PieceFreightPo getPieceFreightPo()
@@ -125,6 +136,7 @@ public class PieceItem implements VoObject {
     }
 
 
+>>>>>>> Stashed changes
     @Override
     public Object createVo() {
         return new PieceFreightRetVo(this);
