@@ -41,6 +41,39 @@ public class Freight implements VoObject{
     public Freight()
     {
     }
+
+    public Integer getUnit() {
+        return unit;
+    }
+
+    public Byte getType() {
+        return type;
+    }
+
+    public Byte getDefaultModel() {
+        return defaultModel;
+    }
+
+    public LocalDateTime getGmtCreate() {
+        return gmtCreate;
+    }
+
+    public LocalDateTime getGmtModified() {
+        return gmtModified;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Long getShopId() {
+        return shopId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
     public void setUnit(Integer unit) {
         this.unit = unit;
     }
@@ -91,6 +124,7 @@ public class Freight implements VoObject{
         FreightModelVo freightModelVo = new FreightModelVo();
         freightModelVo.setId(id);
         freightModelVo.setName(name);
+        freightModelVo.setUnit(unit);
         if(defaultModel==null||defaultModel==0x00)
             freightModelVo.setDefaultModel(false);
         else
