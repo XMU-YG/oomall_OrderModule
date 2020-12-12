@@ -9,9 +9,18 @@ public class FreightModelVo {
     private Long id;
     private String name;
     private Byte type;
+    private Integer unit;
     private Boolean defaultModel;
     private LocalDateTime gmtCreate;
     private LocalDateTime gmtModified;
+
+    public Byte getType() {
+        return type;
+    }
+
+    public Integer getUnit() {
+        return unit;
+    }
 
     public void setId(Long id) {
         this.id = id;
@@ -25,6 +34,9 @@ public class FreightModelVo {
         this.type = type;
     }
 
+    public void setUnit(Integer unit) {
+        this.unit = unit;
+    }
     public void setDefaultModel(Boolean defaultModel) {
         this.defaultModel = defaultModel;
     }
