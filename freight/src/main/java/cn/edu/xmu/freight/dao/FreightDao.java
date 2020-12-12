@@ -1,13 +1,7 @@
 package cn.edu.xmu.freight.dao;
 
-import cn.edu.xmu.freight.mapper.FreightPoMapper;
 import cn.edu.xmu.freight.mapper.PieceFreightPoMapper;
 import cn.edu.xmu.freight.mapper.WeightFreightPoMapper;
-<<<<<<< Updated upstream
-import cn.edu.xmu.freight.model.bo.FreightItem;
-import cn.edu.xmu.freight.model.bo.PieceItem;
-import cn.edu.xmu.freight.model.po.*;
-=======
 import cn.edu.xmu.freight.model.bo.Freight;
 import cn.edu.xmu.freight.model.bo.FreightItem;
 import cn.edu.xmu.freight.model.bo.PieceItem;
@@ -16,16 +10,17 @@ import cn.edu.xmu.freight.model.vo.FreightModelVo;
 import cn.edu.xmu.freight.model.vo.ItemsVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.RandomCaptcha;
->>>>>>> Stashed changes
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.freight.mapper.FreightPoMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
-<<<<<<< Updated upstream
-=======
 //import sun.java2d.pipe.SpanShapeRenderer;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -33,20 +28,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import org.springframework.stereotype.Service;
->>>>>>> Stashed changes
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
 
 @Repository
 public class FreightDao {
-<<<<<<< Updated upstream
-
-    private static final Logger logger = LoggerFactory.getLogger(FreightDao.class);
-=======
     private  static  final Logger logger = LoggerFactory.getLogger(FreightDao.class);
->>>>>>> Stashed changes
     @Resource
     private FreightPoMapper freightPoMapper;
     @Resource
@@ -54,8 +41,6 @@ public class FreightDao {
     @Resource
     private PieceFreightPoMapper pieceFreightPoMapper;
 
-<<<<<<< Updated upstream
-=======
     /**
      * 计算运费
      * @author 胡曼珑
@@ -70,6 +55,7 @@ public class FreightDao {
         //Boolean check=checkMix(models);
         ReturnObject<VoObject>ret=null;
         int type=0;
+        //注意：unit的单位是g
         int unit=0;
         Set<Long> keySet=models.keySet();
         Iterator<Long> it=keySet.iterator();
@@ -142,12 +128,13 @@ public class FreightDao {
         List<WeightFreightPo> pos=weightFreightPoMapper.selectByExample(example);
         WeightFreightPo po=pos.get(0);
         Long freight;
-        Long num=weight/unit;
+        //注意：首重应该也是以g为单位，因为是Long类型，常见的0.5kg首重就只能用g表示
         Long first=po.getFirstWeight();
-        Long ten=(10l-first)/unit;
-        Long fifty=(50l-first)/unit;
-        Long hundred=(100l-first)/unit;
-        Long threeHundred=(300l-first)/unit;
+        Long num=(weight-first)/unit;
+        Long ten=(10000l-first)/unit;
+        Long fifty=(50000l-first)/unit;
+        Long hundred=(100000l-first)/unit;
+        Long threeHundred=(300000l-first)/unit;
         Long firstWeightFreight=po.getFirstWeightFreight();
         Long tenPrice=po.getTenPrice();
         Long fiftyPrice=po.getTenPrice();
@@ -156,24 +143,24 @@ public class FreightDao {
         Long abovePrice=po.getAbovePrice();
 
         if(num*unit<weight) num++;
-        if(weight<po.getFirstWeight())
-            return po.getFirstWeightFreight();
-        else if(weight<10)
+        if(weight<first)
+            return firstWeightFreight;
+        else if(weight<10000)
         {
             freight=firstWeightFreight+(num)*tenPrice;
             return freight;
         }
-        else if(weight<50)
+        else if(weight<50000)
         {
             freight=firstWeightFreight+(ten)*tenPrice+(num-ten)*fiftyPrice;
             return freight;
         }
-        else if(weight<100)
+        else if(weight<100000)
         {
             freight=firstWeightFreight+(ten)*tenPrice+(fifty-ten)*fiftyPrice+(num-fifty)*hundredPrice;
             return freight;
         }
-        else if(weight<300)
+        else if(weight<300000)
         {
             freight=firstWeightFreight+(ten)*tenPrice+(fifty-ten)*fiftyPrice+(hundred-fifty)*hundredPrice+(num-hundred)*trihunPrice;
             return freight;
@@ -245,6 +232,13 @@ public class FreightDao {
 
     }
 
+    public FreightModelVo getFreModelByModelId(Long shopId,Long id)
+    {
+        FreightPo freightPo=null;
+        freightPo=freightPoMapper.selectByPrimaryKey(id);
+        Freight bo=new Freight(freightPo);
+        return new FreightModelVo(bo);
+    }
     /**
      * 管理员定义运费模板
      * @author 胡曼珑
@@ -406,13 +400,6 @@ public class FreightDao {
         {
             //将原有的默认模板设为非默认
           int ret1=freightPoMapper.updateByExampleSelective(freightPo1,example);
-          if(ret1==0)
-          {
-              //修改失败
-              logger.debug("editFreightModel: update freight fail : " + freightPo.toString());
-              retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("模板id不存在：" + freightPo.getId()));
-              return retObj;
-          }
             int ret=freightPoMapper.updateByPrimaryKeySelective(freightPo);
             if (ret == 0) {
                 //修改失败
@@ -588,7 +575,7 @@ public class FreightDao {
                 ret=pieceFreightPoMapper.deleteByExample(del);
             }
            //是否要加上如果type不等于0，1的情况吗？
-            /*调用商品模块的删除与运费模板的联系*/
+
             int ret1 = freightPoMapper.deleteByPrimaryKey(id);
             if (ret1 == 0) {
                 //删除失败
@@ -608,7 +595,6 @@ public class FreightDao {
     }
 
 
->>>>>>> Stashed changes
     /**
      * 店家或管理员查询某个（重量）运费模板的明细
      *

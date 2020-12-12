@@ -16,11 +16,8 @@ public class FreightItem implements VoObject {
 
     private Long id;
 
-<<<<<<< Updated upstream
-=======
     private  Long freightModelId;
 
->>>>>>> Stashed changes
     private Long firstWeight;
 
     private Long firstWeightFreight;
@@ -41,8 +38,6 @@ public class FreightItem implements VoObject {
 
     private LocalDateTime gmtModified;
 
-<<<<<<< Updated upstream
-=======
     public FreightItem()
     {
 
@@ -63,18 +58,14 @@ public class FreightItem implements VoObject {
         this.gmtModified=po.getGmtModified();
     }
 
->>>>>>> Stashed changes
     public Long getId() {
         return id;
     }
 
-<<<<<<< Updated upstream
-=======
     public Long getFreightModelId() {
         return freightModelId;
     }
 
->>>>>>> Stashed changes
     public Long getFirstWeight() {
         return firstWeight;
     }
@@ -115,20 +106,6 @@ public class FreightItem implements VoObject {
         return gmtModified;
     }
 
-<<<<<<< Updated upstream
-    public FreightItem(WeightFreightPo po){
-        this.id=po.getId();
-        this.firstWeight=po.getFirstWeight();
-        this.firstWeightFreight=po.getFirstWeightFreight();
-        this.tenPrice=po.getTenPrice();
-        this.fiftyPrice=po.getFiftyPrice();
-        this.hundredPrice=po.getHundredPrice();
-        this.trihunPrice=po.getTrihunPrice();
-        this.abovePrice=po.getAbovePrice();
-        this.regionId=po.getRegionId();
-        this.gmtCreate=po.getGmtCreate();
-        this.gmtModified=po.getGmtModified();
-=======
     public void setId(Long id) {
         this.id = id;
     }
@@ -194,7 +171,6 @@ public class FreightItem implements VoObject {
         weightFreightPo.setGmtModified(gmtModified);
         return weightFreightPo;
 
->>>>>>> Stashed changes
     }
 
     @Override
