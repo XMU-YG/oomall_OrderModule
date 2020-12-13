@@ -11,4 +11,10 @@ public interface IGoodsService {
      */
     public String getGoodsInfoBySkuIds(Long skuId);
 
+    /**
+     * 清空商品关联的运费模板
+     * @param freightId
+     * @return
+     */
+    public boolean cleanFreightIdById (Long freightId);
 }
