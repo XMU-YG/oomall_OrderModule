@@ -3,51 +3,32 @@ package cn.edu.xmu.order.dao;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.order.mapper.OrderItemPoMapper;
-<<<<<<< Updated upstream
-import cn.edu.xmu.order.model.po.OrderItemPo;
-import org.springframework.beans.factory.annotation.Autowired;
-=======
-<<<<<<< Updated upstream
-=======
+
 import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrderItemPoExample;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
 public class OrderItemDao {
-<<<<<<< Updated upstream
 
-    @Autowired
-=======
-<<<<<<< Updated upstream
-=======
 
     private  static  final Logger logger = LoggerFactory.getLogger(OrderItemDao.class);
 
     @Autowired
->>>>>>> Stashed changes
->>>>>>> Stashed changes
     private OrderItemPoMapper orderItemPoMapper;
 
     public OrderItemPo getOrderItemById(Long id) {
         return orderItemPoMapper.selectByPrimaryKey(id);
     }
 
-<<<<<<< Updated upstream
-    public int updateOrderItem(OrderItemPo orderItemPo) {
-        return orderItemPoMapper.updateByPrimaryKey(orderItemPo);
-    }
-=======
-<<<<<<< Updated upstream
-=======
+
     public int updateOrderItem(OrderItemPo orderItemPo) {
         return orderItemPoMapper.updateByPrimaryKey(orderItemPo);
     }
@@ -88,6 +69,5 @@ public class OrderItemDao {
         orderItemPos=orderItemPoMapper.selectByExample(example);
         return orderItemPos;
     }
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
 }

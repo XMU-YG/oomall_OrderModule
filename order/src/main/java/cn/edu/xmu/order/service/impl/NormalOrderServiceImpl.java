@@ -11,6 +11,7 @@ import cn.edu.xmu.order.model.vo.OrderVo;
 import cn.edu.xmu.order.model.vo.OrderItemVo;
 import cn.edu.xmu.order.service.OrderService;
 import cn.edu.xmu.order.util.OrderStatus;
+import cn.edu.xmu.order.util.OrderType;
 import cn.edu.xmu.order.util.PostOrderService;
 import cn.edu.xmu.produce.IFreightService;
 import cn.edu.xmu.produce.IGoodsService;
@@ -54,7 +55,7 @@ public class NormalOrderServiceImpl implements PostOrderService {
         String orderSn= Common.genSeqNum();
         orderPo.setOrderSn(orderSn);
         //0普通 1团购 2预售
-        orderPo.setOrderType((byte) 0);
+        orderPo.setOrderType(OrderType.NORMAL.getCode());
         //普通商品
         ArrayList<OrderGoods> norGoodsArrayList=new ArrayList<>();
         //秒杀商品
@@ -92,7 +93,7 @@ public class NormalOrderServiceImpl implements PostOrderService {
             goodsMap.put(orderItemPo.getGoodsSkuId(),orderItemPo.getQuantity());
         }
         //处理购买的普通商品：扣库存
-        ReturnObject nor=orderService.disposeNorGoodsList(norGoodsArrayList,(byte)0);
+        ReturnObject nor=orderService.disposeNorGoodsList(norGoodsArrayList,OrderType.NORMAL.getCode());
         //处理购买的秒杀商品：扣库存
         ReturnObject sec=orderService.disposeSecGoodsList(secGoodsArrayList);
         if (!nor.getCode().equals(ResponseCode.OK)||!sec.getCode().equals(ResponseCode.OK)){
@@ -102,6 +103,7 @@ public class NormalOrderServiceImpl implements PostOrderService {
         //处理OrderPo
         orderPo.setCustomerId(customerId);
         //计算运费
+        String itemJson=JacksonUtil.toJson(goodsMap);
         orderPo.setFreightPrice(freightService.calculateFreight(orderPo.getRegionId(),goodsMap));
         //计算返点数
         String orderItemPosJson=JacksonUtil.toJson(orderItemPos);

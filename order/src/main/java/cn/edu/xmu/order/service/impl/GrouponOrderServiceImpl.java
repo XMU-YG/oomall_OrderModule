@@ -14,6 +14,7 @@ import cn.edu.xmu.order.model.vo.OrderItemVo;
 import cn.edu.xmu.order.model.vo.OrderVo;
 import cn.edu.xmu.order.service.OrderService;
 import cn.edu.xmu.order.util.OrderStatus;
+import cn.edu.xmu.order.util.OrderType;
 import cn.edu.xmu.order.util.PostOrderService;
 import cn.edu.xmu.produce.IFreightService;
 import cn.edu.xmu.produce.IGoodsService;
@@ -56,7 +57,7 @@ public class GrouponOrderServiceImpl implements PostOrderService {
         String orderSn = Common.genSeqNum();
         orderPo.setOrderSn(orderSn);
         //0普通 1团购 2预售
-        orderPo.setOrderType((byte) 1);
+        orderPo.setOrderType(OrderType.GROUPON.getCode());
         //普通商品
         ArrayList<OrderGoods> norGoodsArrayList = new ArrayList<>();
         //所有商品skuId与quantity的Map，用于计算运费
@@ -86,7 +87,7 @@ public class GrouponOrderServiceImpl implements PostOrderService {
         goodsMap.put(orderItemPo.getGoodsSkuId(), orderItemPo.getQuantity());
 
         //处理购买的普通商品：扣库存
-        ReturnObject nor = orderService.disposeNorGoodsList(norGoodsArrayList, (byte) 1);
+        ReturnObject nor = orderService.disposeNorGoodsList(norGoodsArrayList, OrderType.GROUPON.getCode());
 
         if (!nor.getCode().equals(ResponseCode.OK)) {
             //库存不足
@@ -97,6 +98,7 @@ public class GrouponOrderServiceImpl implements PostOrderService {
         //todo 计算优惠额
         orderPo.setDiscountPrice(11L);
         //计算运费
+        String itemMap=JacksonUtil.toJson(goodsMap);
         orderPo.setFreightPrice(freightService.calculateFreight(orderPo.getRegionId(), goodsMap));
         //计算返点数
         String orderItemPosJson = JacksonUtil.toJson(orderItemPo);

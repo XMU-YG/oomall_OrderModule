@@ -1,57 +1,39 @@
 package cn.edu.xmu.order.service;
 
 import cn.edu.xmu.ooad.model.VoObject;
-<<<<<<< Updated upstream
-import cn.edu.xmu.ooad.util.Common;
-=======
-<<<<<<< Updated upstream
-=======
+
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.JacksonUtil;
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.order.dao.OrderDao;
 import cn.edu.xmu.order.dao.OrderItemDao;
-<<<<<<< Updated upstream
+
 import cn.edu.xmu.order.model.bo.Customer;
 import cn.edu.xmu.order.model.bo.Order;
-import cn.edu.xmu.order.model.bo.OrderItem;
 import cn.edu.xmu.order.model.bo.Shop;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrderPo;
 import cn.edu.xmu.order.model.vo.AddressVo;
-import cn.edu.xmu.order.model.vo.NewOrderVo;
-import cn.edu.xmu.order.service.impl.DeductStockImpl;
-import cn.edu.xmu.order.service.impl.GoodsServiceImpl;
-import cn.edu.xmu.order.service.impl.OtherServiceImpl;
-import cn.edu.xmu.order.util.orderThrowable.OrderThrow;
+
 import com.github.pagehelper.PageInfo;
-<<<<<<< Updated upstream
-import com.mysql.cj.exceptions.DataConversionException;
-=======
-=======
+
+
 import cn.edu.xmu.order.model.bo.*;
-import cn.edu.xmu.order.model.po.OrderItemPo;
-import cn.edu.xmu.order.model.po.OrderPo;
-import cn.edu.xmu.order.model.vo.AddressVo;
 import cn.edu.xmu.order.model.vo.OrderItemVo;
 import cn.edu.xmu.order.model.vo.OrderVo;
 import cn.edu.xmu.order.util.OrderStatus;
 import cn.edu.xmu.produce.IGoodsService;
 import cn.edu.xmu.produce.IOtherService;
-import com.github.pagehelper.PageInfo;
 import org.apache.dubbo.config.annotation.DubboReference;
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -97,29 +79,17 @@ public class OrderService {
     }
 
     @Transactional
-<<<<<<< Updated upstream
-    public ReturnObject<VoObject> getOrderById(Long customerId,Long orderId){
 
-        ReturnObject<VoObject> returnObject= orderDao.getOrderById(customerId,orderId);
-
-<<<<<<< Updated upstream
-=======
-        Customer customer=new Customer();
-        customer.setCustomerId(order.getCustomer().getCustomerId());
-=======
     public ReturnObject<VoObject> getCusOrderById(Long customerId, Long orderId){
         ReturnObject<VoObject> returnObject= orderDao.getOrderById(customerId,orderId);
->>>>>>> Stashed changes
+
         if (returnObject.getCode().equals(ResponseCode.OK)){
 
             Order order=(Order)returnObject.getData();
 
             Customer customer=new Customer();
             customer.setCustomerId(order.getCustomer().getCustomerId());
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
 
             Shop shop=new Shop();
             shop.setShopId(order.getShop().getShopId());
@@ -163,25 +133,12 @@ public class OrderService {
     @Transactional
     public ReturnObject<VoObject> getShopSelfOrder(Long shopId, Long id) {
         ReturnObject<VoObject> returnObject= orderDao.getShopSelfOrder(shopId,id);
-<<<<<<< Updated upstream
 
-=======
-<<<<<<< Updated upstream
-        Order order=(Order)returnObject.getData();
-
-        Customer customer=new Customer();
-        customer.setCustomerId(order.getCustomer().getCustomerId());
-=======
->>>>>>> Stashed changes
         if (returnObject.getCode().equals(ResponseCode.OK)){
             Order order=(Order)returnObject.getData();
 
             Customer customer=new Customer();
             customer.setCustomerId(order.getCustomer().getCustomerId());
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 
             Shop shop=new Shop();
             shop.setShopId(order.getShop().getShopId());
@@ -251,94 +208,7 @@ public class OrderService {
         return false;
     }
 
-<<<<<<< Updated upstream
-    /**
-     * 处理普通商品订单明细
-     * 完善OrderItemPo，检查库存，扣库存(普通商品)
-     * @param orderItemPos
-     * @return
-     */
-    @Transactional
-    public ReturnObject<List<OrderItem>> disposeNorOrderItemsPo(List<OrderItemPo> orderItemPos)  {
-        ArrayList<OrderItem> order_goodsList=new ArrayList<>(orderItemPos.size());
-        //todo
-=======
-<<<<<<< Updated upstream
-    public ReturnObject<List<OrderItemPo>> disposeNorOrderItemsPo(List<OrderItemPo> orderItemPos){
-        ArrayList<OrderItemPo> order_goodsList=new ArrayList<>(orderItemPos.size());
->>>>>>> Stashed changes
-        GoodsServiceImpl goodsService=null;
-        //todo
-        OtherServiceImpl otherService=null;
-        //检查库存
-        for (OrderItemPo orderItemPo:orderItemPos) {
-            OrderItem order_goods=goodsService.findGoodsBySkuId(orderItemPo.getGoodsSkuId());
-            if (orderItemPo.getQuantity()>order_goods.getQuantity()){
-                //库存不足
-                return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
-            }
-            order_goods.setQuantity(orderItemPo.getQuantity());
-            order_goods.setCoupon_activity_id(orderItemPo.getCouponActivityId());
-            //todo
-            // order_goods.setBeShareId(otherService.getBeSharedIdBySkuId(orderItemPo.getGoodsSkuId()));
 
-            order_goodsList.add(order_goods);
-        }
-        //扣库存
-        //todo 商品模块扣库存
-        DeductStockImpl goodsDeduct=null;
-        Map<Long,Integer> map=new HashMap<>(order_goodsList.size());
-        for (OrderItem order_goods:order_goodsList) {
-            map.put(order_goods.getGoods_sku_id(),order_goods.getQuantity());
-            if (!goodsDeduct.deductStock(order_goods.getGoods_sku_id(),order_goods.getQuantity())) {
-                //库存不足
-                //库存回滚
-                map.forEach((k,v)->{
-                    goodsDeduct.deductStock(k,-v);
-                });
-                return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
-            }
-        }
-        return new ReturnObject<>(order_goodsList);
-    }
-
-    /**
-     * 处理秒杀商品订单明细
-     * 完善OrderItemPo，检查库存，扣库存(秒杀商品)
-     * @param orderItemPos
-     * @return
-     */
-    @Transactional
-    public ReturnObject<List<OrderItem>> disposeSecOrderItemsPo(List<OrderItemPo> orderItemPos) {
-        ArrayList<OrderItem> order_goodsList=new ArrayList<>(orderItemPos.size());
-        //todo
-        GoodsServiceImpl goodsService=null;
-        //todo
-        OtherServiceImpl otherService=null;
-        //检查库存
-        for (OrderItemPo orderItemPo:orderItemPos) {
-            OrderItem order_goods=goodsService.findGoodsBySkuId(orderItemPo.getGoodsSkuId());
-            if (orderItemPo.getQuantity()>order_goods.getQuantity()){
-                //库存不足
-                return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
-            }
-<<<<<<< Updated upstream
-            order_goods.setQuantity(orderItemPo.getQuantity());
-            order_goods.setCoupon_activity_id(orderItemPo.getCouponActivityId());
-            //todo
-            // order_goods.setBeShareId(otherService.getBeSharedIdBySkuId(orderItemPo.getGoodsSkuId()));
-
-            order_goodsList.add(order_goods);
-        }
-        //扣库存
-        //todo 扣库存
-
-        Map<Long,Integer> map=new HashMap<>(order_goodsList.size());
-        for (OrderItem order_goods:order_goodsList) {
-            map.put(order_goods.getGoods_sku_id(),order_goods.getQuantity());
-            if (!this.deductStock(order_goods.getGoods_sku_id(),order_goods.getQuantity())) {
-=======
-=======
     /**
      * 处理普通商品订单明细
      * 扣库存(普通商品)
@@ -384,7 +254,6 @@ public class OrderService {
             //扣库存
             boolean deductSuccessful=this.deductStock(po.getGoods_sku_id(),po.getQuantity());
             if (!deductSuccessful) {
->>>>>>> Stashed changes
                 //库存不足
                 //库存回滚
                 map.forEach((k,v)->{
@@ -392,12 +261,9 @@ public class OrderService {
                 });
                 return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
             }
-<<<<<<< Updated upstream
-=======
+
             //扣成功则存入map
             map.put(po.getGoods_sku_id(),po.getQuantity());
->>>>>>> Stashed changes
->>>>>>> Stashed changes
         }
         return new ReturnObject<>(ResponseCode.OK);
     }
@@ -458,55 +324,6 @@ public class OrderService {
     }
 
 
-<<<<<<< Updated upstream
-    public ReturnObject<VoObject> addNewAfterOrder(Long shopId, NewOrderVo vo) {
-
-        return null;
-    }
-
-
-    /**
-     * 分单
-     * @param orderPo 父订单
-     * @param orderItems 父订单对应orderItems(由OrderItemPo构造)
-     * @author Gang Ye
-     * @created 2020/12/10 2:22
-     */
-    public void classifyOrders(OrderPo orderPo,List<OrderItem> orderItems){
-
-        Map<Long,List<OrderItem>> goodsMapByShop=new HashMap<>(orderItems.size());
-        for (OrderItem orderItem :orderItems) {
-            goodsMapByShop.computeIfAbsent(orderItem.getShopId(),k->new ArrayList<>()).add(orderItem);
-=======
-<<<<<<< Updated upstream
-    public ReturnObject<List> getOrderAllStates(Long customerId) {
-        return orderDao.getOrderAllStates(customerId);
-    }
-
-
-//    void classifyOrders(){
-//        Map<Long,List<OrderGoods>> goodsMapByShop=new HashMap<>(goods.size());
-//        for (OrderGoods g :goods) {
-//            goodsMapByShop.computeIfAbsent(g.getShopId(),k->new ArrayList<OrderGoods>()).add(g);
-//        }
-//
-//        ArrayList<OrderPo> orderPos=new ArrayList<>(goodsMapByShop.size());
-//        //分单
-//        goodsMapByShop.forEach((k,v)->{
-//            //子订单
-//            OrderPo po=new OrderPo();
-//            po.setOrderSn(Common.genSeqNum());
-//            po.setShopId(k);
-//            po.setCustomerId(customerId);
-//            OrderServiceImpl freightService=null;
-//            po.setFreightPrice(freightService.calculateFreight(v));
-//            OrderServiceImpl otherService=null;
-//            po.setDiscountPrice(this.calculateDiscount());
-//            po.setRebateNum(otherService.calculateRebateNum(v,customerId));
-//
-//        });
-//    }
-=======
     /**
      * 创建售后订单
      * @param shopId 发起售后的店铺id
@@ -603,31 +420,13 @@ public class OrderService {
             OrderGoods goods= JacksonUtil.toObj(goodsJson,OrderGoods.class);
             assert goods != null;
             goodsMapByShop.computeIfAbsent(goods.getShopId(), k->new ArrayList<>()).add(orderItem);
->>>>>>> Stashed changes
+
         }
         //分单
         goodsMapByShop.forEach((k,v)->{
             //子订单
             OrderPo po=new OrderPo();
-<<<<<<< Updated upstream
-            po.setOrderSn(Common.genSeqNum());
-            po.setShopId(k);
-            po.setCustomerId(orderPo.getCustomerId());
 
-            po.setOriginPrice(11l);
-            po.setFreightPrice(orderPo.getFreightPrice()*(po.getOriginPrice()/orderPo.getOriginPrice()));
-
-            po.setDiscountPrice(this.calculateDiscount());
-            //todo
-            po.setRebateNum(11);
-
-            Long orderId=orderDao.insertOrder(orderPo).getData();
-
-            v.forEach(x->{
-                OrderItemPo orderItemPo=orderItemDao.getOrderItemById(x.getId());
-                orderItemPo.setOrderId(orderId);
-                orderItemPo.setGmtModified(LocalDateTime.now());
-=======
             po.setGmtCreate(LocalDateTime.now());
             po.setOrderSn(Common.genSeqNum());
             po.setShopId(k);
@@ -649,15 +448,10 @@ public class OrderService {
                 orderItemPo.setOrderId(id);
                 orderItemPo.setGmtModified(LocalDateTime.now());
                 //更新
->>>>>>> Stashed changes
                 orderItemDao.updateOrderItem(orderItemPo);
             });
         });
     }
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
-
     public List<Long> getOrderItemIdList(List<Long> skuIds,Long customerId){
         List<Long> orderItemIds=new ArrayList<>(skuIds.size());
 
@@ -669,8 +463,6 @@ public class OrderService {
                 }
             });
         }
->>>>>>> Stashed changes
-
         return orderItemIds;
     }
 

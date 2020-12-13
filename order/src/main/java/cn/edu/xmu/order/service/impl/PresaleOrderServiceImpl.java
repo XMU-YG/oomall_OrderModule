@@ -11,6 +11,7 @@ import cn.edu.xmu.order.model.vo.OrderItemVo;
 import cn.edu.xmu.order.model.vo.OrderVo;
 import cn.edu.xmu.order.service.OrderService;
 import cn.edu.xmu.order.util.OrderStatus;
+import cn.edu.xmu.order.util.OrderType;
 import cn.edu.xmu.order.util.PostOrderService;
 import cn.edu.xmu.produce.IFreightService;
 import cn.edu.xmu.produce.IGoodsService;
@@ -54,7 +55,7 @@ public class PresaleOrderServiceImpl implements PostOrderService {
         String orderSn = Common.genSeqNum();
         orderPo.setOrderSn(orderSn);
         //0普通 1团购 2预售
-        orderPo.setOrderType((byte) 2);
+        orderPo.setOrderType(OrderType.PRESALE.getCode());
         //检查库存
         String orderGoodsJson = goodsService.findGoodsBySkuId(orderItemVo.getSkuId());
         OrderGoods order_goods = JacksonUtil.toObj(orderGoodsJson, OrderGoods.class);
@@ -77,7 +78,7 @@ public class PresaleOrderServiceImpl implements PostOrderService {
         ArrayList<OrderGoods> norGoodsArrayList=new ArrayList<>();
         norGoodsArrayList.add(order_goods);
         //处理购买的普通商品：扣库存
-        ReturnObject nor = orderService.disposeNorGoodsList(norGoodsArrayList, (byte) 2);
+        ReturnObject nor = orderService.disposeNorGoodsList(norGoodsArrayList, OrderType.PRESALE.getCode());
 
         if (!nor.getCode().equals(ResponseCode.OK)) {
             //库存不足
@@ -89,7 +90,8 @@ public class PresaleOrderServiceImpl implements PostOrderService {
         Map<Long,Integer> goodsMap=new HashMap<>();
         goodsMap.put(orderItemPo.getGoodsSkuId(),orderItemPo.getQuantity());
         //计算运费
-        orderPo.setFreightPrice(freightService.calculateFreight(orderPo.getRegionId(), goodsMap));
+
+        orderPo.setFreightPrice(freightService.calculateFreight(orderPo.getRegionId(),goodsMap));
         //计算返点数
         String orderItemPosJson = JacksonUtil.toJson(orderItemPo);
         orderPo.setRebateNum(otherService.calculateRebateNum(orderItemPosJson, customerId));

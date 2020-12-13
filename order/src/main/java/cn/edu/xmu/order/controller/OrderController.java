@@ -7,24 +7,17 @@ import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.order.util.factory.PostOrderFactory;
+import cn.edu.xmu.order.factory.PostOrderFactory;
 import cn.edu.xmu.order.model.vo.AddressVo;
-<<<<<<< Updated upstream
-import cn.edu.xmu.order.model.vo.NewOrderVo;
+
 import cn.edu.xmu.order.model.vo.StateRetVo;
 import cn.edu.xmu.order.service.OrderService;
-import cn.edu.xmu.order.service.impl.PostOrderServiceImpl;
-<<<<<<< Updated upstream
+
 import cn.edu.xmu.order.util.OrderStatus;
-=======
-=======
+
 import cn.edu.xmu.order.model.vo.OrderVo;
-import cn.edu.xmu.order.model.vo.StateRetVo;
-import cn.edu.xmu.order.service.OrderService;
 import cn.edu.xmu.order.util.PostOrderService;
-import cn.edu.xmu.order.util.OrderStatus;
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
@@ -81,38 +74,19 @@ public class OrderController {
     })
     @Audit
     @PostMapping("orders")
-<<<<<<< Updated upstream
-    public Object addNewOrderByCustomer(@ApiIgnore @LoginUser Long customerId, @Validated @RequestBody NewOrderVo orderInfo,BindingResult bindingResult) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-=======
-<<<<<<< Updated upstream
-    public Object addNewOrderByCustomer(@ApiIgnore @LoginUser Long customerId, @Validated @RequestBody NewOrderVo vo,BindingResult bindingResult) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-=======
+
     public Object addNewOrderByCustomer(@ApiIgnore @LoginUser Long customerId, @Validated @RequestBody OrderVo orderInfo, BindingResult bindingResult) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
             return returnObject;
         }
         Object ret=null;
-<<<<<<< Updated upstream
-        PostOrderServiceImpl postOrderService=postOrderFactory.createService(orderInfo);
-        logger.debug("addNewOrder.  customerId: "+customerId);
-        ReturnObject<VoObject> object=postOrderService.addNewOrderByCustomer(customerId,orderInfo);
-=======
-<<<<<<< Updated upstream
-        Class c= PostOrderFactory.createService(vo);
-        Constructor a=c.getConstructor();
-        PostOrderServiceImpl postOrderService=(PostOrderServiceImpl)a.newInstance();
 
-        ReturnObject<VoObject> object=postOrderService.addNewOrderByCustomer(customerId,vo);
-=======
         PostOrderService postOrderService=postOrderFactory.createService(orderInfo);
         logger.debug("addNewOrder.  customerId: "+customerId);
         ReturnObject object=postOrderService.addNewOrderByCustomer(customerId,orderInfo);
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 
         if (object.getCode().equals(ResponseCode.OK)){
             ret=Common.getRetObject(object);
@@ -547,7 +521,6 @@ public class OrderController {
     })
     @Audit
     @GetMapping("orders/states")
-<<<<<<< Updated upstream
     public Object getOrderAllStates(){
 
         logger.debug("customer get all order states.");
@@ -559,58 +532,4 @@ public class OrderController {
         return ResponseUtil.ok(new ReturnObject<>(stateRetVos));
     }
 
-    @ApiOperation(value = "管理员新增售后订单")
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-            @ApiImplicitParam(name="shopId", value="店铺ID", required = true, dataType="int", paramType="path"),
-            @ApiImplicitParam(name="orderInfo", value="订单信息", required = true, dataType="object", paramType="body")
-
-    })
-    @ApiResponses({
-            @ApiResponse(code = 0, message = "成功"),
-            @ApiResponse(code = 900, message = "商品库存不足")
-    })
-    @Audit
-    @PostMapping("/shops/{shopId}/orders")
-    public Object addNewAfterOrder(@ApiIgnore @PathVariable(name = "shopId") Long shopId,@Validated @RequestBody NewOrderVo vo,BindingResult bindingResult){
-        //校验前端数据
-        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
-        if (null != returnObject) {
-            return returnObject;
-        }
-=======
-<<<<<<< Updated upstream
-    public Object getOrderAllStates(@ApiIgnore @LoginUser Long customerId){
-        ReturnObject<List> object=null;
->>>>>>> Stashed changes
-        Object ret=null;
-
-        ReturnObject<VoObject> object=orderService.addNewAfterOrder(shopId,vo);
-
-        if (object.getCode().equals(ResponseCode.OK)){
-            ret=Common.getRetObject(object);
-        }
-        else{
-            ret=Common.decorateReturnObject(object);
-        }
-        return ret;
-    }
-<<<<<<< Updated upstream
-=======
-
-=======
-    public Object getOrderAllStates(){
-
-        logger.debug("customer get all order states.");
-        OrderStatus[] orderStatuses= OrderStatus.class.getEnumConstants();
-        List<StateRetVo> stateRetVos=new ArrayList<>(orderStatuses.length);
-        for (OrderStatus orderStatus:orderStatuses){
-            stateRetVos.add(new StateRetVo(orderStatus));
-        }
-        return ResponseUtil.ok(new ReturnObject<>(stateRetVos));
-    }
-
-
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 }
