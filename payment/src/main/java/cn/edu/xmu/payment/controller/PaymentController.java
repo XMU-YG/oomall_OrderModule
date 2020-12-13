@@ -326,11 +326,11 @@ public class PaymentController {
     })
     @ApiResponses({
             @ApiResponse(code=0,message="成功"),
-            @ApiResponse(code=504,message = "支付不存在"),
-            @ApiResponse(code=505,message = "支付无权访问")
+            @ApiResponse(code=504,message = "退款不存在"),
+            @ApiResponse(code=505,message = "该退款无权访问")
     })
     @PostMapping("/shops/{shopId}/payments/{id}/refunds")
-    public Object createAftersalePayment(@LoginUser @ApiIgnore @RequestParam(required =false)  Long userId,
+    public Object createRefund(@LoginUser @ApiIgnore @RequestParam(required =false)  Long userId,
                                          @Validated @RequestBody NewRefundVo vo, BindingResult bindingResult,
                                          @PathVariable Long shopId, @PathVariable Long id){
         logger.debug("insert aftersale payment orderid: "+id);
