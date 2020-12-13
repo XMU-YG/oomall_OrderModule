@@ -3,14 +3,18 @@ package cn.edu.xmu.freight.service;
 import cn.edu.xmu.freight.dao.FreightDao;
 import cn.edu.xmu.freight.model.bo.Freight;
 import cn.edu.xmu.freight.model.bo.FreightItem;
+import cn.edu.xmu.freight.model.bo.InnerSkuFreightInfo;
 import cn.edu.xmu.freight.model.bo.PieceItem;
 import cn.edu.xmu.freight.model.po.FreightPo;
 import cn.edu.xmu.freight.model.po.PieceFreightPo;
 import cn.edu.xmu.freight.model.po.WeightFreightPo;
 import cn.edu.xmu.freight.model.vo.*;
 import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.produce.IGoodsService;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,18 +35,19 @@ public class FreightService {
     @Autowired
     private FreightDao freightDao;
 
+    @DubboReference
+    private IGoodsService goodsService;
     /**
      * 获取运费模板概要
      * @author 胡曼珑
-     * @param shopId
      * @param id
      * @return
      */
     @Transactional
-    public FreightModelVo getFreModelByModelId(Long shopId,Long id)
+    public FreightModelVo getFreModelByModelId(Long id)
     {
-        logger.info("id"+id+" shopId"+shopId);
-       return freightDao.getFreModelByModelId(shopId,id);
+        logger.info("id"+id);
+       return freightDao.getFreModelByModelId(id);
 
     }
 
@@ -184,17 +189,18 @@ public class FreightService {
         Long weightSum=0L;
         Long counts=0L;
         Long shopId=null;
-        /*Long freightId=nul;;
-
-        InnerSkuFreightInfo info=null;
+        Long freightId=null;;
+        String goodsInfoJson=null;
+       ///InnerSkuFreightInfo info=null;
         for (Long id:skuIds) {
-            info=goodsService.getGoodsInfoBySkuIds(id);
+            goodsInfoJson=goodsService.getGoodsInfoBySkuIds(id);
+            InnerSkuFreightInfo info= JacksonUtil.toObj(goodsInfoJson,InnerSkuFreightInfo.class);
             weightSum+=info.getWeight();
             freightId=info.getFreightId();
             models.put(freightId,shopId);
         }
 
-       */
+
         /*for(Long a : weights)
         {
             weightSum+=a;

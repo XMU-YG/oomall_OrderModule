@@ -232,7 +232,7 @@ public class FreightDao {
 
     }
 
-    public FreightModelVo getFreModelByModelId(Long shopId,Long id)
+    public FreightModelVo getFreModelByModelId(Long id)
     {
         FreightPo freightPo=null;
         freightPo=freightPoMapper.selectByPrimaryKey(id);
