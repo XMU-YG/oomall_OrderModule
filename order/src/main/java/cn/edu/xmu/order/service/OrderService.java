@@ -1,11 +1,20 @@
 package cn.edu.xmu.order.service;
 
 import cn.edu.xmu.ooad.model.VoObject;
+<<<<<<< Updated upstream
 import cn.edu.xmu.ooad.util.Common;
+=======
+<<<<<<< Updated upstream
+=======
+import cn.edu.xmu.ooad.util.Common;
+import cn.edu.xmu.ooad.util.JacksonUtil;
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.order.dao.OrderDao;
 import cn.edu.xmu.order.dao.OrderItemDao;
+<<<<<<< Updated upstream
 import cn.edu.xmu.order.model.bo.Customer;
 import cn.edu.xmu.order.model.bo.Order;
 import cn.edu.xmu.order.model.bo.OrderItem;
@@ -19,7 +28,23 @@ import cn.edu.xmu.order.service.impl.GoodsServiceImpl;
 import cn.edu.xmu.order.service.impl.OtherServiceImpl;
 import cn.edu.xmu.order.util.orderThrowable.OrderThrow;
 import com.github.pagehelper.PageInfo;
+<<<<<<< Updated upstream
 import com.mysql.cj.exceptions.DataConversionException;
+=======
+=======
+import cn.edu.xmu.order.model.bo.*;
+import cn.edu.xmu.order.model.po.OrderItemPo;
+import cn.edu.xmu.order.model.po.OrderPo;
+import cn.edu.xmu.order.model.vo.AddressVo;
+import cn.edu.xmu.order.model.vo.OrderItemVo;
+import cn.edu.xmu.order.model.vo.OrderVo;
+import cn.edu.xmu.order.util.OrderStatus;
+import cn.edu.xmu.produce.IGoodsService;
+import cn.edu.xmu.produce.IOtherService;
+import com.github.pagehelper.PageInfo;
+import org.apache.dubbo.config.annotation.DubboReference;
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,31 +63,63 @@ import java.util.Map;
  * @author Gang Ye
  */
 @Service
-public class OrderService implements DeductStockImpl{
+public class OrderService {
     private Logger logger=LoggerFactory.getLogger(OrderService.class);
+
+
     @Autowired
     private OrderItemDao orderItemDao;
 
     @Autowired
     private OrderDao orderDao;
 
+    @DubboReference
+    private IGoodsService goodsService;
+
+    @DubboReference
+    private IOtherService otherService;
+
+    public List<OrderItemPo> findOrderItemsByOrderId(Long orderId){
+        return orderItemDao.getOrderItemsByOrderId(orderId);
+    }
+
+    public List<OrderItemPo> getItemsBySkuId(Long skuId) {
+        return orderItemDao.getItemsBySkuId(skuId);
+    }
+
+    public ReturnObject insertOrderItem(OrderItemPo orderItemPo) {
+        return orderItemDao.insertOrderItem(orderItemPo);
+    }
+
     @Transactional
     public ReturnObject<PageInfo<VoObject>> getAllSimpleOrders(Long customerId, String orderSn, Integer state, LocalDateTime beginTime, LocalDateTime endTime, Integer page, Integer pageSize){
         return orderDao.getAllSimpleOrders(customerId,orderSn,state,beginTime,endTime,page,pageSize);
     }
 
-
     @Transactional
+<<<<<<< Updated upstream
     public ReturnObject<VoObject> getOrderById(Long customerId,Long orderId){
 
         ReturnObject<VoObject> returnObject= orderDao.getOrderById(customerId,orderId);
 
+<<<<<<< Updated upstream
+=======
+        Customer customer=new Customer();
+        customer.setCustomerId(order.getCustomer().getCustomerId());
+=======
+    public ReturnObject<VoObject> getCusOrderById(Long customerId, Long orderId){
+        ReturnObject<VoObject> returnObject= orderDao.getOrderById(customerId,orderId);
+>>>>>>> Stashed changes
         if (returnObject.getCode().equals(ResponseCode.OK)){
 
             Order order=(Order)returnObject.getData();
 
             Customer customer=new Customer();
             customer.setCustomerId(order.getCustomer().getCustomerId());
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 
             Shop shop=new Shop();
             shop.setShopId(order.getShop().getShopId());
@@ -106,12 +163,25 @@ public class OrderService implements DeductStockImpl{
     @Transactional
     public ReturnObject<VoObject> getShopSelfOrder(Long shopId, Long id) {
         ReturnObject<VoObject> returnObject= orderDao.getShopSelfOrder(shopId,id);
+<<<<<<< Updated upstream
 
+=======
+<<<<<<< Updated upstream
+        Order order=(Order)returnObject.getData();
+
+        Customer customer=new Customer();
+        customer.setCustomerId(order.getCustomer().getCustomerId());
+=======
+>>>>>>> Stashed changes
         if (returnObject.getCode().equals(ResponseCode.OK)){
             Order order=(Order)returnObject.getData();
 
             Customer customer=new Customer();
             customer.setCustomerId(order.getCustomer().getCustomerId());
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 
             Shop shop=new Shop();
             shop.setShopId(order.getShop().getShopId());
@@ -141,19 +211,38 @@ public class OrderService implements DeductStockImpl{
         return orderDao.deliverShopOrder(shopId,orderId,freightSn);
     }
 
+    /**
+     * 订单写入
+     * @param orderPo
+     * @return 订单id
+     * @author Gang Ye
+     */
     @Transactional
     public ReturnObject<Long> insertOrder(OrderPo orderPo){
         return orderDao.insertOrder(orderPo);
     }
+
+    /**
+     * 判断订单是否属于该顾客
+     * @param customerId
+     * @param orderId
+     * @return
+     */
     public boolean verifyOrderByCustomerId(Long customerId,Long orderId) {
 
-        ReturnObject<VoObject> returnObject=orderDao.getOrderById(customerId,orderId);
-        if (returnObject.getCode().equals(ResponseCode.OK)){
+        OrderPo ret=orderDao.getOrderPoById(orderId);
+        if (ret.getCustomerId().equals(customerId)){
             return true;
         }
         return false;
     }
 
+    /**
+     * 判断订单是否属于该店铺
+     * @param shopId
+     * @param orderId
+     * @return
+     */
     public boolean verifyOrderByShopId(Long shopId,Long orderId) {
         ReturnObject<VoObject> returnObject=orderDao.getShopSelfOrder(shopId,orderId);
         if (returnObject.getCode().equals(ResponseCode.OK)){
@@ -162,6 +251,7 @@ public class OrderService implements DeductStockImpl{
         return false;
     }
 
+<<<<<<< Updated upstream
     /**
      * 处理普通商品订单明细
      * 完善OrderItemPo，检查库存，扣库存(普通商品)
@@ -172,6 +262,11 @@ public class OrderService implements DeductStockImpl{
     public ReturnObject<List<OrderItem>> disposeNorOrderItemsPo(List<OrderItemPo> orderItemPos)  {
         ArrayList<OrderItem> order_goodsList=new ArrayList<>(orderItemPos.size());
         //todo
+=======
+<<<<<<< Updated upstream
+    public ReturnObject<List<OrderItemPo>> disposeNorOrderItemsPo(List<OrderItemPo> orderItemPos){
+        ArrayList<OrderItemPo> order_goodsList=new ArrayList<>(orderItemPos.size());
+>>>>>>> Stashed changes
         GoodsServiceImpl goodsService=null;
         //todo
         OtherServiceImpl otherService=null;
@@ -227,6 +322,7 @@ public class OrderService implements DeductStockImpl{
                 //库存不足
                 return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
             }
+<<<<<<< Updated upstream
             order_goods.setQuantity(orderItemPo.getQuantity());
             order_goods.setCoupon_activity_id(orderItemPo.getCouponActivityId());
             //todo
@@ -241,6 +337,54 @@ public class OrderService implements DeductStockImpl{
         for (OrderItem order_goods:order_goodsList) {
             map.put(order_goods.getGoods_sku_id(),order_goods.getQuantity());
             if (!this.deductStock(order_goods.getGoods_sku_id(),order_goods.getQuantity())) {
+=======
+=======
+    /**
+     * 处理普通商品订单明细
+     * 扣库存(普通商品)
+     * @param goodsList 商品列表
+     * @return 是否成功
+     * @modified by Gang Ye  修改业务只有扣库存
+     */
+    @Transactional
+    public ReturnObject disposeNorGoodsList(List<OrderGoods> goodsList, Byte type)  {
+        //扣库存
+        //存储以扣库存的商品skuId和quantity，便于回滚,局域变量，线程安全
+        Map<Long,Integer> map=new HashMap<>(goodsList.size());
+        for (OrderGoods po:goodsList) {
+            //扣库存
+            boolean deductSuccessful=goodsService.deductStock(po.getGoods_sku_id(),po.getQuantity(),type);
+            if (!deductSuccessful) {
+                //库存不足
+                //库存回滚
+                map.forEach((k,v)->{
+                    goodsService.deductStock(k,-v,type);
+                });
+                return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
+            }
+            //扣成功则存入map
+            map.put(po.getGoods_sku_id(),po.getQuantity());
+        }
+        return new ReturnObject<>(ResponseCode.OK);
+    }
+
+    /**
+     * 处理秒杀商品订单明细
+     * 扣库存(秒杀商品)
+     * @param goodsList 商品列表
+     * @return 是否成功
+     * @modified by Gang Ye  修改业务只有扣库存
+     */
+    @Transactional
+    public ReturnObject disposeSecGoodsList(List<OrderGoods> goodsList) {
+        //扣库存
+        //存储以扣库存的商品skuId和quantity，便于回滚,局域变量，线程安全
+        Map<Long,Integer> map=new HashMap<>(goodsList.size());
+        for (OrderGoods po:goodsList) {
+            //扣库存
+            boolean deductSuccessful=this.deductStock(po.getGoods_sku_id(),po.getQuantity());
+            if (!deductSuccessful) {
+>>>>>>> Stashed changes
                 //库存不足
                 //库存回滚
                 map.forEach((k,v)->{
@@ -248,14 +392,34 @@ public class OrderService implements DeductStockImpl{
                 });
                 return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
             }
+<<<<<<< Updated upstream
+=======
+            //扣成功则存入map
+            map.put(po.getGoods_sku_id(),po.getQuantity());
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
         }
-        return new ReturnObject<>(order_goodsList);
+        return new ReturnObject<>(ResponseCode.OK);
     }
 
-    public Long calculateDiscount(){
-        return (long)100;
+    /**
+     * 计算优惠数额
+     * @return
+     */
+    public Long calculateDiscount(List<OrderItemPo> orderItemPos){
+        Long sum=0L;
+        for (OrderItemPo po:orderItemPos
+             ) {
+            sum+=po.getDiscount();
+        }
+        return sum;
     }
 
+    /**
+     * 查询sn有否存在
+     * @param orderSn
+     * @return
+     */
     public boolean haveOrderSn(String orderSn){
         return orderDao.haveOrderSn(orderSn);
     }
@@ -267,8 +431,7 @@ public class OrderService implements DeductStockImpl{
      */
     public Long calculateOriginPrice(List<OrderItemPo> orderGoods){
         Long sum=0l;
-        for (OrderItemPo o:orderGoods
-             ) {
+        for (OrderItemPo o:orderGoods) {
             sum+=o.getPrice()*o.getQuantity();
         }
         return sum;
@@ -280,27 +443,22 @@ public class OrderService implements DeductStockImpl{
      * @param skuId
      * @param quantity
      * @return
+     * @modified by Gang Ye  删除秒杀商品在redis上找不到的情况，即默认所有都在redis上
      */
     @Transactional
-    @Override
     public boolean deductStock(Long skuId, Integer quantity) {
-
         int flag=orderDao.deductStock(skuId,quantity);
         switch (flag){
             case 1:
                 return true;
-            case 0:{
-            }
-            case -1:
+            case 0:
                 return false;
         }
         return false;
     }
 
-    public ReturnObject insertOrderItem(OrderItemPo orderItemPo) {
-        return orderDao.insertOrderItem(orderItemPo);
-    }
 
+<<<<<<< Updated upstream
     public ReturnObject<VoObject> addNewAfterOrder(Long shopId, NewOrderVo vo) {
 
         return null;
@@ -319,11 +477,139 @@ public class OrderService implements DeductStockImpl{
         Map<Long,List<OrderItem>> goodsMapByShop=new HashMap<>(orderItems.size());
         for (OrderItem orderItem :orderItems) {
             goodsMapByShop.computeIfAbsent(orderItem.getShopId(),k->new ArrayList<>()).add(orderItem);
+=======
+<<<<<<< Updated upstream
+    public ReturnObject<List> getOrderAllStates(Long customerId) {
+        return orderDao.getOrderAllStates(customerId);
+    }
+
+
+//    void classifyOrders(){
+//        Map<Long,List<OrderGoods>> goodsMapByShop=new HashMap<>(goods.size());
+//        for (OrderGoods g :goods) {
+//            goodsMapByShop.computeIfAbsent(g.getShopId(),k->new ArrayList<OrderGoods>()).add(g);
+//        }
+//
+//        ArrayList<OrderPo> orderPos=new ArrayList<>(goodsMapByShop.size());
+//        //分单
+//        goodsMapByShop.forEach((k,v)->{
+//            //子订单
+//            OrderPo po=new OrderPo();
+//            po.setOrderSn(Common.genSeqNum());
+//            po.setShopId(k);
+//            po.setCustomerId(customerId);
+//            OrderServiceImpl freightService=null;
+//            po.setFreightPrice(freightService.calculateFreight(v));
+//            OrderServiceImpl otherService=null;
+//            po.setDiscountPrice(this.calculateDiscount());
+//            po.setRebateNum(otherService.calculateRebateNum(v,customerId));
+//
+//        });
+//    }
+=======
+    /**
+     * 创建售后订单
+     * @param shopId 发起售后的店铺id
+     * @param orderVoJson 新订单信息视图Json
+     * @return
+     * @author Gang Ye
+     */
+    public ReturnObject createAfterSaleOrder(Long shopId, String orderVoJson) {
+        OrderVo vo=JacksonUtil.toObj(orderVoJson,OrderVo.class);
+        ReturnObject returnObject=null;
+        assert vo != null;
+        OrderPo orderPo=vo.createOrderPo();
+        orderPo.setGmtCreate(LocalDateTime.now());
+        List<OrderItemVo> orderItemVos=vo.getOrderItems();
+        List<OrderItemPo> orderItemPos=vo.createOrderItemsPo();
+
+        String orderSn= Common.genSeqNum();
+        orderPo.setOrderSn(orderSn);
+        //orderPo.setOrderType((byte) 0);
+        //普通商品
+        ArrayList<OrderGoods> norGoodsArrayList=new ArrayList<>();
+        //检查库存
+        for (OrderItemVo orderItemVo:orderItemVos) {
+            OrderItemPo orderItemPo=new OrderItemPo();
+            String orderGoodsJson=goodsService.findGoodsBySkuId(orderItemVo.getSkuId());
+            OrderGoods order_goods= JacksonUtil.toObj(orderGoodsJson,OrderGoods.class);
+            if (order_goods==null||orderItemVo.getQuantity()>order_goods.getQuantity()){
+                //库存不足
+                return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
+            }
+            //构造OrderItemPo
+            orderItemPo.setQuantity(orderItemVo.getQuantity());
+            orderItemPo.setName(order_goods.getName());
+            orderItemPo.setPrice(order_goods.getPrice());
+            orderItemPo.setGoodsSkuId(order_goods.getGoods_sku_id());
+            orderItemPo.setGmtCreate(LocalDateTime.now());
+            orderItemPo.setGmtModified(LocalDateTime.now());
+            orderItemPos.add(orderItemPo);
+
+            //商品数量属性设为购买数量，方便之后处理
+            order_goods.setQuantity(orderItemVo.getQuantity());
+            norGoodsArrayList.add(order_goods);
+        }
+        //处理购买的普通商品：扣库存
+        ReturnObject nor=this.disposeNorGoodsList(norGoodsArrayList,(byte)0);
+        if (!nor.getCode().equals(ResponseCode.OK)){
+            //库存不足
+            return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
+        }
+        //处理OrderPo
+        orderPo.setShopId(shopId);
+        //设为待支付状态
+        orderPo.setState((byte) OrderStatus.SHIPPED.getCode());
+        //计算原价
+        orderPo.setOriginPrice(0L);
+        orderPo.setGmtModified(LocalDateTime.now());
+        //OrderPo写入数据库，返回orderId
+        ReturnObject<Long> orderRet=this.insertOrder(orderPo);
+        Long orderId=orderRet.getData();
+        if (orderRet.getCode().equals(ResponseCode.OK)){
+            /*构造orderItems*/
+            for (OrderItemPo orderItemPo:orderItemPos) {
+                orderItemPo.setOrderId(orderId);
+                //写入
+                ReturnObject object=this.insertOrderItem(orderItemPo);
+                if (!object.getCode().equals(ResponseCode.OK)){
+                    return object;
+                }
+            }
+            returnObject=new ReturnObject(ResponseCode.OK);
+        }
+        else {
+            returnObject=new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+        }
+
+        return returnObject;
+    }
+
+    /**
+     * 分单
+     * @param orderId 需要分的订单
+     * @author Gang Ye
+     * @created 2020/12/10 2:22
+     * @modified Gang Ye
+     */
+    public void classifyOrder(Long orderId){
+
+        OrderPo orderPo=orderDao.getOrderPoById(orderId);
+        List<OrderItemPo> orderItems=this.findOrderItemsByOrderId(orderId);
+
+        Map<Long,List<OrderItemPo>> goodsMapByShop=new HashMap<>(orderItems.size());
+        for (OrderItemPo orderItem :orderItems) {
+            String goodsJson=goodsService.findGoodsBySkuId(orderItem.getGoodsSkuId());
+            OrderGoods goods= JacksonUtil.toObj(goodsJson,OrderGoods.class);
+            assert goods != null;
+            goodsMapByShop.computeIfAbsent(goods.getShopId(), k->new ArrayList<>()).add(orderItem);
+>>>>>>> Stashed changes
         }
         //分单
         goodsMapByShop.forEach((k,v)->{
             //子订单
             OrderPo po=new OrderPo();
+<<<<<<< Updated upstream
             po.setOrderSn(Common.genSeqNum());
             po.setShopId(k);
             po.setCustomerId(orderPo.getCustomerId());
@@ -341,9 +627,59 @@ public class OrderService implements DeductStockImpl{
                 OrderItemPo orderItemPo=orderItemDao.getOrderItemById(x.getId());
                 orderItemPo.setOrderId(orderId);
                 orderItemPo.setGmtModified(LocalDateTime.now());
+=======
+            po.setGmtCreate(LocalDateTime.now());
+            po.setOrderSn(Common.genSeqNum());
+            po.setShopId(k);
+            po.setPid(orderId);
+            po.setCustomerId(orderPo.getCustomerId());
+            po.setOrderType(orderPo.getOrderType());
+            po.setState((byte)OrderStatus.WAIT_FOR_RECEIVE.getCode());
+            po.setOriginPrice(this.calculateOriginPrice(v));
+            po.setFreightPrice(orderPo.getFreightPrice()*(po.getOriginPrice()/orderPo.getOriginPrice()));
+            po.setDiscountPrice(this.calculateDiscount(v));
+            po.setRebateNum(otherService.calculateRebateNum(JacksonUtil.toJson(v),po.getCustomerId()));
+            po.setBeDeleted(orderPo.getBeDeleted());
+            po.setCouponId(orderPo.getCouponId());
+            po.setGmtModified(LocalDateTime.now());
+            //写入
+            Long id=orderDao.insertOrder(orderPo).getData();
+            v.forEach(x->{
+                OrderItemPo orderItemPo=orderItemDao.getOrderItemById(x.getId());
+                orderItemPo.setOrderId(id);
+                orderItemPo.setGmtModified(LocalDateTime.now());
+                //更新
+>>>>>>> Stashed changes
                 orderItemDao.updateOrderItem(orderItemPo);
             });
         });
     }
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
 
+    public List<Long> getOrderItemIdList(List<Long> skuIds,Long customerId){
+        List<Long> orderItemIds=new ArrayList<>(skuIds.size());
+
+        for (Long skuId:skuIds) {
+            List<OrderItemPo> orderItemPos=this.getItemsBySkuId(skuId);
+            orderItemPos.forEach(v->{
+                if (this.verifyOrderByCustomerId(customerId,v.getOrderId())){
+                    orderItemIds.add(v.getId());
+                }
+            });
+        }
+>>>>>>> Stashed changes
+
+        return orderItemIds;
+    }
+
+    public OrderItemPo getOrderItemById(Long orderItemId) {
+        return orderItemDao.getOrderItemById(orderItemId);
+    }
+
+    public OrderPo getOrderByItemId(Long orderItemId) {
+        OrderItemPo orderItemPo=this.getOrderItemById(orderItemId);
+        return orderDao.getOrderPoById(orderItemPo.getOrderId());
+    }
 }

@@ -37,4 +37,14 @@ public class OtherTest {
         a x=(a)a11.newInstance();
         x.aVoid();
     }
+<<<<<<< Updated upstream
+=======
+
+    @Test
+    public void a(){
+        int a=-1;
+        int b=1-a;
+        System.out.println(b);
+    }
+>>>>>>> Stashed changes
 }

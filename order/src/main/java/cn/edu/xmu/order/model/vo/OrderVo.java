@@ -8,11 +8,10 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 @Data
-public class NewOrderVo {
+public class OrderVo {
     public Long getPresaleId() {
         return presaleId;
     }
@@ -21,8 +20,36 @@ public class NewOrderVo {
         return grouponId;
     }
 
+    public List<OrderItemVo> getOrderItems() {
+        return orderItems;
+    }
+
+    public String getConsignee() {
+        return consignee;
+    }
+
+    public Long getRegionId() {
+        return regionId;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public String getMobile() {
+        return mobile;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public Long getCouponId() {
+        return couponId;
+    }
+
     @NotEmpty
-    private List<NewOrderItemVo> orderItems;
+    private List<OrderItemVo> orderItems;
     @NotBlank
     private String consignee;
     @NotNull
@@ -64,7 +91,7 @@ public class NewOrderVo {
     }
     public List<OrderItemPo> createOrderItemsPo(){
         ArrayList<OrderItemPo> orderItemPos=new ArrayList<>(this.orderItems.size());
-        for (NewOrderItemVo newOrderItem : this.orderItems) {
+        for (OrderItemVo newOrderItem : this.orderItems) {
             OrderItemPo orderItemPo=newOrderItem.createOrderItemPo();
             orderItemPos.add(orderItemPo);
         }

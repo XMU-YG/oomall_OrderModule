@@ -22,7 +22,13 @@ public class OrderItem implements VoObject {
     private Long coupon_id;
     private Long coupon_activity_id;
     private Long be_share_id;
+<<<<<<< Updated upstream
     private Long shopId;
+=======
+<<<<<<< Updated upstream
+=======
+    //private Long shopId;
+>>>>>>> Stashed changes
 
 
     public Long getGoods_sku_id() {
@@ -105,6 +111,7 @@ public class OrderItem implements VoObject {
         this.be_share_id = be_share_id;
     }
 
+<<<<<<< Updated upstream
     public Long getShopId() {
         return shopId;
     }
@@ -112,6 +119,10 @@ public class OrderItem implements VoObject {
     public void setShopId(Long shopId) {
         this.shopId = shopId;
     }
+=======
+
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 
     @Override
     public Object createVo() {
