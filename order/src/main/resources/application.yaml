@@ -12,6 +12,25 @@ server:
     threads:
       max: 1000
 
+dubbo:
+  # 配置服务信息
+  application:
+    name: privilege-service
+    # 禁用QOS同一台机器可能会有端口冲突现象
+    qos-enable: false
+    qos-accept-foreign-ip: false
+  # 配置注册中心
+  registry:
+    address: nacos://172.16.1.87:8848
+  # 设置协议-协议由提供方指定消费方被动接受
+  protocol:
+    name: dubbo
+    port: 20880
+    # 设置超时时间
+  consumer:
+    timeout: 4000
+    check: false
+
 spring:
   application:
     name: order-service
@@ -66,31 +85,30 @@ mybatis:
     #输出产生的SQL
     #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
-#
-#privilegeservice:
-#  #是否对数据库中的未初始化的数据初始化
-#  initialization: false
-#  #分布式锁失效时间（秒）
-#  lockerExpireTime: 30
-#  #图片存储位置
-#  imglocation: ./img
-#  user:
-#    # user的权限字在Redis中失效秒数
-#    expiretime: 600
-#  role:
-#    # role的权限字在Redis中失效秒数
-#    expiretime: 600
-#  login:
-#    #是否允许重复登录
-#    multiply: false
-#    #jwt过期的时间(秒)
-#    jwtExpire: 3600
+
+orderservice:
+  stock:
+    # stock在Redis中失效秒数
+    expiretime: 6000
 
 
 #pagehelper分页插件配置
 pagehelper:
   helper-dialect: mysql
 
+# 配置rocketmq
+rocketmq:
+  # 指定namesrv地址
+  name-server: 172.0.0.1:9876
+  producer:
+    #生产者group名称
+    group: producer_group
+    #一次发送多少数量消息
+    max-message-size: 4096
+    #发送消息超时时间,默认3000
+    send-message-timeout: 3000
+    #发送消息失败重试次数，默认2
+    retry-times-when-send-async-failed: 2
 
 
 

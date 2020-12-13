@@ -12,6 +12,7 @@ import cn.edu.xmu.order.model.vo.NewOrderVo;
 import cn.edu.xmu.order.service.impl.GoodsServiceImpl;
 import cn.edu.xmu.order.service.impl.PostOrderServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,7 +22,7 @@ import java.util.List;
 /**
  * 团购订单创建服务
  */
-@Service
+@Component("GroOrderService")
 public class GrouponOrderService implements PostOrderServiceImpl {
     @Autowired
     private OrderService orderService;

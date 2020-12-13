@@ -1,6 +1,6 @@
 package cn.edu.xmu.order.model.vo;
 
-import cn.edu.xmu.order.model.bo.OrderState;
+import cn.edu.xmu.order.util.OrderStatus;
 import lombok.Data;
 
 /**
@@ -12,9 +12,9 @@ public class StateRetVo {
     private int code;
     private String name;
 
-    public StateRetVo(OrderState orderState){
-        this.code=orderState.getCode();
-        this.name=orderState.getName();
+    public StateRetVo(OrderStatus orderStatus){
+        this.code=orderStatus.getCode();
+        this.name=orderStatus.getDescription();
     }
 
 }

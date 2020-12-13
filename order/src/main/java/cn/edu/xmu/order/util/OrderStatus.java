@@ -1,32 +1,26 @@
 package cn.edu.xmu.order.util;
 /**
  * 订单状态码
- * created by snow 2020/12/02 12:52
+ * created by Gang Ye 2020/12/11
  */
 public enum OrderStatus {
 
-    ORDER_CANCEL(0, "订单取消"),
-    UNPAID_EARNEST(1, "待支付定金"),
-    UNPAID(2, "待支付"),
-    UNGROUP(3, "待参团"),
-    EARNEST_PAID(4, "已支付定金"),
-    UNPAID_FINAL_PAYMENT(5, "待支付尾款"),
-    ORDER_CREATED(6, "创建订单"),
-    PRESALE_TERMINATED(7, "预售中止"),
-    GROUPING(8, "已参团"),
-    GROUP_FAILED(9, "团购未达到门槛"),
-    GROUP_SUCCEED(10, "已成团"),
-    PAID_SUCCEED(11, "已支付"),
-    FINAL_PAYMENT_PAID(12, "已支付尾款"),
-    REFUNDED(13, "已退款"),
-    ORDER_TERMINATED(14, "订单中止"),
-    AFTER_SALE_UNSHIPPED(15, "售后单待发货"),
-    SHIPPING(16, "发货中"),
-    GOODS_ARRIVED(17, "到货"),
-    CLIENT_RECEIVED(18, "已签收");
+
+    WAIT_FOR_PAID(1, "待付款"),
+    WAIT_FOR_RECEIVE(2, "待收货"),
+    FINISHED(3, "已完成"),
+    CANCELED(4,"已取消"),
+    NEW_ORDER(11,"新订单"),
+    WAIT_FOR_PAID_FINAL_PAYMENT(12, "待支付尾款"),
+    PAID_SUCCEED(21, "付款完成"),
+    WAIT_FOR_GROUP(22, "待成团"),
+    UNGROUP(23,"未成团"),
+    SHIPPED(24, "已发货");
+
 
     private int code;
     private String description;
+
     OrderStatus(int code, String description) {
         this.code = code;
         this.description = description;

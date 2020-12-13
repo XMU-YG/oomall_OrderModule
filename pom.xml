@@ -8,6 +8,7 @@
         <module>order</module>
         <module>payment</module>
         <module>freight</module>
+        <module>order-produce</module>
     </modules>
 
     <parent>

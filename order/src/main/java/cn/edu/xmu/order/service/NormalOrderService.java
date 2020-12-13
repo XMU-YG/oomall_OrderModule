@@ -5,6 +5,7 @@ import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.order.model.bo.Order;
+import cn.edu.xmu.order.model.bo.OrderItem;
 import cn.edu.xmu.order.model.bo.SimpleOrderItem;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrderPo;
@@ -12,7 +13,9 @@ import cn.edu.xmu.order.model.vo.NewOrderVo;
 import cn.edu.xmu.order.service.impl.OrderServiceImpl;
 import cn.edu.xmu.order.service.impl.OtherServiceImpl;
 import cn.edu.xmu.order.service.impl.PostOrderServiceImpl;
+import cn.edu.xmu.order.util.OrderStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,12 +25,11 @@ import java.util.List;
 /**
  * 普通订单创建服务
  */
-@Service
+@Component("NorOrderService")
 public class NormalOrderService implements PostOrderServiceImpl {
 
     @Autowired
     private OrderService orderService;
-
 
     @Override
     public ReturnObject<VoObject> addNewOrderByCustomer(Long customerId, NewOrderVo vo) {
@@ -41,9 +43,9 @@ public class NormalOrderService implements PostOrderServiceImpl {
         orderPo.setOrderSn(orderSn);
 
         orderPo.setOrderType((byte) 0);
-        orderPo.setState((byte)6);
+        orderPo.setState((byte)OrderStatus.ORDER_CREATED.getCode());
 
-        ReturnObject<List<OrderItemPo>> listReturnObject=orderService.disposeNorOrderItemsPo(vo.createOrderItemsPo());
+        ReturnObject<List<OrderItem>> listReturnObject=orderService.disposeNorOrderItemsPo(vo.createOrderItemsPo());
         if (listReturnObject.getCode().equals(ResponseCode.SKU_NOTENOUGH)){
             return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
         }
@@ -61,13 +63,14 @@ public class NormalOrderService implements PostOrderServiceImpl {
         /*计算订单优惠，注意在函数中要设置OrderGoods的discount属性*/
         //orderPo.setDiscountPrice(orderService.calculateDiscount());
 
-        orderPo.setState((byte)2);
+        orderPo.setState((byte) OrderStatus.UNPAID.getCode());
         orderPo.setGmtCreate(LocalDateTime.now());
         orderPo.setOriginPrice(orderService.calculateOriginPrice(orderItems));
 
         ReturnObject<Long> orderRet=orderService.insertOrder(orderPo);
 
         ArrayList<SimpleOrderItem> simpleOrderItems=new ArrayList<>(vo.createOrderItemsPo().size());
+        ArrayList<OrderItemPo> orderItemPoArrayList=new ArrayList<>(vo.createOrderItemsPo().size());
         if (orderRet.getCode().equals(ResponseCode.OK)){
             Order order=new Order(orderPo);
             /*构造orderItems*/
@@ -77,6 +80,8 @@ public class NormalOrderService implements PostOrderServiceImpl {
                 orderItemPo.setOrderId(orderRet.getData());
                 orderItemPo.setGmtCreate(LocalDateTime.now());
                 ReturnObject object=orderService.insertOrderItem(orderItemPo);
+                orderItemPoArrayList.add(orderItemPo);
+
                 SimpleOrderItem simpleOrderItem=new SimpleOrderItem(orderItemPo);
                 simpleOrderItems.add(simpleOrderItem);
 
@@ -93,4 +98,5 @@ public class NormalOrderService implements PostOrderServiceImpl {
 
         return returnObject;
     }
+
 }

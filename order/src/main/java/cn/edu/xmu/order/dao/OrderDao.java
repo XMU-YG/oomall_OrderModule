@@ -9,7 +9,6 @@ import cn.edu.xmu.order.mapper.OrderItemPoMapper;
 import cn.edu.xmu.order.mapper.OrderMapper;
 import cn.edu.xmu.order.mapper.OrderPoMapper;
 import cn.edu.xmu.order.model.bo.Order;
-import cn.edu.xmu.order.model.bo.OrderState;
 import cn.edu.xmu.order.model.bo.SimpleOrder;
 import cn.edu.xmu.order.model.bo.SimpleOrderItem;
 import cn.edu.xmu.order.model.po.OrderItemPo;
@@ -25,21 +24,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 @Repository
+
 public class OrderDao {
 
     private  static  final Logger logger = LoggerFactory.getLogger(OrderDao.class);
@@ -53,7 +51,8 @@ public class OrderDao {
     @Autowired
     private RedisTemplate<String, Serializable> redisTemplate;
 
-    private int timeout=30;
+    @Value("${orderservice.stock.expiretime}")
+    private long timeout;
 
     /**
      * 分页查询顾客所有订单概要信息
@@ -197,7 +196,15 @@ public class OrderDao {
 
         }
         else if(orderPo.getCustomerId().equals(customerId)){
+<<<<<<< Updated upstream
+            if (orderPo.getState()==OrderStatus.AFTER_SALE_UNSHIPPED.getCode()){  //15为未发货
+=======
+<<<<<<< Updated upstream
             if (orderPo.getState().equals(15)){  //15为未发货
+=======
+            if (orderPo.getSubstate()==OrderStatus.PAID_SUCCEED.getCode()){  //未发货
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
                 logger.debug("customer modifySelfOrderAddressById success！  orderId:  "+orderId+"   customerId:  "+customerId);
                 OrderPo po=vo.createPo();
                 po.setGmtModified(LocalDateTime.now());
@@ -207,7 +214,7 @@ public class OrderDao {
                 return orderReturnObject;
             }
             else {
-                logger.debug("customer modifySelfOrderAddressById error！the order state: "+orderPo.getState());
+                logger.debug("customer modifySelfOrderAddressById error！the order state: "+orderPo.getSubstate()+" ("+orderPo.getState()+" )");
                 return new ReturnObject(ResponseCode.ORDER_STATENOTALLOW,"订单已发货");
             }
 
@@ -244,15 +251,38 @@ public class OrderDao {
 
         }
         else if(orderPo.getCustomerId().equals(customerId)){
+<<<<<<< Updated upstream
+            if (orderPo.getState()<=OrderStatus.AFTER_SALE_UNSHIPPED.getCode()){  //15为待发货
+                logger.debug("customer cancelSelfOrderById success！  orderId:  "+orderId+"   customerId:  "+customerId+" state: "+orderPo.getState());
+                orderPo.setGmtModified(LocalDateTime.now());
+                orderPo.setState((byte)OrderStatus.ORDER_CANCEL.getCode());//0为订单取消
+=======
+<<<<<<< Updated upstream
             if (orderPo.getState().intValue()<=15){  //15为待发货
                 logger.debug("customer cancelSelfOrderById success！  orderId:  "+orderId+"   customerId:  "+customerId+" state: "+orderPo.getState());
                 orderPo.setGmtModified(LocalDateTime.now());
                 orderPo.setState((byte) 0);//0为订单取消
+=======
+            if (orderPo.getState()==OrderStatus.WAIT_FOR_PAID.getCode()
+                    ||orderPo.getSubstate()==OrderStatus.PAID_SUCCEED.getCode()){  //待付款 未发货
+                logger.debug("customer cancelSelfOrderById success！  orderId:  "+orderId+"   customerId:  "+customerId+" state: "+orderPo.getState());
+                orderPo.setGmtModified(LocalDateTime.now());
+                orderPo.setState((byte)OrderStatus.CANCELED.getCode());//订单取消
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
                 orderPoMapper.updateByPrimaryKeySelective(orderPo);
                 orderReturnObject=new ReturnObject(ResponseCode.OK,"订单取消成功");
                 return orderReturnObject;
             }
+<<<<<<< Updated upstream
+            else if (orderPo.getState()==OrderStatus.CLIENT_RECEIVED.getCode()){
+=======
+<<<<<<< Updated upstream
             else if (orderPo.getState().equals((byte)18)){
+=======
+            else if (orderPo.getState()==OrderStatus.FINISHED.getCode()){ //已完成
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
                 logger.debug("customer deleteSelfOrderById success！  orderId:  "+orderId+"   customerId:  "+customerId+" state: "+orderPo.getState());
                 orderPo.setGmtModified(LocalDateTime.now());
                 orderPo.setBeDeleted((byte) 1);//1为订单逻辑删除
@@ -297,10 +327,24 @@ public class OrderDao {
 
         }
         else if(orderPo.getCustomerId().equals(customerId)){
+<<<<<<< Updated upstream
+            if (orderPo.getState()==OrderStatus.GOODS_ARRIVED.getCode()){  //17为待收货
+                logger.debug("customer confirmSelfOrderById success！  orderId:  "+orderId+"   customerId:  "+customerId);
+                orderPo.setGmtModified(LocalDateTime.now());
+                orderPo.setState((byte)OrderStatus.CLIENT_RECEIVED.getCode());//18为已收货
+=======
+<<<<<<< Updated upstream
             if (orderPo.getState().equals(17)){  //17为待收货
                 logger.debug("customer confirmSelfOrderById success！  orderId:  "+orderId+"   customerId:  "+customerId);
                 orderPo.setGmtModified(LocalDateTime.now());
                 orderPo.setState((byte)18);//18为已收货
+=======
+            if (orderPo.getState()==OrderStatus.WAIT_FOR_RECEIVE.getCode()){  //为待收货
+                logger.debug("customer confirmSelfOrderById success！  orderId:  "+orderId+"   customerId:  "+customerId);
+                orderPo.setGmtModified(LocalDateTime.now());
+                orderPo.setState((byte)OrderStatus.FINISHED.getCode());//已收货
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
                 orderPoMapper.updateByPrimaryKeySelective(orderPo);
                 orderReturnObject=new ReturnObject(ResponseCode.OK,"订单确认收货成功");
                 return orderReturnObject;
@@ -324,7 +368,8 @@ public class OrderDao {
             OrderPoExample.Criteria criteria=example.createCriteria();
             criteria.andIdEqualTo(id);
             criteria.andCustomerIdEqualTo(customerId);
-            orderPo=(OrderPo) orderPoMapper.selectByExample(example);
+            List<OrderPo> orderPos= orderPoMapper.selectByExample(example);
+            orderPo=orderPos.isEmpty()?null:orderPos.get(0);
         }catch (DataAccessException e){
             logger.error("transLateGroToNor:  DataAccessException:  "+e.getMessage());
             return  new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
@@ -334,12 +379,24 @@ public class OrderDao {
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST,"订单号不存在");
         }
         else{
+<<<<<<< Updated upstream
+            if (orderPo.getSubstate()!=null&&orderPo.getSubstate()==OrderStatus.GROUP_FAILED.getCode()){
+                //9未成团
+                orderPo.setSubstate(null);
+=======
+<<<<<<< Updated upstream
             if (orderPo.getState().equals(9)){
                 //9未成团
+=======
+            if (orderPo.getSubstate()!=null&&orderPo.getSubstate()==OrderStatus.UNGROUP.getCode()){
+                //未成团
+                orderPo.setSubstate(null);
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
                 orderPo.setOrderType((byte) 0);
                 orderPoMapper.updateByPrimaryKeySelective(orderPo);
 
-                return new ReturnObject(ResponseCode.OK,"订单确认收货成功");
+                return new ReturnObject(ResponseCode.OK);
             }
             else{
                 logger.debug("customer transLateGroToNor error！the order state: "+orderPo.getState());
@@ -352,8 +409,10 @@ public class OrderDao {
         //设置查询条件
         OrderPoExample example=new OrderPoExample();
         OrderPoExample.Criteria criteria=example.createCriteria();
-        criteria.andCustomerIdEqualTo(customerId);
         criteria.andShopIdEqualTo(shopId);
+        if (customerId!=null){
+            criteria.andCustomerIdEqualTo(customerId);
+        }
         if (orderSn!=null){
             criteria.andOrderSnEqualTo(orderSn);
         }
@@ -370,11 +429,10 @@ public class OrderDao {
             logger.error("getShopSelfSimpleOrders:  DataAccessException:  "+e.getMessage());
             return  new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
         }
-
+        logger.debug("getShopSelfSimpleOrders: shopId: "+shopId);
         List<VoObject> ret=new ArrayList<>(orderPos.size());
         for(OrderPo po:orderPos){
             SimpleOrder simpleOrder=new SimpleOrder(po);
-            logger.debug("getShopSelfSimpleOrders: shopId: "+shopId);
             ret.add(simpleOrder);
         }
 
@@ -417,13 +475,9 @@ public class OrderDao {
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单号不存在");
 
         }
-        else if(orderPo.getShopId().equals(shopId)){
+        else if(orderPo.getShopId()!=null&&orderPo.getShopId().equals(shopId)){
             logger.debug("shop getSelfOrder success！  orderId:  "+id+"   shopId:  "+shopId);
             Order order=new Order(orderPo);
-
-
-            LocalDateTime time=LocalDateTime.of(1,1,1,1,1,1);
-
             OrderItemPoExample itemPoExample=new OrderItemPoExample();
             OrderItemPoExample.Criteria criteria=itemPoExample.createCriteria();
             criteria.andOrderIdEqualTo(id);
@@ -460,7 +514,7 @@ public class OrderDao {
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST,"订单号不存在");
 
         }
-        else if(orderPo.getShopId().equals(shopId)){
+        else if(orderPo.getShopId()!=null&&orderPo.getShopId().equals(shopId)){
             logger.debug("modifyOrderMessage success！  orderId:  "+orderId+"   orderId:  "+orderId);
             orderPo.setGmtModified(LocalDateTime.now());
             orderPo.setMessage(message);
@@ -490,12 +544,30 @@ public class OrderDao {
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST,"订单号不存在");
 
         }
+<<<<<<< Updated upstream
+        else if(orderPo.getShopId()!=null&&orderPo.getShopId().equals(shopId)){
+            if (orderPo.getState()==OrderStatus.AFTER_SALE_UNSHIPPED.getCode()){  //15为待发货
+                logger.debug("deleteShopOrder success！  orderId:  "+orderId+"   shopId:  "+shopId);
+                orderPo.setGmtModified(LocalDateTime.now());
+                orderPo.setBeDeleted((byte) 1);
+                orderPo.setState((byte) OrderStatus.ORDER_CANCEL.getCode());//0为订单取消
+=======
+<<<<<<< Updated upstream
         else if(orderPo.getShopId().equals(shopId)){
             if (orderPo.getState().equals(15)){  //15为待发货
                 logger.debug("deleteShopOrder success！  orderId:  "+orderId+"   shopId:  "+shopId);
                 orderPo.setGmtModified(LocalDateTime.now());
                 orderPo.setBeDeleted((byte) 1);
                 orderPo.setState((byte) 0);//0为订单取消
+=======
+        else if(orderPo.getShopId()!=null&&orderPo.getShopId().equals(shopId)){
+            if (orderPo.getState()==OrderStatus.PAID_SUCCEED.getCode()){  //待发货
+                logger.debug("deleteShopOrder success！  orderId:  "+orderId+"   shopId:  "+shopId);
+                orderPo.setGmtModified(LocalDateTime.now());
+                orderPo.setBeDeleted((byte) 1);
+                orderPo.setState((byte) OrderStatus.CANCELED.getCode());//0为订单取消
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
                 orderPoMapper.updateByPrimaryKeySelective(orderPo);
                 orderReturnObject=new ReturnObject(ResponseCode.OK,"订单取消成功");
                 return orderReturnObject;
@@ -527,12 +599,31 @@ public class OrderDao {
             return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST,"订单号不存在");
 
         }
+<<<<<<< Updated upstream
+        else if(orderPo.getShopId()!=null&&orderPo.getShopId().equals(shopId)){
+            if (orderPo.getState()==OrderStatus.AFTER_SALE_UNSHIPPED.getCode()||
+                    orderPo.getState()==OrderStatus.SHIPPING.getCode()){  //15为待发货
+                logger.debug("deliverShopOrder success！  orderId:  "+orderId+"   shopId:  "+shopId);
+                orderPo.setGmtModified(LocalDateTime.now());
+                //orderPo.setFreightSn(freightSn);
+                orderPo.setState((byte)OrderStatus.SHIPPING.getCode());//16为已发货
+=======
+<<<<<<< Updated upstream
         else if(orderPo.getShopId().equals(shopId)){
             if (orderPo.getState().equals(15)||orderPo.getState().equals(16)){  //15为待发货
                 logger.debug("deliverShopOrder success！  orderId:  "+orderId+"   shopId:  "+shopId);
                 orderPo.setGmtModified(LocalDateTime.now());
                 //orderPo.setFreightSn(freightSn);
                 orderPo.setState((byte)16);//16为已发货
+=======
+        else if(orderPo.getShopId()!=null&&orderPo.getShopId().equals(shopId)){
+            if (orderPo.getState()==OrderStatus.PAID_SUCCEED.getCode()){  //15为待发货
+                logger.debug("deliverShopOrder success！  orderId:  "+orderId+"   shopId:  "+shopId);
+                orderPo.setGmtModified(LocalDateTime.now());
+                //orderPo.setFreightSn(freightSn);
+                orderPo.setState((byte)OrderStatus.WAIT_FOR_RECEIVE.getCode());//已发货
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
                 orderPoMapper.updateByPrimaryKeySelective(orderPo);
                 orderReturnObject=new ReturnObject(ResponseCode.OK,"订单发货成功");
                 return orderReturnObject;
@@ -549,31 +640,63 @@ public class OrderDao {
         }
     }
 
+    /**
+     * 秒杀扣库存
+     * @param skuId
+     * @param quantity
+     * @return
+     */
     public int deductStock(Long skuId, Integer quantity) {
         String key="sku_"+skuId;
         String value= RandomCaptcha.getRandomString(11);
+<<<<<<< Updated upstream
         boolean flag=redisTemplate.opsForValue().setIfAbsent(key,value,Common.addRandomTime(timeout),TimeUnit.SECONDS);
         if (flag){
             logger.debug("redis lock successful!  key:  "+key);
             Integer stock=(Integer) redisTemplate.opsForValue().get(skuId.toString());
+            stock=10;
             if (stock>quantity){
                 redisTemplate.opsForValue().decrement(String.valueOf(skuId),quantity);
+=======
+        try{
+            boolean flag=redisTemplate.opsForValue().setIfAbsent(key,value,Common.addRandomTime(timeout),TimeUnit.SECONDS);
+            if (flag){
+                logger.debug("redis lock successful!  key:  "+key);
+                String goodsKey="sku:"+skuId;
+                Integer stock=(Integer) redisTemplate.opsForHash().get(goodsKey,"quantity");
+                //stock=10;
+                if (stock>quantity){
+                    redisTemplate.opsForHash().increment(goodsKey,"quantity",-quantity);
+                    String lockValue= (String) redisTemplate.opsForValue().get(key);
+                    if (lockValue.equals(value)){
+                        redisTemplate.delete(key);
+                        logger.debug("redis unlock successful! key:  "+key);
+                    }
+                    return 1;
+                }
+>>>>>>> Stashed changes
                 String lockValue= (String) redisTemplate.opsForValue().get(key);
                 if (lockValue.equals(value)){
                     redisTemplate.delete(key);
                     logger.debug("redis unlock! key:  "+key);
                 }
-                return 1;
             }
-            String lockValue= (String) redisTemplate.opsForValue().get(key);
-            if (lockValue.equals(value)){
-                redisTemplate.delete(key);
-                logger.debug("redis unlock! key:  "+key);
-            }
+<<<<<<< Updated upstream
             return -1;
 
         }
+        else{
+            logger.debug("get lock error");
+        }
         return 0;
+=======
+            return 0;
+        }catch (NullPointerException e){
+            logger.error("redis error!"+e.getMessage());
+            return 0;
+        }
+
+>>>>>>> Stashed changes
     }
 
     public boolean loadGoodsStock(Long skuId, Integer stock) {
@@ -594,6 +717,11 @@ public class OrderDao {
         }
     }
 
+    /**
+     * 判断订单号是否重复
+     * @param orderSn
+     * @return
+     */
     public boolean haveOrderSn(String orderSn) {
         List<String> orderSns=orderMapper.getAllOrderSn();
         return orderSns.contains(orderSn);
@@ -602,52 +730,39 @@ public class OrderDao {
     public ReturnObject<Long> insertOrder(OrderPo orderPo) {
         ReturnObject<Long> returnObject=null;
         try{
-            Long orderId=(long)orderPoMapper.insert(orderPo);
-            logger.debug("insertOrder:  orderId:"+orderId+"    customerId: "+orderPo.getCustomerId());
-            returnObject=new ReturnObject<Long>(orderId);
-            return returnObject;
+            int ret=orderPoMapper.insert(orderPo);
+            if (ret==1){
+                logger.debug("insertOrder:  orderId:"+orderPo.getId()+"    customerId: "+orderPo.getCustomerId());
+                returnObject=new ReturnObject<Long>(orderPo.getId());
+                return returnObject;
+            }
+            else{
+                logger.debug("insertOrder error:  orderId:"+orderPo.getId()+"    customerId: "+orderPo.getCustomerId());
+                return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+            }
+
         }catch (DataAccessException e){
             logger.error("insertOrder:  DataAccessException:  "+e.getMessage());
             return  new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
         }
     }
 
-    public ReturnObject insertOrderItem(OrderItemPo orderItemPo) {
-        ReturnObject<Long> returnObject=null;
-        try{
-            orderItemPoMapper.insert(orderItemPo);
-            logger.debug("insertOrderItem:  orderId:"+orderItemPo.getOrderId());
-            returnObject=new ReturnObject<Long>();
-            return returnObject;
-        }catch (DataAccessException e){
-            logger.error("insertOrderItem:  DataAccessException:  "+e.getMessage());
-            return  new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
-        }
-    }
-
     /**
-     * 获得订单所有状态
-     * @param customerId
-     * @return 订单状态视图
-     * @author Gang Ye
+     * 根据订单号获得OrderPo
+     * @param id
+     * @return OrderPo
      */
-    public ReturnObject<List> getOrderAllStates(Long customerId) {
-        ReturnObject<List> returnObject=null;
-        try{
-            List<Byte> states=orderMapper.getAllOrderStatesByCusId(customerId);
-            ArrayList<OrderState> orderStates=new ArrayList<>(states.size());
-            for (Byte state:states) {
-                OrderState orderState=new OrderState();
-                orderState.setCode(state);
-                orderState.setName("11");
-                orderStates.add(orderState);
-            }
-            returnObject=new ReturnObject<>(orderStates);
-            return returnObject;
-        }catch (DataAccessException e){
-            logger.error("getAllStates:  DataAccessException:  "+e.getMessage());
-            return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
-        }
-
+    public OrderPo getOrderPoById(Long id){
+        return orderPoMapper.selectByPrimaryKey(id);
     }
+
+
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+    }
+=======
+
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 }
