@@ -202,7 +202,7 @@ public class PaymentService {
     /**
      * 跟据id查询支付
      * @author Yuting Zhong@3333
-     * @param id
+     * @param paymentId
      * @return
      */
     public Payment getPaymentById(Long paymentId) {

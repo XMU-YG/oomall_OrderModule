@@ -139,20 +139,24 @@ public class RefundService {
         }else if(payment.getAmount()<vo.getAmount()){
             return retObject=new ReturnObject<>(ResponseCode.REFUND_MORE,"退款金额大于支付金额");
         }else{
-            ReturnObject<VoObject> checkBelong=null;
-
+            //若支付orderId不为空，则支付为订单支付，验证订单和店铺的关系；若支付aftersalId不为空，则支付为售后支付
             if(payment.getOrderId()!=null){
-                //checkBelong=orderService.checkShopOrder(shopId,payment.getOrderId());
-               // checkBelong=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该订单无权访问");
-                checkBelong=new ReturnObject<>(ResponseCode.OK,"该订单无权访问");
-                if(!checkBelong.getCode().equals(ResponseCode.OK)){
-                    return retObject=checkBelong;
+                //int checkBelong=orderService.checkShopOrder(shopId,payment.getOrderId());
+                int checkBelong=1;
+
+                if(checkBelong==0){
+                  return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单不存在");
+                }else if(checkBelong==-1){
+                    return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该订单无权访问");
                 }
             }else if(payment.getAftersaleId()!=null){
-                //checkBelong=aftersaleService.checkShopAftersale(shopId,payment.getAftersaleId());
-                checkBelong=new ReturnObject<>(ResponseCode.OK,"该售后单无权访问");
-                if(!checkBelong.getCode().equals(ResponseCode.OK)){
-                    return retObject=checkBelong;
+                //int checkBelong=aftersaleService.checkShopAftersale(shopId,payment.getAftersaleId();
+                int checkBelong=1;
+
+                if(checkBelong==0){
+                    return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"售后单不存在");
+                }else if(checkBelong==-1){
+                    return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该售后单无权访问");
                 }
             }
         }
