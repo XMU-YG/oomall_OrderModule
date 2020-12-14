@@ -1,7 +1,12 @@
-package cn.edu.xmu.produce;
+package cn.edu.xmu.produce.order;
 
 import java.util.List;
 
+/**
+ * 订单模块提供接口
+ * @author Gang Ye
+ * @version 1.0-SNAPSHOT
+ */
 public interface IOrderService {
 
     public List<Long> getOrderItemIdList(List<Long> skuId,Long customerId);

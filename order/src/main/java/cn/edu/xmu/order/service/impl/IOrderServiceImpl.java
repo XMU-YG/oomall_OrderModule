@@ -2,7 +2,7 @@ package cn.edu.xmu.order.service.impl;
 
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.order.service.OrderService;
-import cn.edu.xmu.produce.IOrderService;
+import cn.edu.xmu.produce.order.IOrderService;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.factory.annotation.Autowired;
 

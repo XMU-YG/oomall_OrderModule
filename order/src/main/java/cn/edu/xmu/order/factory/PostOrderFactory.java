@@ -4,7 +4,7 @@ import cn.edu.xmu.order.model.po.OrderItemPo;
 
 import cn.edu.xmu.order.model.vo.OrderVo;
 import cn.edu.xmu.order.util.PostOrderService;
-import cn.edu.xmu.produce.IGoodsService;
+import cn.edu.xmu.produce.goods.IGoodsService;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.dubbo.config.annotation.DubboReference;

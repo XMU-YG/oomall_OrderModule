@@ -1,4 +1,4 @@
-package cn.edu.xmu.produce;
+package cn.edu.xmu.produce.other;
 
 import java.util.List;
 

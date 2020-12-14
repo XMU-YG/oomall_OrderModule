@@ -1,17 +1,15 @@
-package cn.edu.xmu.order;
+package cn.edu.xmu.dubbo;
 
 import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
-import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
+@SpringBootApplication(scanBasePackages = {"cn.edu.xmu.dubbo"})
 @EnableDubbo
 @EnableDiscoveryClient
-@SpringBootApplication(scanBasePackages = {"cn.edu.xmu.order","cn.edu.xmu.ooad"})
-@MapperScan("cn.edu.xmu.order.mapper")
-public class OrderServiceApplication {
+public class Application {
     public static void main(String[] args) {
-        SpringApplication.run(OrderServiceApplication.class, args);
+        SpringApplication.run(Application.class,args);
     }
 }

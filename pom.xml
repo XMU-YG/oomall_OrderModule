@@ -9,6 +9,7 @@
         <module>payment</module>
         <module>freight</module>
         <module>order-produce</module>
+        <module>order-dubbo-test</module>
     </modules>
 
     <parent>

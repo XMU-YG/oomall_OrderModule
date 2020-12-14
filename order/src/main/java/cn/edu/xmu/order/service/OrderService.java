@@ -24,8 +24,8 @@ import cn.edu.xmu.order.model.bo.*;
 import cn.edu.xmu.order.model.vo.OrderItemVo;
 import cn.edu.xmu.order.model.vo.OrderVo;
 import cn.edu.xmu.order.util.OrderStatus;
-import cn.edu.xmu.produce.IGoodsService;
-import cn.edu.xmu.produce.IOtherService;
+import cn.edu.xmu.produce.goods.IGoodsService;
+import cn.edu.xmu.produce.other.IOtherService;
 import org.apache.dubbo.config.annotation.DubboReference;
 
 import org.slf4j.Logger;
@@ -55,10 +55,10 @@ public class OrderService {
     @Autowired
     private OrderDao orderDao;
 
-    @DubboReference
+    @DubboReference(version ="1.0-SNAPSHOT")
     private IGoodsService goodsService;
 
-    @DubboReference
+    @DubboReference(version ="1.0-SNAPSHOT")
     private IOtherService otherService;
 
     public List<OrderItemPo> findOrderItemsByOrderId(Long orderId){

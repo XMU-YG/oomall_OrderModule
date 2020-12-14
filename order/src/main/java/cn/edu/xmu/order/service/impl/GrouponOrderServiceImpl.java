@@ -1,13 +1,10 @@
 package cn.edu.xmu.order.service.impl;
 
-import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.order.model.bo.Order;
 import cn.edu.xmu.order.model.bo.OrderGoods;
-import cn.edu.xmu.order.model.bo.SimpleOrderItem;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrderPo;
 import cn.edu.xmu.order.model.vo.OrderItemVo;
@@ -16,9 +13,9 @@ import cn.edu.xmu.order.service.OrderService;
 import cn.edu.xmu.order.util.OrderStatus;
 import cn.edu.xmu.order.util.OrderType;
 import cn.edu.xmu.order.util.PostOrderService;
-import cn.edu.xmu.produce.IFreightService;
-import cn.edu.xmu.produce.IGoodsService;
-import cn.edu.xmu.produce.IOtherService;
+import cn.edu.xmu.produce.freight.IFreightService;
+import cn.edu.xmu.produce.goods.IGoodsService;
+import cn.edu.xmu.produce.other.IOtherService;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,7 +23,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

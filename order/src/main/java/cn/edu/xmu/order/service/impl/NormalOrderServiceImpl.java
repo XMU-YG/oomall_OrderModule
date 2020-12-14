@@ -13,9 +13,9 @@ import cn.edu.xmu.order.service.OrderService;
 import cn.edu.xmu.order.util.OrderStatus;
 import cn.edu.xmu.order.util.OrderType;
 import cn.edu.xmu.order.util.PostOrderService;
-import cn.edu.xmu.produce.IFreightService;
-import cn.edu.xmu.produce.IGoodsService;
-import cn.edu.xmu.produce.IOtherService;
+import cn.edu.xmu.produce.freight.IFreightService;
+import cn.edu.xmu.produce.goods.IGoodsService;
+import cn.edu.xmu.produce.other.IOtherService;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,13 +35,13 @@ public class NormalOrderServiceImpl implements PostOrderService {
     @Autowired
     private OrderService orderService;
 
-    @DubboReference
+    @DubboReference(version ="1.0-SNAPSHOT")
     private IGoodsService goodsService;
 
-    @DubboReference
+    @DubboReference(version ="1.0-SNAPSHOT")
     private IOtherService otherService;
 
-    @DubboReference
+    @DubboReference(version ="1.0-SNAPSHOT")
     private IFreightService freightService;
 
     @Override
