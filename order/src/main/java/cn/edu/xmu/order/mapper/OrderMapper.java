@@ -10,4 +10,7 @@ public interface OrderMapper {
 
     List<Byte> getAllOrderStatesByCusId(Long customerId);
 
+    Byte getStateById(Long orderId);
+
+    List<OrderPo> getAllOrders();
 }

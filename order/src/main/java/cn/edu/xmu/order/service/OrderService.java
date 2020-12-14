@@ -2,6 +2,7 @@ package cn.edu.xmu.order.service;
 
 import cn.edu.xmu.ooad.model.VoObject;
 
+import cn.edu.xmu.ooad.order.discount.BaseCouponDiscount;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 
@@ -55,10 +56,10 @@ public class OrderService {
     @Autowired
     private OrderDao orderDao;
 
-    @DubboReference(version ="1.0-SNAPSHOT")
+    @DubboReference
     private IGoodsService goodsService;
 
-    @DubboReference(version ="1.0-SNAPSHOT")
+    @DubboReference
     private IOtherService otherService;
 
     public List<OrderItemPo> findOrderItemsByOrderId(Long orderId){
@@ -82,9 +83,11 @@ public class OrderService {
 
     public ReturnObject<VoObject> getCusOrderById(Long customerId, Long orderId){
         ReturnObject<VoObject> returnObject= orderDao.getOrderById(customerId,orderId);
-
         if (returnObject.getCode().equals(ResponseCode.OK)){
-
+//            Order order=(Order)returnObject.getData();
+//            Long shopId=order.getCustomer().getCustomerId();
+//            Customer customer=JacksonUtil.toObj(otherService.findCustomerById(customerId),Customer.class);
+//            Shop shop=JacksonUtil.toObj(goodsService.findShopById(shopId),Shop.class);
             Order order=(Order)returnObject.getData();
 
             Customer customer=new Customer();
@@ -95,8 +98,8 @@ public class OrderService {
             shop.setShopId(order.getShop().getShopId());
 
             order.setCustomer(customer);
+            order.setCustomer(customer);
             order.setShop(shop);
-
             return new ReturnObject<>(order);
         }
         else{
@@ -136,13 +139,9 @@ public class OrderService {
 
         if (returnObject.getCode().equals(ResponseCode.OK)){
             Order order=(Order)returnObject.getData();
-
-            Customer customer=new Customer();
-            customer.setCustomerId(order.getCustomer().getCustomerId());
-
-            Shop shop=new Shop();
-            shop.setShopId(order.getShop().getShopId());
-
+            Long customerId=order.getCustomer().getCustomerId();
+            Customer customer=JacksonUtil.toObj(otherService.findCustomerById(customerId),Customer.class);
+            Shop shop=JacksonUtil.toObj(goodsService.findShopById(shopId),Shop.class);
             order.setCustomer(customer);
             order.setShop(shop);
             return new ReturnObject<>(order);
@@ -150,7 +149,6 @@ public class OrderService {
         else{
             return returnObject;
         }
-
     }
 
     @Transactional
@@ -273,6 +271,7 @@ public class OrderService {
      * @return
      */
     public Long calculateDiscount(List<OrderItemPo> orderItemPos){
+
         Long sum=0L;
         for (OrderItemPo po:orderItemPos
              ) {
@@ -303,7 +302,6 @@ public class OrderService {
         return sum;
     }
 
-
     /**
      * 秒杀扣库存
      * @param skuId
@@ -322,7 +320,6 @@ public class OrderService {
         }
         return false;
     }
-
 
     /**
      * 创建售后订单
@@ -473,5 +470,22 @@ public class OrderService {
     public OrderPo getOrderByItemId(Long orderItemId) {
         OrderItemPo orderItemPo=this.getOrderItemById(orderItemId);
         return orderDao.getOrderPoById(orderItemPo.getOrderId());
+    }
+
+    /**
+     * 定时器调用任务
+     * @param customerId
+     * @param orderId
+     */
+    public void checkOrderPayState(Long customerId,Long orderId){
+        Byte state=orderDao.getOrderState(orderId);
+        if (state==OrderStatus.NEW_ORDER.getCode()){
+            this.deleteSelfOrderById(customerId,orderId);
+        }
+    }
+
+    public void checkOrderRebate(){
+        List<SimpleOrder> simpleOrders=orderDao.getAllOrders();
+
     }
 }

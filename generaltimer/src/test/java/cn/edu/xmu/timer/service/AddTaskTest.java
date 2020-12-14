@@ -50,7 +50,7 @@ public class AddTaskTest {
         LocalDateTime loadTime = LocalDateTime.now();
         LocalDateTime localDateTime = LocalDateTime.of(loadTime.getYear(),loadTime.getMonth(),
                 loadTime.getDayOfMonth(),loadTime.getHour(),loadTime.getMinute()+10,5);
-        task.setSendTime(localDateTime);
+        //task.setSendTime(localDateTime);
 
         tasks.add(task);
 
