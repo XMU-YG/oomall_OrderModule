@@ -8,6 +8,7 @@ import cn.edu.xmu.freight.model.vo.FreightModelVo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.freight.service.FreightService;
+import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.produce.IFreightService;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
@@ -16,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 @DubboService(version ="1.0-SNAPSHOT") // 注意这里的Serivce引用的是dubbo的包
 public class FreightServiceImpl implements IFreightService{
     @Autowired
@@ -29,5 +32,11 @@ public class FreightServiceImpl implements IFreightService{
 
     }
 
-
+   /* @Override
+    public Long calculateFreight(Long rid,String json)
+    {
+        //Map<Long,Long> items;
+        //JacksonUtil.toMap(json);
+    }
+*/
 }
