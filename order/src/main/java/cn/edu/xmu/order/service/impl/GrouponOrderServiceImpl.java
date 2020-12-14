@@ -99,6 +99,7 @@ public class GrouponOrderServiceImpl implements PostOrderService {
         orderPo.setDiscountPrice(11L);
         //计算运费
         String itemMap=JacksonUtil.toJson(goodsMap);
+        //这里错了吧，应该用的是
         orderPo.setFreightPrice(freightService.calculateFreight(orderPo.getRegionId(), goodsMap));
         //计算返点数
         String orderItemPosJson = JacksonUtil.toJson(orderItemPo);

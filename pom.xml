@@ -10,6 +10,8 @@
         <module>freight</module>
         <module>order-produce</module>
         <module>order-dubbo-test</module>
+        <module>payment-produce</module>
+        <module>freight-produce</module>
     </modules>
 
     <parent>

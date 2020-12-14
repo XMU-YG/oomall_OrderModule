@@ -10,5 +10,6 @@ public interface IFreightService {
      */
     public String getFreModelByModelId(Long id);
 
+    public Long calculateFreight(Long rid,String json);
 
 }

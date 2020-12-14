@@ -1,7 +1,6 @@
 package cn.edu.xmu.payment.service;
 
 import cn.edu.xmu.ooad.model.VoObject;
-import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 
@@ -10,15 +9,14 @@ import cn.edu.xmu.payment.dao.RefundDao;
 import cn.edu.xmu.payment.model.bo.Payment;
 import cn.edu.xmu.payment.model.bo.Refund;
 import cn.edu.xmu.payment.model.vo.NewRefundVo;
-import cn.edu.xmu.payment.model.vo.PaymentVo;
-import cn.edu.xmu.payment.util.PaymentStates;
+
+import cn.edu.xmu.produce.order.IPOrderService;
+import cn.edu.xmu.produce.other.IPOtherService;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * 退款服务
@@ -33,11 +31,13 @@ public class RefundService {
     private RefundDao refundDao;
     @Autowired
     private PaymentDao paymentDao;
-    //@Autowired
-   // private OrderService orderService;
 
-   // @Autowired
-   // private AftersaleService aftersaleService;
+    @DubboReference(version ="1.0-SNAPSHOT")
+    private IPOrderService orderService;
+
+    @DubboReference(version="1.0-SNAPSHOT")
+    private IPOtherService otherService;
+
    @Autowired
     private PaymentService paymentService;
 
@@ -48,15 +48,16 @@ public class RefundService {
      * Modified at 2020/12/6
      */
     public ReturnObject<VoObject> findOrderRefundShop(Long shopId,Long orderId){
-        //int check=aftersaleService.checkShopUser(shopId,aftersaleid);
-        //check=1 属于 check=0 资源不存在 check=-1 不属于
         ReturnObject<VoObject> returnObject=null;
-        int check=1;
-        if(check==0){
+
+        //check=1 属于 check=0 不属于 check=-1 不存在
+       String checkBelong=orderService.checkShopOrder(shopId,orderId);
+
+        if(checkBelong.equals("-1")){
             returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单不存在");
-        }else if(check==-1){
+        }else if(checkBelong.equals("0")){
             returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该订单无权限");
-        }else if(check==1){
+        }else if(checkBelong.equals("1")){
             returnObject=refundDao.findRefundByOrder(orderId);
         }
         return returnObject;
@@ -69,15 +70,15 @@ public class RefundService {
      * Modified at 2020/12/6
      */
     public ReturnObject<VoObject> findAftersaleRefundShop(Long shopId,Long aftersaleId){
-        //int check=aftersaleService.checkShopAftersale(shopId,aftersaleid);
-        //check=1 属于 check=0 资源不存在 check=-1 不属于
         ReturnObject<VoObject> returnObject=null;
-        int check=1;
-        if(check==0){
+        //check=1 属于 check=0 资源不存在 check=-1 不属于
+        String checkBelong=otherService.checkShopAftersale(shopId,aftersaleId);
+
+        if(checkBelong.equals("-1")){
             returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"售后单不存在");
-        }else if(check==-1){
+        }else if(checkBelong.equals("0")){
             returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该售后单无权限");
-        }else if(check==1){
+        }else if(checkBelong.equals("1")){
             returnObject=refundDao.findRefundByAftersale(aftersaleId);
         }
         return returnObject;
@@ -89,15 +90,16 @@ public class RefundService {
      * Modified at 2020/12/2
      */
     public ReturnObject<VoObject> findOrderRefundSelf(Long userId,Long orderId){
-        //int check=aftersaleService.checkUserOrder(userId,orderid);
-        //check=1 属于 check=0 资源不存在 check=-1 不属于
         ReturnObject<VoObject> returnObject=null;
-        int check=1;
-        if(check==0){
+
+        //check=1 属于 check=0 资源不存在 check=-1 不属于
+        String checkBelong=orderService.checkUserOrder(userId,orderId);
+
+        if(checkBelong.equals("-1")){
             returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单不存在");
-        }else if(check==-1){
+        }else if(checkBelong.equals("0")){
             returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该订单无权限");
-        }else if(check==1){
+        }else if(checkBelong.equals("1")){
             returnObject=refundDao.findRefundByOrder(orderId);
         }
         return returnObject;
@@ -110,15 +112,16 @@ public class RefundService {
      * Modified at 2020/12/6
      */
     public ReturnObject<VoObject> findAftersaleRefundSelf(Long userId,Long aftersaleId){
-        //int check=aftersaleService.checkUserAftersale(userId,aftersaleid);
-        //check=1 属于 check=0 资源不存在 check=-1 不属于
         ReturnObject<VoObject> returnObject=null;
-        int check=1;
-        if(check==0){
+
+        //check=1 属于 check=0 资源不存在 check=-1 不属于
+        String checkBelong=otherService.checkUserAftersale(userId,aftersaleId);
+
+        if(checkBelong.equals("-1")){
             returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"售后单不存在");
-        }else if(check==-1){
+        }else if(checkBelong.equals("0")){
             returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该售后单无权限");
-        }else if(check==1){
+        }else if(checkBelong.equals("1")){
             returnObject=refundDao.findRefundByAftersale(aftersaleId);
         }
         return returnObject;
@@ -141,21 +144,21 @@ public class RefundService {
         }else{
             //若支付orderId不为空，则支付为订单支付，验证订单和店铺的关系；若支付aftersalId不为空，则支付为售后支付
             if(payment.getOrderId()!=null){
-                //int checkBelong=orderService.checkShopOrder(shopId,payment.getOrderId());
-                int checkBelong=1;
+                String checkBelong=orderService.checkShopOrder(shopId,payment.getOrderId());
 
-                if(checkBelong==0){
+
+                if(checkBelong.equals("-1")){
                   return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单不存在");
-                }else if(checkBelong==-1){
+                }else if(checkBelong.equals("0")){
                     return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该订单无权访问");
                 }
             }else if(payment.getAftersaleId()!=null){
-                //int checkBelong=aftersaleService.checkShopAftersale(shopId,payment.getAftersaleId();
-                int checkBelong=1;
+                String checkBelong=otherService.checkShopAftersale(shopId,payment.getAftersaleId());
 
-                if(checkBelong==0){
+
+                if(checkBelong.equals("-1")){
                     return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"售后单不存在");
-                }else if(checkBelong==-1){
+                }else if(checkBelong.equals("0")){
                     return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该售后单无权访问");
                 }
             }
