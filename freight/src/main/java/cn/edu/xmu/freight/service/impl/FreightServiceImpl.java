@@ -1,26 +1,17 @@
 package cn.edu.xmu.freight.service.impl;
 
 
-import cn.edu.xmu.freight.dao.FreightDao;
-import cn.edu.xmu.freight.model.bo.FreightItem;
-import cn.edu.xmu.freight.model.po.WeightFreightPo;
-import cn.edu.xmu.freight.model.vo.FreightModelVo;
-import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.freight.model.vo.ItemsVo;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.freight.service.FreightService;
-import cn.edu.xmu.ooad.util.ResponseUtil;
-import cn.edu.xmu.produce.IFreightService;
-import cn.edu.xmu.ooad.util.ResponseCode;
-import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.produce.freight.IFFreightService;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @DubboService(version ="1.0-SNAPSHOT") // 注意这里的Serivce引用的是dubbo的包
-public class FreightServiceImpl implements IFreightService{
+public class FreightServiceImpl implements IFFreightService {
     @Autowired
     private FreightService freightService;
 
@@ -32,11 +23,19 @@ public class FreightServiceImpl implements IFreightService{
 
     }
 
-   /* @Override
-    public Long calculateFreight(Long rid,String json)
+    @Override
+    public Long calculateFreight(Long rid,Map<Long,Integer> goodsMap)
     {
-        //Map<Long,Long> items;
-        //JacksonUtil.toMap(json);
+        ItemsVo vo=new ItemsVo();
+        List<ItemsVo> vos=new ArrayList<>();
+        for(Map.Entry<Long,Integer> entry : goodsMap.entrySet())
+        {
+          vo.setSkuId(entry.getKey());
+          vo.setCount(entry.getValue());
+          vos.add(vo);
+        }
+        return freightService.calculateFreight(rid,vos);
+
     }
-*/
+
 }
