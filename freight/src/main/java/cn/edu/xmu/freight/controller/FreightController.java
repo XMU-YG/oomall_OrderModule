@@ -51,10 +51,12 @@ public class FreightController {
     @PostMapping("/region/{rid}/price")
     public Object calculateFreight(@PathVariable Long rid, @RequestBody List<ItemsVo> vos){
         logger.debug("calculate freight by shopId:"+rid);
-        Object ret=null;
-        ret=freightService.calculateFreight(rid,vos);
+        //当返回值为-1时，出错，其他情况下正常
+        Long ret1=freightService.calculateFreight(rid,vos);
         logger.debug("calculateFreight by: rid : "+rid);
-        return ret;
+        if(ret1!=-1)
+            return ResponseUtil.ok(ret1);
+        return ResponseUtil.fail(ResponseCode.RESOURCE_ID_NOTEXIST);
     }
 
     /**

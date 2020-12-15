@@ -66,12 +66,12 @@ public class FreightDao {
         {
             Long modelId= it.next();
             Long shopId=models.get(modelId);
-            //需判断modelId为null,即使用默认运费模板
+            //需判断modelId是否为null,当为null时则使用店铺默认运费模板
             ret=getFreModelSummeryByModelId(shopId,modelId);
-            /*
+
             if(!ret.getCode().equals(ResponseCode.OK))
-                return ResponseUtil.fail(ret.getCode());
-             */
+                return -1l;
+
 
             type=((FreightModelVo)ret.getData().createVo()).getType();
 
