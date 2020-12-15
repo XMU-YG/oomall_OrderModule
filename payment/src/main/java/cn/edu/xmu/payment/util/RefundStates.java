@@ -8,7 +8,8 @@ import java.sql.Ref;
 public enum RefundStates {
     UNREFUND(0,"未退款"),
     REFUNDED(1,"已退款"),
-    REFUSE(2,"拒绝退款");
+    FAILED_REFUND(2,"退款失败");
+
 
     private int code;
     private String description;
