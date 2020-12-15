@@ -35,7 +35,6 @@ public  class PostOrderFactory {
         for (OrderItemPo o:itemPos) {
             skuIds.add(o.getGoodsSkuId());
         }
-
         if (vo.getGrouponId()!=null){
             boolean effective=goodsService.checkGrouponSkuId(vo.getPresaleId(),skuIds.get(0));
             if (effective){

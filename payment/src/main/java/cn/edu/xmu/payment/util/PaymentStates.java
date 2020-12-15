@@ -4,9 +4,9 @@ package cn.edu.xmu.payment.util;
  * @author Yuting Zhong@3333
  */
 public enum PaymentStates {
-    PAYED(0,"已支付"),
-    NEEDPAY(1,"未支付"),
-    FAIL(2,"支付失败");
+    UNPAY(0,"未支付"),
+    PAYED(1,"已支付"),
+    FAILED_PAY(2,"支付失败");
 
     private int code;
     private String description;

@@ -12,43 +12,8 @@ import java.util.List;
 
 @Data
 public class OrderVo {
-    public Long getPresaleId() {
-        return presaleId;
-    }
 
-    public Long getGrouponId() {
-        return grouponId;
-    }
-
-    public List<OrderItemVo> getOrderItems() {
-        return orderItems;
-    }
-
-    public String getConsignee() {
-        return consignee;
-    }
-
-    public Long getRegionId() {
-        return regionId;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public String getMobile() {
-        return mobile;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public Long getCouponId() {
-        return couponId;
-    }
-
-    @NotEmpty
+    //@NotEmpty
     private List<OrderItemVo> orderItems;
     @NotBlank
     private String consignee;
@@ -66,6 +31,78 @@ public class OrderVo {
     private Long presaleId;
 
     private Long grouponId;
+
+    public List<OrderItemVo> getOrderItems() {
+        return orderItems;
+    }
+
+    public void setOrderItems(List<OrderItemVo> orderItems) {
+        this.orderItems = orderItems;
+    }
+
+    public String getConsignee() {
+        return consignee;
+    }
+
+    public void setConsignee(String consignee) {
+        this.consignee = consignee;
+    }
+
+    public Long getRegionId() {
+        return regionId;
+    }
+
+    public void setRegionId(Long regionId) {
+        this.regionId = regionId;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getMobile() {
+        return mobile;
+    }
+
+    public void setMobile(String mobile) {
+        this.mobile = mobile;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public Long getCouponId() {
+        return couponId;
+    }
+
+    public void setCouponId(Long couponId) {
+        this.couponId = couponId;
+    }
+
+    public Long getPresaleId() {
+        return presaleId;
+    }
+
+    public void setPresaleId(Long presaleId) {
+        this.presaleId = presaleId;
+    }
+
+    public Long getGrouponId() {
+        return grouponId;
+    }
+
+    public void setGrouponId(Long grouponId) {
+        this.grouponId = grouponId;
+    }
 
     public OrderPo createOrderPo(){
         OrderPo orderPo=new OrderPo();

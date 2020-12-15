@@ -54,6 +54,9 @@ public interface IGoodsService {
     public boolean deductPreStock(Long skuId,Integer quantity);
     public boolean deductGroStock(Long skuId,Integer quantity);
 
+    public boolean addNorStock(Long skuId,Integer quantity);
+    public boolean addPreStock(Long skuId,Integer quantity);
+    public boolean addGroStock(Long skuId,Integer quantity);
     /**
      * 获得商品的定金
      * @param presaleId 预售活动id

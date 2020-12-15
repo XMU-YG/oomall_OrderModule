@@ -85,6 +85,7 @@ public class OrderController {
         Object ret=null;
 
         PostOrderService postOrderService=postOrderFactory.createService(orderInfo);
+        System.out.println("***"+postOrderService.toString()+"   ");
         logger.debug("addNewOrder.  customerId: "+customerId);
         ReturnObject object=postOrderService.addNewOrderByCustomer(customerId,orderInfo);
 
