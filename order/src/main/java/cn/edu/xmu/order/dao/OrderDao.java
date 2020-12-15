@@ -569,7 +569,7 @@ public class OrderDao {
      * @return
      */
     public int deductStock(Long skuId, Integer quantity) {
-        String key="sku_"+skuId;
+        String key="sku_lock_"+skuId;
         String value= RandomCaptcha.getRandomString(11);
 
         try{
@@ -590,6 +590,7 @@ public class OrderDao {
                 }
 
                 String lockValue= (String) redisTemplate.opsForValue().get(key);
+                assert lockValue != null;
                 if (lockValue.equals(value)){
                     redisTemplate.delete(key);
                     logger.debug("redis unlock! key:  "+key);
@@ -602,24 +603,6 @@ public class OrderDao {
             return 0;
         }
 
-    }
-
-    public boolean loadGoodsStock(Long skuId, Integer stock) {
-        if (timeout <= 0) {
-            timeout = 60;
-        }
-
-        long min = 1;
-        long max = timeout / 5;
-        try {
-            //增加随机数，防止雪崩
-            timeout += (long) new Random().nextDouble() * (max - min);
-            redisTemplate.opsForValue().set(String.valueOf(skuId), stock, timeout, TimeUnit.SECONDS);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
     }
 
     /**
@@ -661,4 +644,19 @@ public class OrderDao {
         return orderPoMapper.selectByPrimaryKey(id);
     }
 
+    public Byte getOrderState(Long orderId) {
+        return orderMapper.getStateById(orderId);
+    }
+
+    public List<SimpleOrder> getAllOrders() {
+        List<OrderPo> orderPos=orderMapper.getAllOrders();
+        List<SimpleOrder> simpleOrders=new ArrayList<>(orderPos.size());
+        for (OrderPo o : orderPos) {
+            if (o.getBeDeleted() != 1&&o.getGmtCreate().plusDays(7).getDayOfMonth()==LocalDateTime.now().getDayOfMonth()){
+                SimpleOrder simpleOrder=new SimpleOrder(o);
+                simpleOrders.add(simpleOrder);
+            }
+        }
+        return simpleOrders;
+    }
 }

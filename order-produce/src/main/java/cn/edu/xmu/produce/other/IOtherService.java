@@ -28,4 +28,11 @@ public interface IOtherService {
     public String findCustomerById(Long customerId);
 
     public Long getBeSharedId(Long skuId,Long customerId);
+
+    /**
+     * 查看是否有售后信息
+     * @param orderId
+     * @return
+     */
+    public boolean haveAfterSaleCode(Long orderId);
 }

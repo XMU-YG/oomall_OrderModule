@@ -10,6 +10,7 @@ import cn.edu.xmu.order.model.po.OrderPo;
 import cn.edu.xmu.order.model.vo.OrderVo;
 import cn.edu.xmu.order.model.vo.OrderItemVo;
 import cn.edu.xmu.order.service.OrderService;
+import cn.edu.xmu.order.service.time.TimeService;
 import cn.edu.xmu.order.util.OrderStatus;
 import cn.edu.xmu.order.util.OrderType;
 import cn.edu.xmu.order.util.PostOrderService;
@@ -34,6 +35,9 @@ public class NormalOrderServiceImpl implements PostOrderService {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private TimeService timeService;
 
     @DubboReference(version ="1.0-SNAPSHOT")
     private IGoodsService goodsService;
@@ -119,6 +123,8 @@ public class NormalOrderServiceImpl implements PostOrderService {
         //OrderPo写入数据库，返回orderId
         ReturnObject<Long> orderRet=orderService.insertOrder(orderPo);
         Long orderId=orderRet.getData();
+        //定时任务
+        timeService.createPayTask(customerId,orderId);
         if (orderRet.getCode().equals(ResponseCode.OK)){
             /*构造orderItems*/
             for (OrderItemPo orderItemPo:orderItemPos) {
