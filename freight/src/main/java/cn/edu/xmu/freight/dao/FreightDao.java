@@ -50,7 +50,7 @@ public class FreightDao {
      * @param rid
      * @return
      */
-    public Object calculateFreight(Map<Long,Long> models, Long weightSum,Long counts,Long rid)
+    public Long calculateFreight(Map<Long,Long> models, Long weightSum,Integer counts,Long rid)
     {
         //Boolean check=checkMix(models);
         ReturnObject<VoObject>ret=null;
@@ -68,8 +68,11 @@ public class FreightDao {
             Long shopId=models.get(modelId);
             //需判断modelId为null,即使用默认运费模板
             ret=getFreModelSummeryByModelId(shopId,modelId);
+            /*
             if(!ret.getCode().equals(ResponseCode.OK))
                 return ResponseUtil.fail(ret.getCode());
+             */
+
             type=((FreightModelVo)ret.getData().createVo()).getType();
 
             if(type==0)
@@ -90,9 +93,10 @@ public class FreightDao {
                 maxFreight=b;
         }
 
-        return  ResponseUtil.ok(maxFreight);
+        //return  ResponseUtil.ok(maxFreight);
+        return maxFreight;
     }
-    public Long calPieceFreight(Long modelId,Long counts,Long rid)
+    public Long calPieceFreight(Long modelId,Integer counts,Long rid)
     {
         PieceFreightPoExample example=new PieceFreightPoExample();
         PieceFreightPoExample.Criteria criteria= example.createCriteria();
@@ -106,7 +110,7 @@ public class FreightDao {
         int firstItem=po.getFirstItems();
         int additionalItems=po.getAdditionalItems();
         //续件组数:num
-        Long num=(counts-firstItem)/additionalItems;
+        Integer num=(counts-firstItem)/additionalItems;
         if(num*additionalItems+firstItem<counts)
             num++;
         if(counts<firstItem)

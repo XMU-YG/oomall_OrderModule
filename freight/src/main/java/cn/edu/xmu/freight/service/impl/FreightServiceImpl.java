@@ -1,9 +1,9 @@
 package cn.edu.xmu.freight.service.impl;
 
 
+import cn.edu.xmu.freight.model.vo.ItemsVo;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.freight.service.FreightService;
-
 import cn.edu.xmu.produce.freight.IFFreightService;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +22,18 @@ public class FreightServiceImpl implements IFFreightService {
     }
 
     @Override
-    public Long calculateFreight(Long rid,String json)
+    public Long calculateFreight(Long rid,Map<Long,Integer> goodsMap)
     {
-        //Map<Long,Long> items;
-        //JacksonUtil.toMap(json);
-        return 0L;
+        ItemsVo vo=new ItemsVo();
+        List<ItemsVo> vos=new ArrayList<>();
+        for(Map.Entry<Long,Integer> entry : goodsMap.entrySet())
+        {
+          vo.setSkuId(entry.getKey());
+          vo.setCount(entry.getValue());
+          vos.add(vo);
+        }
+        return freightService.calculateFreight(rid,vos);
+
     }
 
 }

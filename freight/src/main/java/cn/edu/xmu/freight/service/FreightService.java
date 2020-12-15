@@ -12,7 +12,6 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
-
 import cn.edu.xmu.produce.goods.IFGoodsService;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
@@ -184,15 +183,15 @@ public class FreightService {
      * @return
      */
     @Transactional
-    public Object calculateFreight(Long rid, List<ItemsVo> vos)
+    public Long calculateFreight(Long rid, List<ItemsVo> vos)
     {
 
         List<Long> skuIds=vos.stream().map(src->src.getSkuId()).collect(Collectors.toList());
         //前model_id,后shopid
         Map<Long,Long> models=new HashMap<Long,Long>();
-        List<Long> weights=null;
+        List<Long> weights=new ArrayList<>();
         Long weightSum=0L;
-        Long counts=0L;
+        Integer counts=0;
         Long shopId=null;
         Long freightId=null;;
         String goodsInfoJson=null;

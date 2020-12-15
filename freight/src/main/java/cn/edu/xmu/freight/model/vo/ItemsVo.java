@@ -16,13 +16,21 @@ public class ItemsVo implements Serializable {
     private Long skuId;
 
     @ApiModelProperty(value = "数量")
-    private Long count;
+    private Integer count;
 
-    public Long getCount() {
+    public Integer getCount() {
         return count;
     }
 
     public Long getSkuId() {
         return skuId;
+    }
+
+    public void setCount(Integer count) {
+        this.count = count;
+    }
+
+    public void setSkuId(Long skuId) {
+        this.skuId = skuId;
     }
 }
