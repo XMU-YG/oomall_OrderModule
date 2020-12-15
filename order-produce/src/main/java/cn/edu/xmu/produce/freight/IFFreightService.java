@@ -1,6 +1,8 @@
 package cn.edu.xmu.produce.freight;
 
 import java.util.List;
+import java.util.Map;
+
 public interface IFFreightService {
 
     /**
@@ -10,6 +12,6 @@ public interface IFFreightService {
      */
     public String getFreModelByModelId(Long id);
 
-    public Long calculateFreight(Long rid,String json);
+    public Long calculateFreight(Long rid, Map<Long,Integer> goodsMap);
 
 }

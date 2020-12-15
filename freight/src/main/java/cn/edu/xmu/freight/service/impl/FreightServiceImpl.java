@@ -8,6 +8,10 @@ import cn.edu.xmu.produce.freight.IFFreightService;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 @DubboService(version ="1.0-SNAPSHOT") // 注意这里的Serivce引用的是dubbo的包
 public class FreightServiceImpl implements IFFreightService {
     @Autowired
@@ -22,7 +26,7 @@ public class FreightServiceImpl implements IFFreightService {
     }
 
     @Override
-    public Long calculateFreight(Long rid,Map<Long,Integer> goodsMap)
+    public Long calculateFreight(Long rid, Map<Long,Integer> goodsMap)
     {
         ItemsVo vo=new ItemsVo();
         List<ItemsVo> vos=new ArrayList<>();
