@@ -7,6 +7,7 @@ import cn.edu.xmu.payment.dao.PaymentDao;
 import cn.edu.xmu.payment.model.bo.Payment;
 import cn.edu.xmu.payment.model.vo.NewPaymentVo;
 
+import cn.edu.xmu.payment.util.PaymentPatterns;
 import cn.edu.xmu.produce.order.IPOrderService;
 import cn.edu.xmu.produce.other.IPOtherService;
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -51,20 +52,25 @@ public class PaymentService {
           logger.debug("findOrderRefundShop: fail: 该订单无权限");
           retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该订单无权访问");
       }else if(checkBelong.equals("1")){
-           //在用户模块查询返点够不够
-          boolean rebateEnough= otherSerivice.reduceRebate(userId,vo.getPrice());
+          if(vo.getPaymentPattern()==PaymentPatterns.REBATEPAY.getCode())
+          {
+              //在用户模块查询返点够不够
+              boolean rebateEnough= otherSerivice.reduceRebate(userId,vo.getPrice());
 
-           if(!rebateEnough){
-               retObject=new ReturnObject<>(ResponseCode.REBATE_NOTENOUGH,"返点不足");
-               logger.debug("findOrderRefundShop: fail: 返点不足");
-           }else{
+              if(!rebateEnough){
+                  retObject=new ReturnObject<>(ResponseCode.REBATE_NOTENOUGH,"返点不足");
+                  logger.debug("findOrderRefundShop: fail: 返点不足");
+                  return retObject;
+              }
+          }
+
                //创建bo对象
                Payment payment=vo.createPayment();
                payment.setOrderId(orderId);
 
                //用bo对象payment在dao层创建po对象，dao层返回构造后的vo对象
                retObject=paymentDao.createPayment(payment);
-           }
+
        }
 
        return retObject;
@@ -76,34 +82,40 @@ public class PaymentService {
      * @author Yuting Zhong
      * Modified at 2020/12/9
      */
-    public ReturnObject<VoObject> createAftersalePayment(Long userId,Long aftersaleId,NewPaymentVo vo){
-        ReturnObject<VoObject> retObject=null;
+    public ReturnObject<VoObject> createAftersalePayment(Long userId,Long aftersaleId,NewPaymentVo vo) {
+        ReturnObject<VoObject> retObject = null;
 
-       // int checkBelong=1;
-        String checkBelong=otherSerivice.checkUserAftersale(userId,aftersaleId);
-        //校验用户和订单的从属关系  若订单不存在或订单不属于对应用户，则返回相应错误码，并直接返回给controller层
-        if(checkBelong.equals("-1")){
+        // int checkBelong=1;
+        String checkBelong = otherSerivice.checkUserAftersale(userId, aftersaleId);
+        //校验用户和售后单的从属关系  若订单不存在或订单不属于对应用户，则返回相应错误码，并直接返回给controller层
+        if (checkBelong.equals("-1")) {
             logger.debug("findOrderRefundShop: fail: 售后单不存在");
-            retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"售后单不存在");
-        }else if(checkBelong.equals("0")){
+            retObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, "售后单不存在");
+        } else if (checkBelong.equals("0")) {
             logger.debug("findOrderRefundShop: fail: 该售后单无权限");
-            retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该售后单无权访问");
-        }else if(checkBelong.equals("1")){
-            //扣除用户返点
-            boolean rebateEnough= otherSerivice.reduceRebate(userId,vo.getPrice());
+            retObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, "该售后单无权访问");
+        } else if (checkBelong.equals("1")) {
 
-            if(!rebateEnough){
-                retObject=new ReturnObject<>(ResponseCode.REBATE_NOTENOUGH,"返点不足");
-                logger.debug("findOrderRefundShop: fail: 返点不足");
-            }else{
-                //创建bo对象
-                Payment payment=vo.createPayment();
-                payment.setAftersaleId(aftersaleId);
+            if (vo.getPaymentPattern() == PaymentPatterns.REBATEPAY.getCode()) {
+                //扣除用户返点
+                boolean rebateEnough = otherSerivice.reduceRebate(userId, vo.getPrice());
 
-                //用bo对象payment在dao层创建po对象，dao层返回构造后的vo对象
-                retObject=paymentDao.createPayment(payment);
+                if (!rebateEnough) {
+                    retObject = new ReturnObject<>(ResponseCode.REBATE_NOTENOUGH, "返点不足");
+                    logger.debug("findOrderRefundShop: fail: 返点不足");
+                }
+                return retObject;
+
             }
+            //创建bo对象
+            Payment payment = vo.createPayment();
+            payment.setAftersaleId(aftersaleId);
+
+            //用bo对象payment在dao层创建po对象，dao层返回构造后的vo对象
+            retObject = paymentDao.createPayment(payment);
+
         }
+
         return retObject;
     }
 
