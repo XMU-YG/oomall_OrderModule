@@ -90,6 +90,10 @@ orderservice:
   stock:
     # stock在Redis中失效秒数
     expiretime: 6000
+  payment:
+    expiretime:10
+
+
 
 
 #pagehelper分页插件配置

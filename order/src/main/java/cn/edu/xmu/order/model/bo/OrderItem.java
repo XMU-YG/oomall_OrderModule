@@ -22,6 +22,18 @@ public class OrderItem implements VoObject {
     private Long couponActivityId;
     private Long beShareId;
 
+    public OrderItem(OrderItemPo orderItemPo){
+        this.id=orderItemPo.getId();
+        this.skuId=orderItemPo.getGoodsSkuId();
+        this.beShareId=orderItemPo.getBeShareId();
+        this.couponActivityId=orderItemPo.getCouponActivityId();
+        this.discount=orderItemPo.getDiscount();
+        this.name=orderItemPo.getName();
+        this.orderId=orderItemPo.getOrderId();
+        this.price=orderItemPo.getPrice();
+        this.quantity=orderItemPo.getQuantity();
+    }
+
 
     @Override
     public Object createVo() {

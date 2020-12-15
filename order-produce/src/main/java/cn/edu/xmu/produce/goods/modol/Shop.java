@@ -1,4 +1,4 @@
-package cn.edu.xmu.order.model.bo;
+package cn.edu.xmu.produce.goods.modol;
 
 import lombok.Data;
 

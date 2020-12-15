@@ -1,10 +1,10 @@
-package cn.edu.xmu.produce;
+package cn.edu.xmu.produce.goods;
 
 
 /**
  * 运费所需的商品模块接口
  */
-public interface IGoodsService {
+public interface IFGoodsService {
 
     /**
      * 获得商品的weight,freightId,shopId

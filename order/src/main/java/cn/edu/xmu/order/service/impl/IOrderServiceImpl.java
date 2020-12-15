@@ -26,7 +26,7 @@ public class IOrderServiceImpl implements IOrderService {
 
     @Override
     public String getOrderByOrderItemId(Long orderItemId) {
-        return JacksonUtil.toJson(orderService.getOrderByItemId(orderItemId));
+        return "00";//JacksonUtil.toJson(orderService.getOrderByItemId(orderItemId));
     }
 
     @Override

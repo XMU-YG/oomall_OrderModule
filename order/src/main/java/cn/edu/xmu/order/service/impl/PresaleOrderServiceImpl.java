@@ -4,7 +4,7 @@ import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.order.model.bo.OrderGoods;
+import cn.edu.xmu.produce.goods.modol.OrderGoods;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrderPo;
 import cn.edu.xmu.order.model.vo.OrderItemVo;

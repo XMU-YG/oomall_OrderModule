@@ -5,7 +5,6 @@ import cn.edu.xmu.freight.model.bo.Freight;
 import cn.edu.xmu.freight.model.bo.FreightItem;
 import cn.edu.xmu.freight.model.bo.InnerSkuFreightInfo;
 import cn.edu.xmu.freight.model.bo.PieceItem;
-import cn.edu.xmu.freight.model.po.FreightPo;
 import cn.edu.xmu.freight.model.po.PieceFreightPo;
 import cn.edu.xmu.freight.model.po.WeightFreightPo;
 import cn.edu.xmu.freight.model.vo.*;
@@ -13,7 +12,8 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.produce.IGoodsService;
+
+import cn.edu.xmu.produce.goods.IFGoodsService;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +36,7 @@ public class FreightService {
     private FreightDao freightDao;
 
     @DubboReference
-    private IGoodsService goodsService;
+    private IFGoodsService goodsService;
     /**
      * 获取运费模板概要
      * @author 胡曼珑

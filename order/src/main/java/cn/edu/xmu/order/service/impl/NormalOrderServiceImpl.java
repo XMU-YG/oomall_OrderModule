@@ -4,7 +4,7 @@ import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.order.model.bo.OrderGoods;
+import cn.edu.xmu.produce.goods.modol.OrderGoods;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrderPo;
 import cn.edu.xmu.order.model.vo.OrderVo;
@@ -118,7 +118,7 @@ public class NormalOrderServiceImpl implements PostOrderService {
         //设为待支付状态
         orderPo.setState((byte) OrderStatus.WAIT_FOR_PAID.getCode());
         //计算原价
-        orderPo.setOriginPrice(orderService.calculateOriginPrice(orderItemPos));
+        //orderPo.setOriginPrice(orderService.calculateOriginPrice(orderItemPos));
         orderPo.setGmtModified(LocalDateTime.now());
         //OrderPo写入数据库，返回orderId
         ReturnObject<Long> orderRet=orderService.insertOrder(orderPo);

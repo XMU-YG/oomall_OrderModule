@@ -4,6 +4,8 @@ import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.order.mapper.OrderItemPoMapper;
 
+import cn.edu.xmu.order.model.bo.OrderItem;
+import cn.edu.xmu.order.model.bo.SimpleOrderItem;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrderItemPoExample;
 import org.slf4j.Logger;
@@ -13,6 +15,7 @@ import org.springframework.dao.DataAccessException;
 
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -53,12 +56,42 @@ public class OrderItemDao {
         }
     }
 
-    public List<OrderItemPo> getOrderItemsByOrderId(Long orderId) {
-        OrderItemPoExample example=new OrderItemPoExample();
-        OrderItemPoExample.Criteria criteria=example.createCriteria();
+    /**
+     * 根据订单号查询订单明细
+     * @param orderId
+     * @return OrderItem视图列表
+     * @author Gang Ye
+     */
+    public List<OrderItem> getOrderItemsByOrderId(Long orderId) {
+        OrderItemPoExample itemPoExample=new OrderItemPoExample();
+        OrderItemPoExample.Criteria criteria=itemPoExample.createCriteria();
         criteria.andOrderIdEqualTo(orderId);
+        List<OrderItemPo> orderItemPos=orderItemPoMapper.selectByExample(itemPoExample);
+        ArrayList<OrderItem> orderItems=new ArrayList<>(orderItemPos.size());
+        for (OrderItemPo orderItemPo : orderItemPos){
+            OrderItem orderItem=new OrderItem(orderItemPo);
+            orderItems.add(orderItem);
+        }
+        return orderItems;
+    }
 
-        return orderItemPoMapper.selectByExample(example);
+    /**
+     * 根据订单号查询订单明细
+     * @param orderId
+     * @return SimpleOrderItem视图列表
+     * @author Gang Ye
+     */
+    public List<SimpleOrderItem> getSimOrderItemsByOrderId(Long orderId) {
+        OrderItemPoExample itemPoExample=new OrderItemPoExample();
+        OrderItemPoExample.Criteria criteria=itemPoExample.createCriteria();
+        criteria.andOrderIdEqualTo(orderId);
+        List<OrderItemPo> orderItemPos=orderItemPoMapper.selectByExample(itemPoExample);
+        ArrayList<SimpleOrderItem> orderItems=new ArrayList<>(orderItemPos.size());
+        for (OrderItemPo orderItemPo : orderItemPos){
+            SimpleOrderItem orderItem=new SimpleOrderItem(orderItemPo);
+            orderItems.add(orderItem);
+        }
+        return orderItems;
     }
 
     public List<OrderItemPo> getItemsBySkuId(Long skuId) {

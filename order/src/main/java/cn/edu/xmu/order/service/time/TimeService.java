@@ -4,6 +4,7 @@ import cn.edu.xmu.timer.client.TimerService;
 import cn.edu.xmu.timer.model.bo.Param;
 import cn.edu.xmu.timer.model.bo.Task;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ import java.util.List;
 @Service
 public class TimeService {
 
+    //@Value("${orderservice.payment.expiretime}")
     private int paymentTime=10;
 
     private int receiveTime=10;
@@ -48,7 +50,7 @@ public class TimeService {
         task.setParamList(params);
         task.setBeanName("cn.edu.xmu.order.service.OrderService");
         task.setMethodName("checkOrderPayState");
-        task.setSenderName("order");
+        task.setSenderName("RocketMQ");
         task.setTopic("pay-group");
         task.setBeginTime(LocalDateTime.now().plusSeconds(paymentTime));
         timerService.createTask(task,0);
@@ -61,7 +63,7 @@ public class TimeService {
         Task task=new Task();
         task.setBeanName("cn.edu.xmu.order.service.OrderService");
         task.setMethodName("checkOrderRebate");
-        task.setSenderName("order");
+        task.setSenderName("RocketMQ");
         task.setTopic("rebate-group");
         task.setBeginTime(LocalDateTime.now());
         timerService.createTask(task,1);

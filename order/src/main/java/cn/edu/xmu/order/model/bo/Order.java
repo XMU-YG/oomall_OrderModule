@@ -3,7 +3,8 @@ package cn.edu.xmu.order.model.bo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.order.model.po.OrderPo;
 import cn.edu.xmu.order.model.vo.OrderRetVo;
-import cn.edu.xmu.order.model.vo.SimpleOrderRetVo;
+import cn.edu.xmu.produce.goods.modol.Shop;
+import cn.edu.xmu.produce.other.model.Customer;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -67,14 +68,12 @@ public class Order implements VoObject {
 
     private LocalDateTime gmtModified;
     private List<SimpleOrderItem> simpleOrderItemList;
-
     public Order(OrderPo po){
         this.customer=new Customer();
         this.shop=new Shop();
         this.id=po.getId();
         this.customer.setCustomerId(po.getCustomerId());
         this.shop.setShopId(po.getShopId());
-
         this.orderSn=po.getOrderSn();
         this.pid=po.getPid();
         this.consignee=po.getConsignee();

@@ -2,7 +2,6 @@ package cn.edu.xmu.order.service;
 
 import cn.edu.xmu.ooad.model.VoObject;
 
-import cn.edu.xmu.ooad.order.discount.BaseCouponDiscount;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 
@@ -11,16 +10,15 @@ import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.order.dao.OrderDao;
 import cn.edu.xmu.order.dao.OrderItemDao;
 
-import cn.edu.xmu.order.model.bo.Customer;
+import cn.edu.xmu.produce.goods.modol.OrderGoods;
+import cn.edu.xmu.produce.other.model.Customer;
 import cn.edu.xmu.order.model.bo.Order;
-import cn.edu.xmu.order.model.bo.Shop;
+import cn.edu.xmu.produce.goods.modol.Shop;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrderPo;
 import cn.edu.xmu.order.model.vo.AddressVo;
 
 import com.github.pagehelper.PageInfo;
-
-
 import cn.edu.xmu.order.model.bo.*;
 import cn.edu.xmu.order.model.vo.OrderItemVo;
 import cn.edu.xmu.order.model.vo.OrderVo;
@@ -62,7 +60,12 @@ public class OrderService {
     @DubboReference
     private IOtherService otherService;
 
-    public List<OrderItemPo> findOrderItemsByOrderId(Long orderId){
+    /**
+     * 根据订单号查询订单明细
+     * @param orderId
+     * @return
+     */
+    public List<OrderItem> findOrderItemsByOrderId(Long orderId){
         return orderItemDao.getOrderItemsByOrderId(orderId);
     }
 
@@ -79,50 +82,81 @@ public class OrderService {
         return orderDao.getAllSimpleOrders(customerId,orderSn,state,beginTime,endTime,page,pageSize);
     }
 
+    /**
+     * 顾客查询本人订单详情
+     * @param customerId
+     * @param orderId
+     * @return Order视图
+     * @author Gang Ye
+     */
     @Transactional
-
     public ReturnObject<VoObject> getCusOrderById(Long customerId, Long orderId){
-        ReturnObject<VoObject> returnObject= orderDao.getOrderById(customerId,orderId);
+
+        ReturnObject returnObject= orderDao.getOrderById(orderId);
         if (returnObject.getCode().equals(ResponseCode.OK)){
-//            Order order=(Order)returnObject.getData();
-//            Long shopId=order.getCustomer().getCustomerId();
-//            Customer customer=JacksonUtil.toObj(otherService.findCustomerById(customerId),Customer.class);
-//            Shop shop=JacksonUtil.toObj(goodsService.findShopById(shopId),Shop.class);
-            Order order=(Order)returnObject.getData();
+            Order order=(Order) returnObject.getData();
+            if(order.getCustomer().getCustomerId().equals(customerId)){
+                //构造完整Order详情
+                List<SimpleOrderItem> orderItems=orderItemDao.getSimOrderItemsByOrderId(order.getId());
+                order.setSimpleOrderItemList(orderItems);
+                Long shopId=order.getShop().getShopId();
+                Customer customer=JacksonUtil.toObj(otherService.findCustomerById(customerId),Customer.class);
+                Shop shop=JacksonUtil.toObj(goodsService.findShopById(shopId),Shop.class);
+                order.setCustomer(customer);
+                order.setShop(shop);
+                return new ReturnObject<>(order);
+            }
+            else{
+                logger.debug("customer getOrderById error: don't have privilege!   orderId:  "+orderId+"   customerId:  "+customerId);
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"订单无权访问，不是自己订单");
+            }
 
-            Customer customer=new Customer();
-            customer.setCustomerId(order.getCustomer().getCustomerId());
-
-
-            Shop shop=new Shop();
-            shop.setShopId(order.getShop().getShopId());
-
-            order.setCustomer(customer);
-            order.setCustomer(customer);
-            order.setShop(shop);
-            return new ReturnObject<>(order);
         }
         else{
             return returnObject;
         }
-
     }
 
+    /**
+     * 修改订单地址
+     * @param customerId
+     * @param orderId
+     * @param vo 新信息
+     * @return
+     * @author Gang Ye
+     */
     @Transactional
     public ReturnObject modifySelfOrderAddressById(Long customerId, Long orderId, AddressVo vo){
         return orderDao.modifySelfOrderAddressById(customerId,orderId,vo);
     }
 
+    /**
+     * 顾客取消或者删除订单
+     * @param customerId
+     * @param orderId
+     * @return
+     */
     @Transactional
     public ReturnObject deleteSelfOrderById(Long customerId, Long orderId) {
-        return orderDao.deleteSelfOrderById(customerId,orderId);
+        ReturnObject returnObject=orderDao.deleteOrderByCus(customerId,orderId);
+        if (returnObject.getErrmsg().equals("已取消")){
+            List<SimpleOrderItem> simpleOrderItems=orderItemDao.getSimOrderItemsByOrderId(orderId);
+            for (SimpleOrderItem item:simpleOrderItems) {
+                goodsService.addStock(item.getGoods_sku_id(),item.getQuantity());
+            }
+        }
+        return returnObject;
     }
-
+    /**
+     * 顾客确认收货
+     * @param customerId
+     * @param orderId
+     * @return
+     */
     @Transactional
     public ReturnObject confirmSelfOrderById(Long customerId, Long orderId) {
         return orderDao.confirmSelfOrderById(customerId,orderId);
     }
-
     @Transactional
     public ReturnObject translateGroToNor(Long customerId, Long id) {
         return orderDao.transLateGroToNor(customerId,id);
@@ -133,37 +167,59 @@ public class OrderService {
         return orderDao.getShopSelfSimpleOrders(shopId,customerId,orderSn,beginTime,endTime,page,pageSize);
     }
 
+    /**
+     * 店铺根据订单号查询订单详情
+     * @param shopId
+     * @param id
+     * @return Order
+     * @Gang Ye
+     */
     @Transactional
     public ReturnObject<VoObject> getShopSelfOrder(Long shopId, Long id) {
-        ReturnObject<VoObject> returnObject= orderDao.getShopSelfOrder(shopId,id);
-
-        if (returnObject.getCode().equals(ResponseCode.OK)){
-            Order order=(Order)returnObject.getData();
-            Long customerId=order.getCustomer().getCustomerId();
-            Customer customer=JacksonUtil.toObj(otherService.findCustomerById(customerId),Customer.class);
-            Shop shop=JacksonUtil.toObj(goodsService.findShopById(shopId),Shop.class);
-            order.setCustomer(customer);
-            order.setShop(shop);
-            return new ReturnObject<>(order);
-        }
-        else{
+        ReturnObject<Order> object= orderDao.getOrderById(id);
+        ReturnObject returnObject=null;
+        if (object.getCode().equals(ResponseCode.OK)){
+            Order order=(Order) returnObject.getData();
+            if(shopId==0L||order.getShop().getShopId().equals(shopId)){
+                logger.debug("shop getSelfOrder success！  orderId:  "+id+"   shopId:  "+shopId);
+                //构造完整Order详情
+                List<SimpleOrderItem> orderItems=orderItemDao.getSimOrderItemsByOrderId(order.getId());
+                order.setSimpleOrderItemList(orderItems);
+                Long customerId=order.getCustomer().getCustomerId();
+                Customer customer=JacksonUtil.toObj(otherService.findCustomerById(customerId),Customer.class);
+                if(shopId!=0){
+                    Shop shop=JacksonUtil.toObj(goodsService.findShopById(shopId),Shop.class);
+                    order.setShop(shop);
+                }
+                order.setCustomer(customer);
+                return new ReturnObject<>(order);
+            } else{
+                logger.debug("customer getOrderById error: don't have privilege!   orderId:  "+id+"  shopId:  "+shopId);
+                return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"订单无权访问，不是自己订单");
+            }
+        } else{
             return returnObject;
         }
     }
 
+    /**
+     * 店铺修改留言
+     * @param shopId
+     * @param orderId
+     * @param message
+     * @return
+     */
     @Transactional
     public ReturnObject modifyOrderMessage(Long shopId, Long orderId, String message) {
         return orderDao.modifyOrderMessage(shopId,orderId,message);
     }
-
     @Transactional
     public ReturnObject deleteShopOrder(Long shopId, Long orderId) {
-        return orderDao.deleteShopOrder(shopId,orderId);
+        return orderDao.deleteOrderByShop(shopId,orderId);
     }
-
-    @Transactional()
+    @Transactional
     public ReturnObject deliverShopOrder(Long shopId, Long orderId, String freightSn) {
-        return orderDao.deliverShopOrder(shopId,orderId,freightSn);
+        return orderDao.deliverOrderByShop(shopId,orderId,freightSn);
     }
 
     /**
@@ -184,12 +240,11 @@ public class OrderService {
      * @return
      */
     public boolean verifyOrderByCustomerId(Long customerId,Long orderId) {
-
-        OrderPo ret=orderDao.getOrderPoById(orderId);
-        if (ret.getCustomerId().equals(customerId)){
-            return true;
+        ReturnObject<Order> ret=orderDao.getOrderById(orderId);
+        if (ret.getData()==null){
+            return false;
         }
-        return false;
+        return ret.getData().getCustomer().getCustomerId().equals(customerId);
     }
 
     /**
@@ -199,13 +254,12 @@ public class OrderService {
      * @return
      */
     public boolean verifyOrderByShopId(Long shopId,Long orderId) {
-        ReturnObject<VoObject> returnObject=orderDao.getShopSelfOrder(shopId,orderId);
-        if (returnObject.getCode().equals(ResponseCode.OK)){
-            return true;
+        ReturnObject<Order> returnObject=orderDao.getOrderById(orderId);
+        if (returnObject.getData()==null){
+            return false;
         }
-        return false;
+        return returnObject.getData().getShop().getShopId().equals(shopId);
     }
-
 
     /**
      * 处理普通商品订单明细
@@ -270,10 +324,10 @@ public class OrderService {
      * 计算优惠数额
      * @return
      */
-    public Long calculateDiscount(List<OrderItemPo> orderItemPos){
+    public Long calculateDiscount(List<OrderItem> orderItems){
 
         Long sum=0L;
-        for (OrderItemPo po:orderItemPos
+        for (OrderItem po:orderItems
              ) {
             sum+=po.getDiscount();
         }
@@ -281,22 +335,13 @@ public class OrderService {
     }
 
     /**
-     * 查询sn有否存在
-     * @param orderSn
-     * @return
-     */
-    public boolean haveOrderSn(String orderSn){
-        return orderDao.haveOrderSn(orderSn);
-    }
-
-    /**
      * 计算原价
      * @param orderGoods
      * @return
      */
-    public Long calculateOriginPrice(List<OrderItemPo> orderGoods){
-        Long sum=0l;
-        for (OrderItemPo o:orderGoods) {
+    public Long calculateOriginPrice(List<OrderItem> orderGoods){
+        long sum=0L;
+        for (OrderItem o:orderGoods) {
             sum+=o.getPrice()*o.getQuantity();
         }
         return sum;
@@ -322,6 +367,7 @@ public class OrderService {
     }
 
     /**
+     * 内部接口
      * 创建售后订单
      * @param shopId 发起售后的店铺id
      * @param orderVoJson 新订单信息视图Json
@@ -400,6 +446,7 @@ public class OrderService {
     }
 
     /**
+     * 内部接口
      * 分单
      * @param orderId 需要分的订单
      * @author Gang Ye
@@ -407,39 +454,33 @@ public class OrderService {
      * @modified Gang Ye
      */
     public void classifyOrder(Long orderId){
-
-        OrderPo orderPo=orderDao.getOrderPoById(orderId);
-        List<OrderItemPo> orderItems=this.findOrderItemsByOrderId(orderId);
-
-        Map<Long,List<OrderItemPo>> goodsMapByShop=new HashMap<>(orderItems.size());
-        for (OrderItemPo orderItem :orderItems) {
-            String goodsJson=goodsService.findGoodsBySkuId(orderItem.getGoodsSkuId());
+        Order order=orderDao.getOrderById(orderId).getData();
+        List<OrderItem> orderItems=this.findOrderItemsByOrderId(orderId);
+        Map<Long,List<OrderItem>> goodsMapByShop=new HashMap<>(orderItems.size());
+        for (OrderItem orderItem :orderItems) {
+            String goodsJson=goodsService.findGoodsBySkuId(orderItem.getSkuId());
             OrderGoods goods= JacksonUtil.toObj(goodsJson,OrderGoods.class);
             assert goods != null;
             goodsMapByShop.computeIfAbsent(goods.getShopId(), k->new ArrayList<>()).add(orderItem);
-
         }
         //分单
         goodsMapByShop.forEach((k,v)->{
             //子订单
             OrderPo po=new OrderPo();
-
             po.setGmtCreate(LocalDateTime.now());
             po.setOrderSn(Common.genSeqNum());
             po.setShopId(k);
             po.setPid(orderId);
-            po.setCustomerId(orderPo.getCustomerId());
-            po.setOrderType(orderPo.getOrderType());
+            po.setCustomerId(order.getCustomer().getCustomerId());
+            po.setOrderType(order.getOrderType());
             po.setState((byte)OrderStatus.WAIT_FOR_RECEIVE.getCode());
             po.setOriginPrice(this.calculateOriginPrice(v));
-            po.setFreightPrice(orderPo.getFreightPrice()*(po.getOriginPrice()/orderPo.getOriginPrice()));
+            po.setFreightPrice(order.getFreightPrice()*(po.getOriginPrice()/order.getOriginPrice()));
             po.setDiscountPrice(this.calculateDiscount(v));
             po.setRebateNum(otherService.calculateRebateNum(JacksonUtil.toJson(v),po.getCustomerId()));
-            po.setBeDeleted(orderPo.getBeDeleted());
-            po.setCouponId(orderPo.getCouponId());
+            po.setCouponId(order.getCouponId());
             po.setGmtModified(LocalDateTime.now());
-            //写入
-            Long id=orderDao.insertOrder(orderPo).getData();
+            Long id=orderDao.insertOrder(po).getData();
             v.forEach(x->{
                 OrderItemPo orderItemPo=orderItemDao.getOrderItemById(x.getId());
                 orderItemPo.setOrderId(id);
@@ -463,14 +504,19 @@ public class OrderService {
         return orderItemIds;
     }
 
+    /**
+     * 内部接口
+     * @param orderItemId
+     * @return
+     */
     public OrderItemPo getOrderItemById(Long orderItemId) {
         return orderItemDao.getOrderItemById(orderItemId);
     }
 
-    public OrderPo getOrderByItemId(Long orderItemId) {
-        OrderItemPo orderItemPo=this.getOrderItemById(orderItemId);
-        return orderDao.getOrderPoById(orderItemPo.getOrderId());
-    }
+//    public OrderPo getOrderByItemId(Long orderItemId) {
+//        OrderItemPo orderItemPo=this.getOrderItemById(orderItemId);
+//        return orderDao.getOrderPoById(orderItemPo.getOrderId());
+//    }
 
     /**
      * 定时器调用任务

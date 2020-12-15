@@ -74,7 +74,6 @@ public class OrderController {
     })
     @Audit
     @PostMapping("orders")
-
     public Object addNewOrderByCustomer(@ApiIgnore @LoginUser Long customerId, @Validated @RequestBody OrderVo orderInfo, BindingResult bindingResult) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 
         //校验前端数据

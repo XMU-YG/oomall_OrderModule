@@ -1,7 +1,7 @@
-package cn.edu.xmu.produce;
+package cn.edu.xmu.produce.freight;
 
 import java.util.List;
-public interface IFreightService {
+public interface IFFreightService {
 
     /**
      * 获得运费模板概要

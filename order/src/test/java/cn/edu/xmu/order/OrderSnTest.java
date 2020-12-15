@@ -12,10 +12,5 @@ public class OrderSnTest {
 
     @Autowired
     private OrderDao orderDao;
-    @Test
-    public void haveOrderSnTest(){
-        String a="111111111111";
-        String b="2016102361242";
-        System.out.println(orderDao.haveOrderSn(a)+"  "+orderDao.haveOrderSn(b));
-    }
+
 }
