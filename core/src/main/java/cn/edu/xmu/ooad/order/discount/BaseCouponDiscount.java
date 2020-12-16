@@ -53,7 +53,7 @@ public abstract class BaseCouponDiscount implements Computable, JsonSerializable
 		return new ObjectMapper().writeValueAsString(this);
 	}
 
-	public BaseCouponDiscount getInstance(String jsonString) throws JsonProcessingException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+	public static BaseCouponDiscount getInstance(String jsonString) throws JsonProcessingException, ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode root = mapper.readTree(jsonString);
 		String className = root.get("className").asText();

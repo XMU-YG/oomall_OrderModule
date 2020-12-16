@@ -2,6 +2,8 @@ package cn.edu.xmu.order.service;
 
 import cn.edu.xmu.ooad.model.VoObject;
 
+import cn.edu.xmu.ooad.order.discount.BaseCouponDiscount;
+import cn.edu.xmu.ooad.order.discount.BaseCouponLimitation;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 
@@ -11,6 +13,7 @@ import cn.edu.xmu.order.dao.OrderDao;
 import cn.edu.xmu.order.dao.OrderItemDao;
 
 import cn.edu.xmu.produce.goods.modol.OrderGoods;
+import cn.edu.xmu.produce.order.model.OtherOrder;
 import cn.edu.xmu.produce.other.model.Customer;
 import cn.edu.xmu.order.model.bo.Order;
 import cn.edu.xmu.produce.goods.modol.Shop;
@@ -18,6 +21,7 @@ import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrderPo;
 import cn.edu.xmu.order.model.vo.AddressVo;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.pagehelper.PageInfo;
 import cn.edu.xmu.order.model.bo.*;
 import cn.edu.xmu.order.model.vo.OrderItemVo;
@@ -33,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -100,10 +105,10 @@ public class OrderService {
                 List<SimpleOrderItem> orderItems=orderItemDao.getSimOrderItemsByOrderId(order.getId());
                 order.setSimpleOrderItemList(orderItems);
                 Long shopId=order.getShop().getShopId();
-                Customer customer=JacksonUtil.toObj(otherService.findCustomerById(customerId),Customer.class);
-                Shop shop=JacksonUtil.toObj(goodsService.findShopById(shopId),Shop.class);
-                order.setCustomer(customer);
-                order.setShop(shop);
+                //Customer customer=JacksonUtil.toObj(otherService.findCustomerById(customerId),Customer.class);
+                //Shop shop=JacksonUtil.toObj(goodsService.findShopById(shopId),Shop.class);
+                //order.setCustomer(customer);
+                //order.setShop(shop);
                 return new ReturnObject<>(order);
             }
             else{
@@ -324,7 +329,7 @@ public class OrderService {
      * 计算优惠数额
      * @return
      */
-    public Long calculateDiscount(List<OrderItem> orderItems){
+    public Long totalDiscount(List<OrderItem> orderItems){
 
         Long sum=0L;
         for (OrderItem po:orderItems
@@ -476,13 +481,13 @@ public class OrderService {
             po.setState((byte)OrderStatus.WAIT_FOR_RECEIVE.getCode());
             po.setOriginPrice(this.calculateOriginPrice(v));
             po.setFreightPrice(order.getFreightPrice()*(po.getOriginPrice()/order.getOriginPrice()));
-            po.setDiscountPrice(this.calculateDiscount(v));
+            //po.setDiscountPrice(this.calculateDiscount(v));
             po.setRebateNum(otherService.calculateRebateNum(JacksonUtil.toJson(v),po.getCustomerId()));
             po.setCouponId(order.getCouponId());
             po.setGmtModified(LocalDateTime.now());
             Long id=orderDao.insertOrder(po).getData();
             v.forEach(x->{
-                OrderItemPo orderItemPo=orderItemDao.getOrderItemById(x.getId());
+                OrderItemPo orderItemPo=orderItemDao.getOrderItemPoById(x.getId());
                 orderItemPo.setOrderId(id);
                 orderItemPo.setGmtModified(LocalDateTime.now());
                 //更新
@@ -509,10 +514,9 @@ public class OrderService {
      * @param orderItemId
      * @return
      */
-    public OrderItemPo getOrderItemById(Long orderItemId) {
+    public OrderItem getOrderItemById(Long orderItemId) {
         return orderItemDao.getOrderItemById(orderItemId);
     }
-
 //    public OrderPo getOrderByItemId(Long orderItemId) {
 //        OrderItemPo orderItemPo=this.getOrderItemById(orderItemId);
 //        return orderDao.getOrderPoById(orderItemPo.getOrderId());
@@ -533,5 +537,37 @@ public class OrderService {
     public void checkOrderRebate(){
         List<SimpleOrder> simpleOrders=orderDao.getAllOrders();
 
+    }
+
+    /**
+     * 内部接口
+     * 为其他模块提供订单DTO
+     * @param orderItemId
+     * @return
+     */
+    public OtherOrder getOrderDTOForOther(Long orderItemId) {
+        OtherOrder otherOrder=new OtherOrder();
+        OrderItem orderItem=this.getOrderItemById(orderItemId);
+        if (orderItem!=null){
+            otherOrder.setSkuId(orderItem.getSkuId());
+            otherOrder.setSkuName(orderItem.getName());
+            Long orderId=orderItem.getOrderId();
+            Order order=orderDao.getOrderById(orderId).getData();
+            if (order!=null){
+                otherOrder.setShopId(order.getShop().getShopId());
+                otherOrder.setOrderSn(order.getOrderSn());
+                return otherOrder;
+            }
+        }
+        return null;
+    }
+
+    public OrderItem calculateDiscount(List<OrderItem> orderItemPos) throws JsonProcessingException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+
+        List<OrderItem> orderItemList=new ArrayList<>(orderItemPos.size());
+
+        String itemJson=JacksonUtil.toJson(orderItemList);
+        BaseCouponDiscount  baseCouponDiscount=BaseCouponDiscount.getInstance(itemJson);
+        return  null;
     }
 }

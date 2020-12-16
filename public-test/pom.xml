@@ -3,9 +3,9 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>oomall_OrderModule</artifactId>
+        <artifactId>oomall</artifactId>
         <groupId>cn.edu.xmu</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>0.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,9 +15,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <ooad.group>1-1</ooad.group>
-        <ooad.testdir>1-1</ooad.testdir>
-        <management.gate>172.16.3.64:8080</management.gate>
-        <mall.gate>172.16.3.64:8080</mall.gate>
+        <ooad.testdir>1111</ooad.testdir>
+        <management.gate>172.16..64:8080</management.gate>
+        <mall.gate>172.16..64:8080</mall.gate>
     </properties>
 
     <dependencies>
@@ -45,13 +45,11 @@
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>2.11.1</version>
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jdk8</artifactId>
-            <version>2.11.1</version>
         </dependency>
 
         <dependency>
@@ -88,31 +86,6 @@
             </plugin>
 
             <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.5</version>
-                <executions>
-                    <execution>
-                        <id>prepare-agent</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>post-unit-test</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                        <configuration>
-                            <dataFile>target/jacoco.exec</dataFile>
-                            <outputDirectory>target/site/jacoco-ut</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
                 <version>3.9.1</version>
@@ -125,11 +98,6 @@
                         <groupId>org.apache.maven.wagon</groupId>
                         <artifactId>wagon-webdav-jackrabbit</artifactId>
                         <version>2.2</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-nop</artifactId>
-                        <version>1.7.30</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -162,7 +130,7 @@
     <distributionManagement>
         <site>
             <id>siteserver</id>
-            <url>dav:http://172.16.1.66:8081/${ooad.group}/${ooad.testdir}</url>
+            <url>dav:http://172.16.1.66:8081/${ooad.group}/${ooad.testdir}/public</url>
         </site>
     </distributionManagement>
 </project>

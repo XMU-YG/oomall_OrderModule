@@ -62,7 +62,6 @@ public class WangWeiceTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
         String token = JSONObject.parseObject(new String(responseString, StandardCharsets.UTF_8)).getString("data");
@@ -83,7 +82,6 @@ public class WangWeiceTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
     }
@@ -99,7 +97,7 @@ public class WangWeiceTest {
     public void selectRoleTest1() throws Exception {
         byte[] ret = manageClient.get().uri("/shops/0/roles?page=1&pageSize=2")
                 .exchange()
-                .expectStatus().isForbidden()
+                .expectStatus().isUnauthorized()
                 .expectBody()
                 .returnResult()
                 .getResponseBodyContent();
@@ -140,10 +138,9 @@ public class WangWeiceTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
-        String expectedResponse = "{\"errno\":0,\"data\":{\"total\":2,\"pages\":1,\"pageSize\":2,\"page\":1,\"list\":[{\"id\":23,\"name\":\"管理员\",\"desc\":\"超级管理员，所有权限都有\",\"createdBy\":1,\"departId\":0,\"gmtCreate\":\"2020-11-01T09:48:24\",\"gmtModified\":\"2020-11-01T09:48:24\"},{\"id\":80,\"name\":\"财务\",\"desc\":null,\"createdBy\":1,\"departId\":0,\"gmtCreate\":\"2020-11-01T09:48:24\",\"gmtModified\":\"2020-11-01T09:48:24\"}]},\"errmsg\":\"成功\"}";
+        String expectedResponse = "{\"errno\":0,\"data\":{\"total\":2,\"pages\":1,\"pageSize\":2,\"page\":1,\"list\":[{\"id\":23,\"name\":\"管理员\",\"desc\":\"超级管理员，所有权限都有\",\"createdBy\":1,\"departId\":0,\"gmtCreate\":\"2020-11-01T09:48:24\",\"gmtModified\":\"2020-11-01T09:48:24\"},{\"id\":80,\"name\":\"财务\",\"desc\":null,\"createdBy\":1,\"departId\":0,\"gmtCreate\":\"2020-11-01T09:48:24\",\"gmtModified\":\"2020-11-01T09:48:24\"}]}}";
         JSONAssert.assertEquals(expectedResponse, new String(responseString, StandardCharsets.UTF_8), false);
     }
 
@@ -163,7 +160,6 @@ public class WangWeiceTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.FIELD_NOTVALID.getCode())
-                .jsonPath("$.errmsg").isEqualTo("部门id不匹配：1")
                 .returnResult()
                 .getResponseBodyContent();
     }
@@ -181,7 +177,7 @@ public class WangWeiceTest {
         byte[] responseString = manageClient.get().uri("/shops/{shopId}/roles?page=1&pageSize=2", 0)
                 .header("authorization", token)
                 .exchange()
-                .expectStatus().isUnauthorized()
+                .expectStatus().isForbidden()
                 .expectBody()
                 .returnResult()
                 .getResponseBodyContent();
@@ -205,11 +201,10 @@ public class WangWeiceTest {
                 .expectStatus().isCreated()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
 
-        String expectedResponse = "{\"errno\":0,\"data\":{\"name\":\"test\",\"createdBy\":1,\"departId\":0,\"desc\":\"test\",\"gmtModified\":null},\"errmsg\":\"成功\"}";
+        String expectedResponse = "{\"errno\":0,\"data\":{\"name\":\"test\",\"createdBy\":1,\"departId\":0,\"desc\":\"test\",\"gmtModified\":null}}";
         JSONAssert.assertEquals(expectedResponse, new String(responseString, StandardCharsets.UTF_8), false);
     }
 
@@ -231,11 +226,10 @@ public class WangWeiceTest {
                 .expectStatus().isCreated()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
 
-        String expectedResponse = "{\"errno\":0,\"data\":{\"name\":\"test2\",\"createdBy\":59,\"departId\":1,\"desc\":\"test2\",\"gmtModified\":null},\"errmsg\":\"成功\"}";
+        String expectedResponse = "{\"errno\":0,\"data\":{\"name\":\"test2\",\"createdBy\":59,\"departId\":1,\"desc\":\"test2\",\"gmtModified\":null}}";
         JSONAssert.assertEquals(expectedResponse, new String(responseString, StandardCharsets.UTF_8), false);
     }
 
@@ -257,7 +251,6 @@ public class WangWeiceTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.ROLE_REGISTERED.getCode())
-                .jsonPath("$.errmsg").isEqualTo("角色名重复：管理员")
                 .returnResult()
                 .getResponseBodyContent();
     }
@@ -280,7 +273,6 @@ public class WangWeiceTest {
                 .expectStatus().isBadRequest()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.FIELD_NOTVALID.getCode())
-                .jsonPath("$.errmsg").isEqualTo("角色名不能为空;")
                 .returnResult()
                 .getResponseBodyContent();
     }
@@ -298,7 +290,7 @@ public class WangWeiceTest {
         byte[] responseString = manageClient.post().uri("/roles")
                 .bodyValue(roleJson)
                 .exchange()
-                .expectStatus().isForbidden()
+                .expectStatus().isUnauthorized()
                 .expectBody()
                 .returnResult()
                 .getResponseBodyContent();
@@ -342,7 +334,6 @@ public class WangWeiceTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
     }
@@ -365,7 +356,6 @@ public class WangWeiceTest {
                 .expectStatus().isBadRequest()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.FIELD_NOTVALID.getCode())
-                .jsonPath("$.errmsg").isEqualTo("角色名不能为空;")
                 .returnResult()
                 .getResponseBodyContent();
     }
@@ -388,7 +378,6 @@ public class WangWeiceTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.ROLE_REGISTERED.getCode())
-                .jsonPath("$.errmsg").isEqualTo("角色名重复：客服")
                 .returnResult()
                 .getResponseBodyContent();
     }
@@ -411,7 +400,6 @@ public class WangWeiceTest {
                 .expectStatus().isNotFound()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
     }
@@ -431,7 +419,7 @@ public class WangWeiceTest {
                 .header("authorization", token)
                 .bodyValue(roleJson)
                 .exchange()
-                .expectStatus().isUnauthorized()
+                .expectStatus().isForbidden()
                 .expectBody()
                 .returnResult()
                 .getResponseBodyContent();
@@ -450,7 +438,7 @@ public class WangWeiceTest {
         byte[] responseString = manageClient.put().uri("/shops/{shopId}/roles/{id}", 0, 85)
                 .bodyValue(roleJson)
                 .exchange()
-                .expectStatus().isForbidden()
+                .expectStatus().isUnauthorized()
                 .expectBody()
                 .returnResult()
                 .getResponseBodyContent();
@@ -492,7 +480,6 @@ public class WangWeiceTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
     }
@@ -513,7 +500,6 @@ public class WangWeiceTest {
                 .expectStatus().isNotFound()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.RESOURCE_ID_NOTEXIST.getCode())
-                .jsonPath("$.errmsg").isEqualTo("角色id不存在：0")
                 .returnResult()
                 .getResponseBodyContent();
     }
@@ -531,7 +517,7 @@ public class WangWeiceTest {
         byte[] responseString = manageClient.delete().uri("/shops/{shopId}/roles/{id}", 0, 86)
                 .header("authorization", token)
                 .exchange()
-                .expectStatus().isUnauthorized()
+                .expectStatus().isForbidden()
                 .expectBody()
                 .returnResult()
                 .getResponseBodyContent();
@@ -548,7 +534,7 @@ public class WangWeiceTest {
     public void deleteRoleTest4() throws Exception {
         byte[] responseString = manageClient.delete().uri("/shops/{shopId}/roles/{id}", 0, 0)
                 .exchange()
-                .expectStatus().isForbidden()
+                .expectStatus().isUnauthorized()
                 .expectBody()
                 .returnResult()
                 .getResponseBodyContent();
