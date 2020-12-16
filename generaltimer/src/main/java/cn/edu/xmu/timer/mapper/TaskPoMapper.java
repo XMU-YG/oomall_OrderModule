@@ -68,5 +68,4 @@ public interface TaskPoMapper {
      * @mbg.generated
      */
     int updateByPrimaryKey(TaskPo record);
-
 }

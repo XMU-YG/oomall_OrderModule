@@ -27,10 +27,21 @@ public class OrderItemDao {
     @Autowired
     private OrderItemPoMapper orderItemPoMapper;
 
-    public OrderItemPo getOrderItemById(Long id) {
-        return orderItemPoMapper.selectByPrimaryKey(id);
+    public OrderItem getOrderItemById(Long id) {
+        OrderItemPo po=orderItemPoMapper.selectByPrimaryKey(id);
+        if (po!=null){
+            return new OrderItem(po);
+        }
+        return null;
     }
 
+    public OrderItemPo getOrderItemPoById(Long id) {
+        OrderItemPo po=orderItemPoMapper.selectByPrimaryKey(id);
+        if (po!=null){
+            return po;
+        }
+        return null;
+    }
 
     public int updateOrderItem(OrderItemPo orderItemPo) {
         return orderItemPoMapper.updateByPrimaryKey(orderItemPo);

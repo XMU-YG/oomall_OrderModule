@@ -59,7 +59,7 @@ public class WangWeiceTest {
         JSONObject body = new JSONObject();
         body.put("userName", "1111");
         body.put("realName", "11111");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         body.put("birthday", "2020-12-09");
         body.put("mobile", "12332111111");
         body.put("email", "11111@11111.com");
@@ -69,21 +69,19 @@ public class WangWeiceTest {
                 .expectStatus().isCreated()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
-        String expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"1111\",\"name\":\"11111\",\"mobile\":\"12332111111\",\"email\":\"11111@11111.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null},\"errmsg\":\"成功\"}";
+        String expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"1111\",\"name\":\"11111\",\"mobile\":\"12332111111\",\"email\":\"11111@11111.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null}}";
         JSONAssert.assertEquals(expectedResponse, new String(responseString, StandardCharsets.UTF_8), false);
         log.debug("尝试登录");
         body = new JSONObject();
         body.put("userName", "1111");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         requireJson = body.toJSONString();
         responseString = mallClient.post().uri("/users/login").bodyValue(requireJson).exchange()
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
         String token = JSONObject.parseObject(new String(responseString, StandardCharsets.UTF_8)).getString("data");
@@ -99,7 +97,7 @@ public class WangWeiceTest {
         JSONObject body = new JSONObject();
         body.put("userName", "2222");
         body.put("realName", "22222");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         body.put("birthday", "2020-12-09");
         body.put("mobile", "12342112222");
         body.put("email", "22222@22222.com");
@@ -109,16 +107,15 @@ public class WangWeiceTest {
                 .expectStatus().isCreated()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
-        String expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"2222\",\"name\":\"22222\",\"mobile\":\"12342112222\",\"email\":\"22222@22222.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null},\"errmsg\":\"成功\"}";
+        String expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"2222\",\"name\":\"22222\",\"mobile\":\"12342112222\",\"email\":\"22222@22222.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null}}";
         JSONAssert.assertEquals(expectedResponse, new String(responseString, StandardCharsets.UTF_8), false);
         log.debug("尝试再次注册");
         body = new JSONObject();
         body.put("userName", "2222");
         body.put("realName", "222222");
-        body.put("password", "1a2B3c4D2");
+        body.put("password", "1a2B4_");
         body.put("birthday", "2020-12-09");
         body.put("mobile", "12342122222");
         body.put("email", "222222@22222.com");
@@ -128,19 +125,17 @@ public class WangWeiceTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.USER_NAME_REGISTERED.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.USER_NAME_REGISTERED.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
         log.debug("尝试登录");
         body = new JSONObject();
         body.put("userName", "2222");
-        body.put("password", "1a2B3c4D2");
+        body.put("password", "1a2B4_");
         requireJson = body.toJSONString();
         mallClient.post().uri("/users/login").bodyValue(requireJson).exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getMessage());
+                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode());
     }
 
     /**
@@ -153,7 +148,7 @@ public class WangWeiceTest {
         JSONObject body = new JSONObject();
         body.put("userName", "3333");
         body.put("realName", "33333");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         body.put("birthday", "2020-12-09");
         body.put("mobile", "12342113333");
         body.put("email", "33333@33333.com");
@@ -163,16 +158,15 @@ public class WangWeiceTest {
                 .expectStatus().isCreated()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
-        String expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"3333\",\"name\":\"33333\",\"mobile\":\"12342113333\",\"email\":\"33333@33333.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null},\"errmsg\":\"成功\"}";
+        String expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"3333\",\"name\":\"33333\",\"mobile\":\"12342113333\",\"email\":\"33333@33333.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null}}";
         JSONAssert.assertEquals(expectedResponse, new String(responseString, StandardCharsets.UTF_8), false);
         log.debug("尝试再次注册");
         body = new JSONObject();
         body.put("userName", "33333");
         body.put("realName", "333333");
-        body.put("password", "1a2B3c4D3");
+        body.put("password", "1a2B4_");
         body.put("birthday", "2020-12-09");
         body.put("mobile", "12342113333");
         body.put("email", "333333@333333.com");
@@ -182,19 +176,17 @@ public class WangWeiceTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.MOBILE_REGISTERED.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.MOBILE_REGISTERED.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
         log.debug("尝试登录");
         body = new JSONObject();
         body.put("userName", "33333");
-        body.put("password", "1a2B3c4D3");
+        body.put("password", "1a2B4_");
         requireJson = body.toJSONString();
         mallClient.post().uri("/users/login").bodyValue(requireJson).exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getMessage());
+                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode());
     }
 
     /**
@@ -207,7 +199,7 @@ public class WangWeiceTest {
         JSONObject body = new JSONObject();
         body.put("userName", "4444");
         body.put("realName", "44444");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         body.put("birthday", "2020-12-09");
         body.put("mobile", "12342114444");
         body.put("email", "44444@44444.com");
@@ -217,16 +209,15 @@ public class WangWeiceTest {
                 .expectStatus().isCreated()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
-        String expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"4444\",\"name\":\"44444\",\"mobile\":\"12342114444\",\"email\":\"44444@44444.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null},\"errmsg\":\"成功\"}";
+        String expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"4444\",\"name\":\"44444\",\"mobile\":\"12342114444\",\"email\":\"44444@44444.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null}}";
         JSONAssert.assertEquals(expectedResponse, new String(responseString, StandardCharsets.UTF_8), false);
         log.debug("尝试再次注册");
         body = new JSONObject();
         body.put("userName", "44444");
         body.put("realName", "444444");
-        body.put("password", "1a2B3c4D4");
+        body.put("password", "1a2B4_");
         body.put("birthday", "2020-12-09");
         body.put("mobile", "12342444444");
         body.put("email", "44444@44444.com");
@@ -236,19 +227,17 @@ public class WangWeiceTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.EMAIL_REGISTERED.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.EMAIL_REGISTERED.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
         log.debug("尝试登录");
         body = new JSONObject();
         body.put("userName", "44444");
-        body.put("password", "1a2B3c4D4");
+        body.put("password", "1a2B4_");
         requireJson = body.toJSONString();
         mallClient.post().uri("/users/login").bodyValue(requireJson).exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getMessage());
+                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode());
     }
 
     /**
@@ -261,7 +250,7 @@ public class WangWeiceTest {
         JSONObject body = new JSONObject();
         body.put("userName", "");
         body.put("realName", "testR2");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         body.put("birthday", "2020-12-09");
         body.put("mobile", "12332112347");
         body.put("email", "123@321.com");
@@ -271,7 +260,7 @@ public class WangWeiceTest {
         log.debug("尝试登录");
         body = new JSONObject();
         body.put("userName", "");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         requireJson = body.toJSONString();
         mallClient.post().uri("/users/login").bodyValue(requireJson).exchange().expectStatus().isBadRequest();
     }
@@ -286,7 +275,7 @@ public class WangWeiceTest {
         JSONObject body = new JSONObject();
         body.put("userName", "123");
         body.put("realName", "");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         body.put("birthday", "2020-12-09");
         body.put("mobile", "12332112347");
         body.put("email", "123@321.com");
@@ -296,13 +285,12 @@ public class WangWeiceTest {
         log.debug("尝试登录");
         body = new JSONObject();
         body.put("userName", "123");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         requireJson = body.toJSONString();
         mallClient.post().uri("/users/login").bodyValue(requireJson).exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getMessage());
+                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode());
     }
 
     /**
@@ -315,7 +303,7 @@ public class WangWeiceTest {
         JSONObject body = new JSONObject();
         body.put("userName", "123");
         body.put("realName", "");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         body.put("birthday", "2020-12-09");
         body.put("mobile", "12332112347");
         body.put("email", "123@321.com");
@@ -325,13 +313,12 @@ public class WangWeiceTest {
         log.debug("尝试登录");
         body = new JSONObject();
         body.put("userName", "123");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         requireJson = body.toJSONString();
         mallClient.post().uri("/users/login").bodyValue(requireJson).exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getMessage());
+                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode());
     }
 
     /**
@@ -369,7 +356,7 @@ public class WangWeiceTest {
         JSONObject body = new JSONObject();
         body.put("userName", "123");
         body.put("realName", "321");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         body.put("birthday", "");
         body.put("mobile", "12332112347");
         body.put("email", "123@321.com");
@@ -379,13 +366,12 @@ public class WangWeiceTest {
         log.debug("尝试登录");
         body = new JSONObject();
         body.put("userName", "123");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         requireJson = body.toJSONString();
         mallClient.post().uri("/users/login").bodyValue(requireJson).exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getMessage());
+                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode());
     }
 
     /**
@@ -398,7 +384,7 @@ public class WangWeiceTest {
         JSONObject body = new JSONObject();
         body.put("userName", "123");
         body.put("realName", "321");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         body.put("birthday", "2020-12-40");
         body.put("mobile", "12332112347");
         body.put("email", "123@321.com");
@@ -408,13 +394,12 @@ public class WangWeiceTest {
         log.debug("尝试登录");
         body = new JSONObject();
         body.put("userName", "123");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         requireJson = body.toJSONString();
         mallClient.post().uri("/users/login").bodyValue(requireJson).exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getMessage());
+                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode());
     }
 
     /**
@@ -427,7 +412,7 @@ public class WangWeiceTest {
         JSONObject body = new JSONObject();
         body.put("userName", "123");
         body.put("realName", "321");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         body.put("birthday", "2020-12-05");
         body.put("mobile", "");
         body.put("email", "123@321.com");
@@ -437,13 +422,12 @@ public class WangWeiceTest {
         log.debug("尝试登录");
         body = new JSONObject();
         body.put("userName", "123");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         requireJson = body.toJSONString();
         mallClient.post().uri("/users/login").bodyValue(requireJson).exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getMessage());
+                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode());
     }
 
     /**
@@ -456,7 +440,7 @@ public class WangWeiceTest {
         JSONObject body = new JSONObject();
         body.put("userName", "123");
         body.put("realName", "321");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         body.put("birthday", "2020-12-05");
         body.put("mobile", "1234567891011");
         body.put("email", "123@321.com");
@@ -466,13 +450,12 @@ public class WangWeiceTest {
         log.debug("尝试登录");
         body = new JSONObject();
         body.put("userName", "123");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         requireJson = body.toJSONString();
         mallClient.post().uri("/users/login").bodyValue(requireJson).exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getMessage());
+                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode());
     }
 
     /**
@@ -485,7 +468,7 @@ public class WangWeiceTest {
         JSONObject body = new JSONObject();
         body.put("userName", "123");
         body.put("realName", "321");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         body.put("birthday", "2020-12-05");
         body.put("mobile", "12345678910");
         body.put("email", "");
@@ -495,13 +478,12 @@ public class WangWeiceTest {
         log.debug("尝试登录");
         body = new JSONObject();
         body.put("userName", "123");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         requireJson = body.toJSONString();
         mallClient.post().uri("/users/login").bodyValue(requireJson).exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getMessage());
+                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode());
     }
 
     /**
@@ -514,7 +496,7 @@ public class WangWeiceTest {
         JSONObject body = new JSONObject();
         body.put("userName", "123");
         body.put("realName", "321");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         body.put("birthday", "2020-12-05");
         body.put("mobile", "12345678910");
         body.put("email", "123#321.com");
@@ -524,13 +506,12 @@ public class WangWeiceTest {
         log.debug("尝试登录");
         body = new JSONObject();
         body.put("userName", "123");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         requireJson = body.toJSONString();
         mallClient.post().uri("/users/login").bodyValue(requireJson).exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getMessage());
+                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode());
     }
 
     /**
@@ -543,7 +524,7 @@ public class WangWeiceTest {
         JSONObject body = new JSONObject();
         body.put("userName", "123");
         body.put("realName", "321");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         body.put("birthday", "2020-12-05");
         body.put("mobile", "12345678910");
         body.put("email", "123@321.com");
@@ -553,13 +534,12 @@ public class WangWeiceTest {
         log.debug("尝试登录");
         body = new JSONObject();
         body.put("userName", "123");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         requireJson = body.toJSONString();
         mallClient.post().uri("/users/login").bodyValue(requireJson).exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getMessage());
+                .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode());
     }
 
     /**
@@ -572,7 +552,7 @@ public class WangWeiceTest {
         JSONObject body = new JSONObject();
         body.put("userName", "1616");
         body.put("realName", "161616");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         body.put("birthday", "2020-12-09");
         body.put("mobile", "12332116161");
         body.put("email", "1616@1616.com");
@@ -582,10 +562,9 @@ public class WangWeiceTest {
                 .expectStatus().isCreated()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
-        String expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"1616\",\"name\":\"161616\",\"mobile\":\"12332116161\",\"email\":\"1616@1616.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null},\"errmsg\":\"成功\"}";
+        String expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"1616\",\"name\":\"161616\",\"mobile\":\"12332116161\",\"email\":\"1616@1616.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null}}";
         JSONAssert.assertEquals(expectedResponse, new String(responseString, StandardCharsets.UTF_8), false);
         log.debug("尝试登录");
         body = new JSONObject();
@@ -596,7 +575,6 @@ public class WangWeiceTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.AUTH_INVALID_ACCOUNT.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
     }
@@ -611,7 +589,7 @@ public class WangWeiceTest {
         JSONObject body = new JSONObject();
         body.put("userName", "1717");
         body.put("realName", "171717");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         body.put("birthday", "2020-12-09");
         body.put("mobile", "12332117171");
         body.put("email", "1717@1717.com");
@@ -621,21 +599,19 @@ public class WangWeiceTest {
                 .expectStatus().isCreated()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
-        String expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"1717\",\"name\":\"171717\",\"mobile\":\"12332117171\",\"email\":\"1717@1717.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null},\"errmsg\":\"成功\"}";
+        String expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"1717\",\"name\":\"171717\",\"mobile\":\"12332117171\",\"email\":\"1717@1717.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null}}";
         JSONAssert.assertEquals(expectedResponse, new String(responseString, StandardCharsets.UTF_8), false);
         log.debug("尝试登录");
         body = new JSONObject();
         body.put("userName", "1717");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         requireJson = body.toJSONString();
         responseString = mallClient.post().uri("/users/login").bodyValue(requireJson).exchange()
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
         String token = JSONObject.parseObject(new String(responseString, StandardCharsets.UTF_8)).getString("data");
@@ -651,7 +627,7 @@ public class WangWeiceTest {
         JSONObject body = new JSONObject();
         body.put("userName", "testU");
         body.put("realName", "testR");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         body.put("birthday", "2020-12-09");
         body.put("mobile", "12332112345");
         body.put("email", "123@321.com");
@@ -661,21 +637,19 @@ public class WangWeiceTest {
                 .expectStatus().isCreated()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
-        String expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"testU\",\"name\":\"testR\",\"mobile\":\"12332112345\",\"email\":\"123@321.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null},\"errmsg\":\"成功\"}";
+        String expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"testU\",\"name\":\"testR\",\"mobile\":\"12332112345\",\"email\":\"123@321.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null}}";
         JSONAssert.assertEquals(expectedResponse, new String(responseString, StandardCharsets.UTF_8), false);
         log.debug("尝试登录");
         body = new JSONObject();
         body.put("userName", "testU");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         requireJson = body.toJSONString();
         responseString = mallClient.post().uri("/users/login").bodyValue(requireJson).exchange()
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
         String token = JSONObject.parseObject(new String(responseString, StandardCharsets.UTF_8)).getString("data");
@@ -683,10 +657,9 @@ public class WangWeiceTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
-        expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"testU\",\"name\":\"testR\",\"mobile\":\"12332112345\",\"email\":\"123@321.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null},\"errmsg\":\"成功\"}";
+        expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"testU\",\"name\":\"testR\",\"mobile\":\"12332112345\",\"email\":\"123@321.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null}}";
         JSONAssert.assertEquals(expectedResponse, new String(responseString, StandardCharsets.UTF_8), false);
     }
 
@@ -715,7 +688,7 @@ public class WangWeiceTest {
         JSONObject body = new JSONObject();
         body.put("userName", "testU20");
         body.put("realName", "testR20");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         body.put("birthday", "2020-12-09");
         body.put("mobile", "12332112320");
         body.put("email", "2020@2020.com");
@@ -725,21 +698,19 @@ public class WangWeiceTest {
                 .expectStatus().isCreated()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
-        String expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"testU20\",\"name\":\"testR20\",\"mobile\":\"12332112320\",\"email\":\"2020@2020.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null},\"errmsg\":\"成功\"}";
+        String expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"testU20\",\"name\":\"testR20\",\"mobile\":\"12332112320\",\"email\":\"2020@2020.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null}}";
         JSONAssert.assertEquals(expectedResponse, new String(responseString, StandardCharsets.UTF_8), false);
         log.debug("尝试登录");
         body = new JSONObject();
         body.put("userName", "testU20");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         requireJson = body.toJSONString();
         responseString = mallClient.post().uri("/users/login").bodyValue(requireJson).exchange()
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
         String token = JSONObject.parseObject(new String(responseString, StandardCharsets.UTF_8)).getString("data");
@@ -747,10 +718,9 @@ public class WangWeiceTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
-        expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"testU20\",\"name\":\"testR20\",\"mobile\":\"12332112320\",\"email\":\"2020@2020.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null},\"errmsg\":\"成功\"}";
+        expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"testU20\",\"name\":\"testR20\",\"mobile\":\"12332112320\",\"email\":\"2020@2020.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null}}";
         JSONAssert.assertEquals(expectedResponse, new String(responseString, StandardCharsets.UTF_8), false);
         mallClient.get().uri("/users/logout").header("authorization", token).exchange()
                 .expectStatus().isOk()
@@ -771,7 +741,7 @@ public class WangWeiceTest {
         JSONObject body = new JSONObject();
         body.put("userName", "testU21");
         body.put("realName", "testR21");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         body.put("birthday", "2020-12-09");
         body.put("mobile", "12332112321");
         body.put("email", "2121@2121.com");
@@ -781,21 +751,19 @@ public class WangWeiceTest {
                 .expectStatus().isCreated()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
-        String expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"testU21\",\"name\":\"testR21\",\"mobile\":\"12332112321\",\"email\":\"2121@2121.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null},\"errmsg\":\"成功\"}";
+        String expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"testU21\",\"name\":\"testR21\",\"mobile\":\"12332112321\",\"email\":\"2121@2121.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null}}";
         JSONAssert.assertEquals(expectedResponse, new String(responseString, StandardCharsets.UTF_8), false);
         log.debug("尝试登录");
         body = new JSONObject();
         body.put("userName", "testU21");
-        body.put("password", "1a2B3c4D");
+        body.put("password", "1a2B3_");
         requireJson = body.toJSONString();
         responseString = mallClient.post().uri("/users/login").bodyValue(requireJson).exchange()
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
         String token = JSONObject.parseObject(new String(responseString, StandardCharsets.UTF_8)).getString("data");
@@ -803,16 +771,14 @@ public class WangWeiceTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
-        expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"testU21\",\"name\":\"testR21\",\"mobile\":\"12332112321\",\"email\":\"2121@2121.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null},\"errmsg\":\"成功\"}";
+        expectedResponse = "{\"errno\":0,\"data\":{\"userName\":\"testU21\",\"name\":\"testR21\",\"mobile\":\"12332112321\",\"email\":\"2121@2121.com\",\"gender\":0,\"birthday\":\"2020-12-09\",\"state\":4,\"gmtModified\":null}}";
         JSONAssert.assertEquals(expectedResponse, new String(responseString, StandardCharsets.UTF_8), false);
         mallClient.get().uri("/users/logout").header("authorization", token).exchange()
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.errno").isEqualTo(ResponseCode.OK.getCode())
-                .jsonPath("$.errmsg").isEqualTo(ResponseCode.OK.getMessage())
                 .returnResult()
                 .getResponseBodyContent();
         mallClient.get().uri("/users").header("authorization", token).exchange().expectStatus().isUnauthorized();

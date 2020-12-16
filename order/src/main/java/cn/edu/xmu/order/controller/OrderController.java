@@ -92,7 +92,7 @@ public class OrderController {
             ret=Common.getRetObject(object);
         }
         else{
-            ret=Common.decorateReturnObject(object);
+            ret=Common.getNullRetObj(object,httpServletResponse);
         }
         return ret;
 
@@ -177,13 +177,13 @@ public class OrderController {
     @GetMapping("orders/{id}")
     public Object getSelfOrderById(@ApiIgnore @LoginUser Long customerId, @PathVariable Long id){
         Object ret=null;
-        ReturnObject<VoObject> object=orderService.getCusOrderById(customerId,id);
+        ReturnObject object=orderService.getCusOrderById(customerId,id);
         logger.debug("customer getOrderById: orderId : "+id+"   customerId:  "+customerId);
         if (object.getCode().equals(ResponseCode.OK)){
             ret=Common.getRetObject(object);
         }
         else{
-            ret=ResponseUtil.fail(object.getCode(),object.getErrmsg());
+            ret=Common.getNullRetObj(object,httpServletResponse);
         }
         return ret;
     }
@@ -217,11 +217,13 @@ public class OrderController {
         logger.debug("modifySelfOrderAddressById:  customerId: "+customerId+"  orderId: "+orderId+"   vo:  "+vo.toString());
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+
         if (null != returnObject) {
             return returnObject;
         }
         Object ret=null;
         ReturnObject object=orderService.modifySelfOrderAddressById(customerId,orderId,vo);
+        System.out.println("***");
         ret=Common.getNullRetObj(object,httpServletResponse);
         return ret;
 
@@ -242,7 +244,7 @@ public class OrderController {
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
-            @ApiResponse(code = 800, message = "订单状态禁止"),
+            @ApiResponse(code = 801, message = "订单状态禁止"),
             @ApiResponse(code = 504, message = "订单号不存在"),
             @ApiResponse(code = 505, message = "该订单无权访问"),
 
@@ -308,7 +310,13 @@ public class OrderController {
         Object ret=null;
         logger.debug("translate groupon order to normal order. customerId: "+customerId+"  orderId: "+id);
         ReturnObject object=orderService.translateGroToNor(customerId,id);
-        ret=Common.getNullRetObj(object,httpServletResponse);
+        if (object.getCode().equals(ResponseCode.OK)){
+            httpServletResponse.setStatus(201);
+            ret=ResponseUtil.ok();
+        }
+        else{
+            ret=Common.getNullRetObj(object,httpServletResponse);
+        }
         return ret;
     }
 
@@ -397,14 +405,14 @@ public class OrderController {
     public Object getShopSelfOrder(@PathVariable(name = "shopId") Long shopId, @PathVariable(name = "id") Long id){
         Object ret=null;
         logger.debug("shop getOrderById: orderId : "+id+"   shopId:  "+shopId);
-        ReturnObject<VoObject> object=orderService.getShopSelfOrder(shopId,id);
+        ReturnObject object=orderService.getShopSelfOrder(shopId,id);
 
         System.out.println(object.getCode()+"   ***");
         if (object.getCode().equals(ResponseCode.OK)){
             ret=Common.getRetObject(object);
         }
         else{
-            ret=ResponseUtil.fail(object.getCode(),object.getErrmsg());
+            ret=Common.getNullRetObj(object,httpServletResponse);
         }
         return ret;
     }
@@ -438,7 +446,7 @@ public class OrderController {
         }
         else{
             ReturnObject object=orderService.modifyOrderMessage(shopId,orderId,message);
-            ret=Common.decorateReturnObject(object);
+            ret=Common.getNullRetObj(object,httpServletResponse);
         }
         return ret;
     }

@@ -70,7 +70,7 @@
       <include refid="Example_Where_Clause" />
     </if>
     <if test="orderByClause != null">
-      cn.edu.xmu.ooad.order by ${orderByClause}
+      order by ${orderByClause}
     </if>
   </select>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">

@@ -4,6 +4,7 @@ import cn.edu.xmu.ooad.Application;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.oomall.LoginVo;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,14 +36,16 @@ public class PrivilegeTest1 {
 
     private String token = "";
 
-    public PrivilegeTest1(){
+    @BeforeEach
+    public void setUp(){
+
         this.manageClient = WebTestClient.bindToServer()
-                .baseUrl(managementGate)
+                .baseUrl("http://"+managementGate)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
                 .build();
 
         this.mallClient = WebTestClient.bindToServer()
-                .baseUrl(mallGate)
+                .baseUrl("http://"+mallGate)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8")
                 .build();
     }

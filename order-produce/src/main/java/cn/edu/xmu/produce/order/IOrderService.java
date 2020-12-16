@@ -1,5 +1,7 @@
 package cn.edu.xmu.produce.order;
 
+import cn.edu.xmu.produce.order.model.OtherOrder;
+
 import java.util.List;
 
 /**
@@ -36,5 +38,7 @@ public interface IOrderService {
     public String createAfterSaleOrder(Long shopId, String orderVoJson);
 
     public void classifyOrder(Long orderId);
+
+    public OtherOrder getOrderDTOForOther(Long orderItemId);
 
 }

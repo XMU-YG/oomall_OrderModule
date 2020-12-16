@@ -1,0 +1,51 @@
+{
+  "errno": 0,
+  "data": {
+    "id": 39,
+    "customer": {
+      "customerId": 3,
+      "customerUserName": null,
+      "customerRealName": null
+    },
+    "shop": {
+      "shopId": null,
+      "shopName": null,
+      "state": null,
+      "shopGmtCreate": null,
+      "shopGmtModified": null
+    },
+    "orderSn": "2016102365897",
+    "pid": null,
+    "consignee": "yg",
+    "regionId": 1,
+    "address": "xmu",
+    "mobile": "123",
+    "message": null,
+    "orderType": null,
+    "freightPrice": null,
+    "couponId": null,
+    "discountPrice": null,
+    "originPrice": null,
+    "presaleId": null,
+    "grouponDiscount": null,
+    "rebateNum": null,
+    "confirmTime": null,
+    "shipmentSn": null,
+    "state": 6,
+    "substate": null,
+
+    "orderItems": [
+      {
+        "goods_sku_id": 341,
+        "quantity": 1,
+        "order_id": 39,
+        "price": 0,
+        "discount": null,
+        "name": null,
+        "coupon_activity_id": null,
+        "be_share_id": null
+      }
+    ]
+  },
+  "errmsg": "成功"
+}

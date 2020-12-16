@@ -1,14 +1,15 @@
 package cn.edu.xmu.order.service.impl;
 
+import cn.edu.xmu.produce.order.IOrderService;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.order.service.OrderService;
-import cn.edu.xmu.produce.order.IOrderService;
+import cn.edu.xmu.produce.order.model.OtherOrder;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-@DubboService(version ="1.0-SNAPSHOT") // 注意这里的Serivce引用的是dubbo的包
+@DubboService(version ="0.0.1") // 注意这里的Serivce引用的是dubbo的包
 public class IOrderServiceImpl implements IOrderService {
 
     @Autowired
@@ -42,5 +43,10 @@ public class IOrderServiceImpl implements IOrderService {
     @Override
     public void classifyOrder(Long orderId) {
         orderService.classifyOrder(orderId);
+    }
+
+    @Override
+    public OtherOrder getOrderDTOForOther(Long orderItemId) {
+        return orderService.getOrderDTOForOther(orderItemId);
     }
 }

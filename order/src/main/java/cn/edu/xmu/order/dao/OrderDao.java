@@ -139,11 +139,11 @@ public class OrderDao {
             return  new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
         }
         if (orderPo==null||orderPo.getBeDeleted()== 1){
-            logger.debug("customer getOrderById error: it's empty!  orderId:  "+orderId);
+            logger.debug("getOrderById error: it's empty!  orderId:  "+orderId);
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单号不存在");
 
         }
-        logger.debug("customer getOrderById success！  orderId:  "+orderId);
+        logger.debug("getOrderById success！  orderId:  "+orderId);
         Order order=new Order(orderPo);
         orderReturnObject=new ReturnObject<>(order);
         return orderReturnObject;
@@ -174,7 +174,7 @@ public class OrderDao {
         else if(orderPo.getCustomerId().equals(customerId)){
             if (orderPo.getState()!=OrderStatus.CANCELED.getCode()
                     &&orderPo.getState()!=OrderStatus.FINISHED.getCode()
-                    &&orderPo.getSubstate()!=OrderStatus.SHIPPED.getCode()){  //未发货前都可以修改
+                    &&(orderPo.getSubstate()==null||orderPo.getSubstate()!=OrderStatus.SHIPPED.getCode())){  //未发货前都可以修改
                 logger.debug("customer modifySelfOrderAddressById success！  orderId:  "+orderId+"   customerId:  "+customerId);
                 orderPo.setRegionId(vo.getRegionId());
                 orderPo.setAddress(vo.getAddress());
@@ -279,6 +279,7 @@ public class OrderDao {
             if (orderPo.getState()==OrderStatus.WAIT_FOR_RECEIVE.getCode()){  //为待收货
                 logger.debug("customer confirmSelfOrderById success！  orderId:  "+orderId+"   customerId:  "+customerId);
                 orderPo.setGmtModified(LocalDateTime.now());
+                orderPo.setConfirmTime(LocalDateTime.now());
                 orderPo.setState((byte)OrderStatus.FINISHED.getCode());//已收货
                 orderPo.setSubstate(null);
                 orderPoMapper.updateByPrimaryKey(orderPo);
