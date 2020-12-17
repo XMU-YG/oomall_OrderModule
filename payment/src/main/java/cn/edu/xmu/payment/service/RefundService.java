@@ -4,14 +4,14 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 
+import cn.edu.xmu.order_provider.IOrderService;
+import cn.edu.xmu.order_provider.other.IPOtherService;
 import cn.edu.xmu.payment.dao.PaymentDao;
 import cn.edu.xmu.payment.dao.RefundDao;
 import cn.edu.xmu.payment.model.bo.Payment;
 import cn.edu.xmu.payment.model.bo.Refund;
 import cn.edu.xmu.payment.model.vo.NewRefundVo;
 
-import cn.edu.xmu.produce.order.IPOrderService;
-import cn.edu.xmu.produce.other.IPOtherService;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ public class RefundService {
     private PaymentDao paymentDao;
 
     @DubboReference(version ="1.0-SNAPSHOT")
-    private IPOrderService orderService;
+    private IOrderService orderService;
 
     @DubboReference(version="1.0-SNAPSHOT")
     private IPOtherService otherService;
@@ -51,7 +51,8 @@ public class RefundService {
         ReturnObject<VoObject> returnObject=null;
 
         //check=1 属于 check=0 不属于 check=-1 不存在
-       String checkBelong=orderService.checkShopOrder(shopId,orderId);
+        String checkBelong=orderService.checkShopOrder(shopId,orderId);
+        //String checkBelong="1";
 
         if(checkBelong.equals("-1")){
             returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单不存在");
@@ -73,6 +74,7 @@ public class RefundService {
         ReturnObject<VoObject> returnObject=null;
         //check=1 属于 check=0 资源不存在 check=-1 不属于
         String checkBelong=otherService.checkShopAftersale(shopId,aftersaleId);
+        // String checkBelong="1";
 
         if(checkBelong.equals("-1")){
             returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"售后单不存在");
@@ -95,6 +97,8 @@ public class RefundService {
         //check=1 属于 check=0 资源不存在 check=-1 不属于
         String checkBelong=orderService.checkUserOrder(userId,orderId);
 
+        // String checkBelong="1";
+
         if(checkBelong.equals("-1")){
             returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单不存在");
         }else if(checkBelong.equals("0")){
@@ -115,7 +119,8 @@ public class RefundService {
         ReturnObject<VoObject> returnObject=null;
 
         //check=1 属于 check=0 资源不存在 check=-1 不属于
-        String checkBelong=otherService.checkUserAftersale(userId,aftersaleId);
+       String checkBelong=otherService.checkUserAftersale(userId,aftersaleId);
+        //String checkBelong="1";
 
         if(checkBelong.equals("-1")){
             returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"售后单不存在");
@@ -145,7 +150,6 @@ public class RefundService {
             //若支付orderId不为空，则支付为订单支付，验证订单和店铺的关系；若支付aftersalId不为空，则支付为售后支付
             if(payment.getOrderId()!=null){
                 String checkBelong=orderService.checkShopOrder(shopId,payment.getOrderId());
-
 
                 if(checkBelong.equals("-1")){
                   return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单不存在");
