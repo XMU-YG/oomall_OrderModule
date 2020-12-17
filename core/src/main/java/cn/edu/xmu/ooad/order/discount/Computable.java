@@ -1,6 +1,6 @@
 package cn.edu.xmu.ooad.order.discount;
 
-import cn.edu.xmu.ooad.order.bo.OrderItem;
+import cn.edu.xmu.ooad.order.bo.COrderItem;
 
 import java.util.List;
 
@@ -10,5 +10,5 @@ import java.util.List;
  */
 public interface Computable {
 
-	List<OrderItem> compute(List<OrderItem> orderItems);
+	List<COrderItem> compute(List<COrderItem> COrderItems);
 }

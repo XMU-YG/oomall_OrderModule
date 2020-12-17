@@ -43,7 +43,7 @@ public class Order {
 	private Integer state;
 	private Integer subState;
 	private Integer beDeleted;
-	private List<OrderItem> orderItems;
+	private List<COrderItem> COrderItems;
 	private LocalDateTime gmtCreated;
 	private LocalDateTime gmtModified;
 }

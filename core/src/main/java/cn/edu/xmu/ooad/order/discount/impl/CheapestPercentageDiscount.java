@@ -1,6 +1,6 @@
 package cn.edu.xmu.ooad.order.discount.impl;
 
-import cn.edu.xmu.ooad.order.bo.OrderItem;
+import cn.edu.xmu.ooad.order.bo.COrderItem;
 import cn.edu.xmu.ooad.order.discount.BaseCouponDiscount;
 import cn.edu.xmu.ooad.order.discount.BaseCouponLimitation;
 
@@ -17,20 +17,20 @@ public class CheapestPercentageDiscount extends BaseCouponDiscount {
 	}
 
 	@Override
-	public void calcAndSetDiscount(List<OrderItem> orderItems) {
+	public void calcAndSetDiscount(List<COrderItem> COrderItems) {
 		int min = Integer.MAX_VALUE;
 		int total = 0;
-		for (int i = 0; i < orderItems.size(); i++) {
-			OrderItem oi = orderItems.get(i);
+		for (int i = 0; i < COrderItems.size(); i++) {
+			COrderItem oi = COrderItems.get(i);
 			total += oi.getPrice() * oi.getQuantity();
 			if (oi.getPrice() < min) {
 				min = i;
 			}
 		}
 
-		long discount = (long) ((1.0 * value / 100) * orderItems.get(min).getPrice());
+		long discount = (long) ((1.0 * value / 100) * COrderItems.get(min).getPrice());
 
-		for (OrderItem oi : orderItems) {
+		for (COrderItem oi : COrderItems) {
 			oi.setDiscount((long) ((1.0 * oi.getPrice() * oi.getQuantity()) / total * discount / oi.getQuantity()));
 		}
 	}

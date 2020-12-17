@@ -1,0 +1,19 @@
+{
+  "errno": 0,
+  "data": {
+    "id": 998887778999,
+    "customer": {
+      "customerId": 520123
+    },
+    "orderSn": "20161023ooooo",
+    "pid": null,
+    "consignee": "yg",
+    "regionId": 1,
+    "address": "xmu",
+    "mobile": "123456",
+    "message": null,
+    "state": 1,
+    "substate": 11
+
+  }
+}

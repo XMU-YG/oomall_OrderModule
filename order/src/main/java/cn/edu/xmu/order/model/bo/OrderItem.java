@@ -34,6 +34,10 @@ public class OrderItem implements VoObject {
         this.quantity=orderItemPo.getQuantity();
     }
 
+    public OrderItem() {
+
+    }
+
 
     @Override
     public Object createVo() {

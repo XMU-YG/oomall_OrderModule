@@ -9,15 +9,11 @@ import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.order.factory.PostOrderFactory;
 import cn.edu.xmu.order.model.vo.AddressVo;
-
 import cn.edu.xmu.order.model.vo.StateRetVo;
 import cn.edu.xmu.order.service.OrderService;
-
 import cn.edu.xmu.order.util.OrderStatus;
-
 import cn.edu.xmu.order.model.vo.OrderVo;
 import cn.edu.xmu.order.util.PostOrderService;
-
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
@@ -38,7 +34,7 @@ import java.util.List;
 
 @Api(value = "商城订单服务", tags = "oomall")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(value = "/order", produces = "application/json;charset=UTF-8")
+@RequestMapping(produces = "application/json;charset=UTF-8")
 public class OrderController {
     private  static  final Logger logger = LoggerFactory.getLogger(OrderController.class);
 
@@ -84,7 +80,7 @@ public class OrderController {
         Object ret=null;
 
         PostOrderService postOrderService=postOrderFactory.createService(orderInfo);
-        System.out.println("***"+postOrderService.toString()+"   ");
+        //System.out.println("***"+postOrderService.toString()+"   ");
         logger.debug("addNewOrder.  customerId: "+customerId);
         ReturnObject object=postOrderService.addNewOrderByCustomer(customerId,orderInfo);
 
@@ -119,38 +115,38 @@ public class OrderController {
             @ApiImplicitParam(name="state", value="订单状态", required = false, dataType="int", paramType="query"),
             @ApiImplicitParam(name="beginTime", value="订单开始时间", required = false, dataType="String", paramType="query"),
             @ApiImplicitParam(name="endTime", value="订单结束时间", required = false, dataType="String", paramType="query"),
-            @ApiImplicitParam(name="page", value="页码", required = true, dataType="int", paramType="query"),
-            @ApiImplicitParam(name="pageSize", value="分页大小", required = true, dataType="int", paramType="query"),
+            @ApiImplicitParam(name="page", value="页码", required = false, dataType="int", paramType="query"),
+            @ApiImplicitParam(name="pageSize", value="分页大小", required = false, dataType="int", paramType="query"),
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
     @Audit
     @GetMapping("orders")
-    public Object getALLSimpleOrders(@ApiIgnore @LoginUser Long customerId, @RequestParam(required = false) String orderSn, @RequestParam(required = false) Integer state, @RequestParam(required = false) String beginTime, @RequestParam(required = false) String endTime, @RequestParam Integer page, @RequestParam Integer pageSize){
+    public Object getALLSimpleOrders(@ApiIgnore @LoginUser Long customerId, @RequestParam(required = false) String orderSn, @RequestParam(required = false) Integer state, @RequestParam(required = false) String beginTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer pageSize){
 
         Object ret=null;
-        if (page<=0||pageSize<=0){
-            ret=Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
-        }else{
-            LocalDateTime begin=null,end=null;
-            if (beginTime!=null){
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                begin=LocalDateTime.parse(beginTime,dateTimeFormatter);
-            }
-            if (endTime!=null){
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                end=LocalDateTime.parse(endTime,dateTimeFormatter);
-            }
-            logger.debug("getAllSimpleOrders: customerId : "+customerId);
-            ReturnObject<PageInfo<VoObject>> object=orderService.getAllSimpleOrders(customerId,orderSn,state,begin,end,page,pageSize);
-            if (object.getCode().equals(ResponseCode.OK)){
-                ret=Common.getPageRetObject(object);
-            }
-            else{
-                ret=Common.getNullRetObj(new ReturnObject<>(object),httpServletResponse);
-            }
+        page=page<=0?1:page;
+        pageSize=pageSize<=0?10:pageSize;
+
+        LocalDateTime begin=null,end=null;
+        if (beginTime!=null){
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            begin=LocalDateTime.parse(beginTime,dateTimeFormatter);
         }
+        if (endTime!=null){
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            end=LocalDateTime.parse(endTime,dateTimeFormatter);
+        }
+        logger.debug("getAllSimpleOrders: customerId : "+customerId);
+        ReturnObject<PageInfo<VoObject>> object=orderService.getAllSimpleOrders(customerId,orderSn,state,begin,end,page,pageSize);
+        if (object.getCode().equals(ResponseCode.OK)){
+            ret=Common.getPageRetObject(object);
+        }
+        else{
+            ret=Common.getNullRetObj(new ReturnObject<>(object),httpServletResponse);
+        }
+
         return ret;
     }
 
@@ -466,7 +462,7 @@ public class OrderController {
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
-            @ApiResponse(code = 800, message = "订单状态禁止"),
+            @ApiResponse(code = 801, message = "订单状态禁止"),
             @ApiResponse(code = 504, message = "订单号不存在"),
             @ApiResponse(code = 505, message = "该订单无权访问"),
 

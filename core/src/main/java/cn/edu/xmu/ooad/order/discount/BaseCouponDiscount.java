@@ -1,6 +1,6 @@
 package cn.edu.xmu.ooad.order.discount;
 
-import cn.edu.xmu.ooad.order.bo.OrderItem;
+import cn.edu.xmu.ooad.order.bo.COrderItem;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,20 +33,20 @@ public abstract class BaseCouponDiscount implements Computable, JsonSerializable
 	protected BaseCouponLimitation couponLimitation;
 
 	@Override
-	public List<OrderItem> compute(List<OrderItem> orderItems) {
-		if (!couponLimitation.pass(orderItems)) {
-			for (OrderItem oi : orderItems) {
+	public List<COrderItem> compute(List<COrderItem> COrderItems) {
+		if (!couponLimitation.pass(COrderItems)) {
+			for (COrderItem oi : COrderItems) {
 				oi.setCouponActivityId(null);
 			}
-			return orderItems;
+			return COrderItems;
 		}
 
-		calcAndSetDiscount(orderItems);
+		calcAndSetDiscount(COrderItems);
 
-		return orderItems;
+		return COrderItems;
 	}
 
-	public abstract void calcAndSetDiscount(List<OrderItem> orderItems);
+	public abstract void calcAndSetDiscount(List<COrderItem> COrderItems);
 
 	@Override
 	public String toJsonString() throws JsonProcessingException {

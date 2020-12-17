@@ -1,6 +1,6 @@
 package cn.edu.xmu.ooad.order.discount.impl;
 
-import cn.edu.xmu.ooad.order.bo.OrderItem;
+import cn.edu.xmu.ooad.order.bo.COrderItem;
 import cn.edu.xmu.ooad.order.discount.BaseCouponLimitation;
 
 import java.util.List;
@@ -18,9 +18,9 @@ public class AmountCouponLimitation extends BaseCouponLimitation {
 	}
 
 	@Override
-	public boolean pass(List<OrderItem> orderItems) {
+	public boolean pass(List<COrderItem> COrderItems) {
 		long t = 0;
-		for (OrderItem oi : orderItems) {
+		for (COrderItem oi : COrderItems) {
 			t += oi.getQuantity();
 		}
 		return t >= value;

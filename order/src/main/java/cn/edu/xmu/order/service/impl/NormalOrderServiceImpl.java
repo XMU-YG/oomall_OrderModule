@@ -4,7 +4,8 @@ import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.produce.goods.modol.OrderGoods;
+import cn.edu.xmu.order_provider.IFreightService;
+import cn.edu.xmu.order_provider.goods.modol.OrderGoods;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrderPo;
 import cn.edu.xmu.order.model.vo.OrderVo;
@@ -14,9 +15,8 @@ import cn.edu.xmu.order.service.time.TimeService;
 import cn.edu.xmu.order.util.OrderStatus;
 import cn.edu.xmu.order.util.OrderType;
 import cn.edu.xmu.order.util.PostOrderService;
-import cn.edu.xmu.produce.freight.IFreightService;
-import cn.edu.xmu.produce.goods.IGoodsService;
-import cn.edu.xmu.produce.other.IOtherService;
+import cn.edu.xmu.order_provider.goods.IGoodsService;
+import cn.edu.xmu.order_provider.other.IOtherService;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -97,7 +97,7 @@ public class NormalOrderServiceImpl implements PostOrderService {
             goodsMap.put(orderItemPo.getGoodsSkuId(),orderItemPo.getQuantity());
         }
         //处理购买的普通商品：扣库存
-        ReturnObject nor=orderService.disposeNorGoodsList(norGoodsArrayList,OrderType.NORMAL.getCode());
+        ReturnObject nor=orderService.disposeNorGoodsList(norGoodsArrayList,"NorOrderService");
         //处理购买的秒杀商品：扣库存
         ReturnObject sec=orderService.disposeSecGoodsList(secGoodsArrayList);
         if (!nor.getCode().equals(ResponseCode.OK)||!sec.getCode().equals(ResponseCode.OK)){
@@ -142,6 +142,11 @@ public class NormalOrderServiceImpl implements PostOrderService {
         }
 
         return returnObject;
+    }
+
+    @Override
+    public boolean deductStock(Long skuId, Integer quantity) {
+        return goodsService.deductNorStock(skuId, quantity);
     }
 
 

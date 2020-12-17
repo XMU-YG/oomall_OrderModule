@@ -507,7 +507,7 @@ public class OrderDao {
                 logger.debug("deliverShopOrder success！  orderId:  "+orderId+"   shopId:  "+shopId);
                 orderPo.setGmtModified(LocalDateTime.now());
                 orderPo.setShipmentSn(freightSn);
-                orderPo.setSubstate((byte)OrderStatus.WAIT_FOR_RECEIVE.getCode());//已发货
+                orderPo.setSubstate((byte)OrderStatus.SHIPPED.getCode());//已发货
                 orderPoMapper.updateByPrimaryKeySelective(orderPo);
                 orderReturnObject=new ReturnObject(ResponseCode.OK,"订单发货成功");
                 return orderReturnObject;

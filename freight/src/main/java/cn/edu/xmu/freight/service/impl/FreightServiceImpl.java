@@ -4,7 +4,7 @@ package cn.edu.xmu.freight.service.impl;
 import cn.edu.xmu.freight.model.vo.ItemsVo;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.freight.service.FreightService;
-import cn.edu.xmu.produce.freight.IFFreightService;
+import cn.edu.xmu.order_provider.IFreightService;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @DubboService(version ="1.0-SNAPSHOT") // 注意这里的Serivce引用的是dubbo的包
-public class FreightServiceImpl implements IFFreightService {
+public class FreightServiceImpl implements IFreightService {
     @Autowired
     private FreightService freightService;
 

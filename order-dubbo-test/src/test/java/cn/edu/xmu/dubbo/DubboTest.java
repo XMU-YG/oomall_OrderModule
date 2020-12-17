@@ -1,6 +1,6 @@
 package cn.edu.xmu.dubbo;
 
-import cn.edu.xmu.produce.order.IOrderService;
+import cn.edu.xmu.order_provider.IOrderService;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.junit.jupiter.api.Test;

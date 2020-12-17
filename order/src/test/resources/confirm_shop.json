@@ -1,0 +1,14 @@
+{
+  "errno": 0,
+  "data": {
+    "id": 9999999999,
+    "shop": {
+      "shopId": 131499560
+    },
+    "orderSn": "201610236124zz",
+    "consignee": "刘将将",
+    "shipmentSn": "111133333",
+    "state": 2,
+    "substate": 24
+  }
+}

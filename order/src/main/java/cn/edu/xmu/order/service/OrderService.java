@@ -2,6 +2,7 @@ package cn.edu.xmu.order.service;
 
 import cn.edu.xmu.ooad.model.VoObject;
 
+import cn.edu.xmu.ooad.order.bo.COrderItem;
 import cn.edu.xmu.ooad.order.discount.BaseCouponDiscount;
 import cn.edu.xmu.ooad.order.discount.BaseCouponLimitation;
 import cn.edu.xmu.ooad.util.Common;
@@ -12,11 +13,10 @@ import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.order.dao.OrderDao;
 import cn.edu.xmu.order.dao.OrderItemDao;
 
-import cn.edu.xmu.produce.goods.modol.OrderGoods;
-import cn.edu.xmu.produce.order.model.OtherOrder;
-import cn.edu.xmu.produce.other.model.Customer;
+import cn.edu.xmu.order.util.PostOrderService;
+import cn.edu.xmu.order_provider.goods.modol.OrderGoods;
+import cn.edu.xmu.order_provider.model.OtherDTO;
 import cn.edu.xmu.order.model.bo.Order;
-import cn.edu.xmu.produce.goods.modol.Shop;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrderPo;
 import cn.edu.xmu.order.model.vo.AddressVo;
@@ -27,13 +27,14 @@ import cn.edu.xmu.order.model.bo.*;
 import cn.edu.xmu.order.model.vo.OrderItemVo;
 import cn.edu.xmu.order.model.vo.OrderVo;
 import cn.edu.xmu.order.util.OrderStatus;
-import cn.edu.xmu.produce.goods.IGoodsService;
-import cn.edu.xmu.produce.other.IOtherService;
+import cn.edu.xmu.order_provider.goods.IGoodsService;
+import cn.edu.xmu.order_provider.other.IOtherService;
 import org.apache.dubbo.config.annotation.DubboReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,6 +59,9 @@ public class OrderService {
 
     @Autowired
     private OrderDao orderDao;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @DubboReference
     private IGoodsService goodsService;
@@ -181,22 +185,22 @@ public class OrderService {
      */
     @Transactional
     public ReturnObject<VoObject> getShopSelfOrder(Long shopId, Long id) {
-        ReturnObject<Order> object= orderDao.getOrderById(id);
+        ReturnObject object= orderDao.getOrderById(id);
         ReturnObject returnObject=null;
         if (object.getCode().equals(ResponseCode.OK)){
-            Order order=(Order) returnObject.getData();
+            Order order=(Order) object.getData();
             if(shopId==0L||order.getShop().getShopId().equals(shopId)){
                 logger.debug("shop getSelfOrder success！  orderId:  "+id+"   shopId:  "+shopId);
                 //构造完整Order详情
                 List<SimpleOrderItem> orderItems=orderItemDao.getSimOrderItemsByOrderId(order.getId());
                 order.setSimpleOrderItemList(orderItems);
                 Long customerId=order.getCustomer().getCustomerId();
-                Customer customer=JacksonUtil.toObj(otherService.findCustomerById(customerId),Customer.class);
+                //Customer customer=JacksonUtil.toObj(otherService.findCustomerById(customerId),Customer.class);
                 if(shopId!=0){
-                    Shop shop=JacksonUtil.toObj(goodsService.findShopById(shopId),Shop.class);
-                    order.setShop(shop);
+                    //Shop shop=JacksonUtil.toObj(goodsService.findShopById(shopId),Shop.class);
+                    //order.setShop(shop);
                 }
-                order.setCustomer(customer);
+                //order.setCustomer(customer);
                 return new ReturnObject<>(order);
             } else{
                 logger.debug("customer getOrderById error: don't have privilege!   orderId:  "+id+"  shopId:  "+shopId);
@@ -274,18 +278,20 @@ public class OrderService {
      * @modified by Gang Ye  修改业务只有扣库存
      */
     @Transactional
-    public ReturnObject disposeNorGoodsList(List<OrderGoods> goodsList, Byte type)  {
+    public ReturnObject disposeNorGoodsList(List<OrderGoods> goodsList, String beanName)  {
+
+        PostOrderService deductService=applicationContext.getBean(beanName,PostOrderService.class);
         //扣库存
         //存储以扣库存的商品skuId和quantity，便于回滚,局域变量，线程安全
         Map<Long,Integer> map=new HashMap<>(goodsList.size());
         for (OrderGoods po:goodsList) {
             //扣库存
-            boolean deductSuccessful=goodsService.deductStock(po.getGoods_sku_id(),po.getQuantity(),type);
+            boolean deductSuccessful=deductService.deductStock(po.getGoods_sku_id(),po.getQuantity());
             if (!deductSuccessful) {
                 //库存不足
                 //库存回滚
                 map.forEach((k,v)->{
-                    goodsService.deductStock(k,-v,type);
+                    deductService.deductStock(k,-v);
                 });
                 return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
             }
@@ -416,7 +422,7 @@ public class OrderService {
             norGoodsArrayList.add(order_goods);
         }
         //处理购买的普通商品：扣库存
-        ReturnObject nor=this.disposeNorGoodsList(norGoodsArrayList,(byte)0);
+        ReturnObject nor=this.disposeNorGoodsList(norGoodsArrayList,"NorOrderService");
         if (!nor.getCode().equals(ResponseCode.OK)){
             //库存不足
             return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
@@ -545,8 +551,8 @@ public class OrderService {
      * @param orderItemId
      * @return
      */
-    public OtherOrder getOrderDTOForOther(Long orderItemId) {
-        OtherOrder otherOrder=new OtherOrder();
+    public OtherDTO getOrderDTOForOther(Long orderItemId) {
+        OtherDTO otherOrder=new OtherDTO();
         OrderItem orderItem=this.getOrderItemById(orderItemId);
         if (orderItem!=null){
             otherOrder.setSkuId(orderItem.getSkuId());
@@ -562,12 +568,59 @@ public class OrderService {
         return null;
     }
 
-    public OrderItem calculateDiscount(List<OrderItem> orderItemPos) throws JsonProcessingException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    private COrderItem translate(OrderItem orderItem)
+    {
+        //和core中类型不一致，转化一下
+        COrderItem cOrderItem=new COrderItem();
+        cOrderItem.setSkuId(orderItem.getSkuId());
+        cOrderItem.setBeShareId(orderItem.getBeShareId());
+        cOrderItem.setCouponActivityId(orderItem.getCouponActivityId());
+        cOrderItem.setDiscount(orderItem.getDiscount());
+        cOrderItem.setId(orderItem.getId());
+        cOrderItem.setName(orderItem.getName());
+        cOrderItem.setOrderId(orderItem.getOrderId());
+        cOrderItem.setPrice(orderItem.getPrice());
+        cOrderItem.setQuantity(orderItem.getQuantity());
+        return cOrderItem;
+    }
 
-        List<OrderItem> orderItemList=new ArrayList<>(orderItemPos.size());
+    private OrderItem translateFor(COrderItem orderItem)
+    {
+        //和core中类型不一致，转化一下
+        OrderItem cOrderItem=new OrderItem();
+        cOrderItem.setSkuId(orderItem.getSkuId());
+        cOrderItem.setBeShareId(orderItem.getBeShareId());
+        cOrderItem.setCouponActivityId(orderItem.getCouponActivityId());
+        cOrderItem.setDiscount(orderItem.getDiscount());
+        cOrderItem.setId(orderItem.getId());
+        cOrderItem.setName(orderItem.getName());
+        cOrderItem.setOrderId(orderItem.getOrderId());
+        cOrderItem.setPrice(orderItem.getPrice());
+        cOrderItem.setQuantity(orderItem.getQuantity());
+        return cOrderItem;
+    }
 
-        String itemJson=JacksonUtil.toJson(orderItemList);
-        BaseCouponDiscount  baseCouponDiscount=BaseCouponDiscount.getInstance(itemJson);
-        return  null;
+    public List<OrderItem> calculateDiscount(List<OrderItem> orderItems) throws JsonProcessingException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+
+        List<COrderItem> orderItemList=new ArrayList<>(orderItems.size());
+
+        Map<Long,List<COrderItem>> listMap=new HashMap<>(orderItems.size());
+        for (OrderItem orderItem :orderItems) {
+            COrderItem cOrderItem=this.translate(orderItem);
+            listMap.computeIfAbsent(orderItem.getCouponActivityId(), k->new ArrayList<>()).add(cOrderItem);
+        }
+        for (Map.Entry<Long, List<COrderItem>> entry : listMap.entrySet()) {
+            Long k = entry.getKey();
+            List<COrderItem> v = entry.getValue();
+            String itemJson = JacksonUtil.toJson(v);
+            BaseCouponDiscount baseCouponDiscount = BaseCouponDiscount.getInstance(itemJson);
+            orderItemList.addAll(baseCouponDiscount.compute(v));
+        }
+        List<OrderItem> items=new ArrayList<>(orderItemList.size());
+        orderItemList.forEach(v->{
+            OrderItem orderItem=this.translateFor(v);
+            items.add(orderItem);
+        });
+        return  items;
     }
 }
