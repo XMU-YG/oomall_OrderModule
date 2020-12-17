@@ -5,6 +5,7 @@ import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.encript.AES;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.slf4j.Logger;
@@ -41,19 +42,26 @@ public class FreightControllerTest {
     @Test
     public void getFreModelByIdTest()
     {
-      String responseString=null;
-      String token = creatTestToken(1L, 0L, 100);
-      try
-      {
-          responseString=this.mvc.perform(get("/shops/1/freightmodels/1234").header("authorization", token))
-                  .andExpect(status().isOk())
-                  .andExpect(content().contentType("application/json;charset=UTF-8"))
-                  .andReturn().getResponse().getContentAsString();
-      }  catch (Exception e) {
-          e.printStackTrace();
-      }
-      String expectedResponse="{\"errno\":0,\"data:\":{\""
+        String responseString=null;
+        String token = creatTestToken(1L, 0L, 100);
+        try
+        {
+            responseString=this.mvc.perform(get("/shops/1/freightmodels/1").header("authorization", token))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        }  catch (Exception e) {
+            e.printStackTrace();
+        }
+        String expectedResponse="{\"errno\":0,\"errmsg\":\"成功\",\"data\":{\"id\":1,\"name\":\"weight\",\"type\":0,\"unit\":500,\"defaultModel\":true,\"gmtCreate\":\"2020-12-16T17:16:00\",\"gmtModified\":null}}";
+     try {
+        JSONAssert.assertEquals(expectedResponse, responseString, false);
+    } catch (
+    JSONException e) {
+        e.printStackTrace();
     }
+}
 
+   
 
 }
