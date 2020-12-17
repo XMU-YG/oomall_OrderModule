@@ -1,5 +1,6 @@
 package cn.edu.xmu.order.service.impl;
 
+import cn.edu.xmu.goodsprovider.activity.PreGroInner;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -15,7 +16,6 @@ import cn.edu.xmu.order.service.time.TimeService;
 import cn.edu.xmu.order.util.OrderStatus;
 import cn.edu.xmu.order.util.OrderType;
 import cn.edu.xmu.order.util.PostOrderService;
-import cn.edu.xmu.order_provider.goods.IGoodsService;
 import cn.edu.xmu.order_provider.other.IOtherService;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,13 +37,13 @@ public class GrouponOrderServiceImpl implements PostOrderService {
     @Autowired
     private TimeService timeService;
 
-    @DubboReference
-    private IGoodsService goodsService;
+    @DubboReference(version = "0.0.1",check = false)
+    private PreGroInner preGroInner;
 
     @DubboReference
     private IOtherService otherService;
 
-    @DubboReference
+    @DubboReference(version = "0.0.1",check = false)
     private IFreightService freightService;
 
     @Override
@@ -63,7 +63,7 @@ public class GrouponOrderServiceImpl implements PostOrderService {
         //所有商品skuId与quantity的Map，用于计算运费
         Map<Long, Integer> goodsMap = new HashMap<>();
         //检查库存
-        String orderGoodsJson = goodsService.findGoodsBySkuId(orderItemVo.getSkuId());
+        String orderGoodsJson = null;
         OrderGoods order_goods = JacksonUtil.toObj(orderGoodsJson, OrderGoods.class);
 
         if (order_goods == null || orderItemVo.getQuantity() > order_goods.getQuantity()) {
@@ -85,10 +85,8 @@ public class GrouponOrderServiceImpl implements PostOrderService {
         order_goods.setQuantity(orderItemVo.getQuantity());
         norGoodsArrayList.add(order_goods);
         goodsMap.put(orderItemPo.getGoodsSkuId(), orderItemPo.getQuantity());
-
         //处理购买的普通商品：扣库存
-        ReturnObject nor = orderService.disposeNorGoodsList(norGoodsArrayList, "GroOrderService");
-
+        ReturnObject nor = orderService.disposeNorGoodsList(orderPo.getGrouponId(),norGoodsArrayList, "GroOrderService");
         if (!nor.getCode().equals(ResponseCode.OK)) {
             //库存不足
             return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
@@ -105,7 +103,7 @@ public class GrouponOrderServiceImpl implements PostOrderService {
         String orderItemPosJson = JacksonUtil.toJson(orderItemPo);
         orderPo.setRebateNum(otherService.calculateRebateNum(orderItemPosJson, customerId));
         //计算团购优惠
-        orderPo.setGrouponDiscount(goodsService.calculateGrouponDiscount(orderPo.getGrouponId(), orderItemPo.getGoodsSkuId()));
+        orderPo.setGrouponDiscount(0L);
         //设为待支付状态
         orderPo.setState((byte) OrderStatus.WAIT_FOR_PAID.getCode());
         //子状态为新订单
@@ -135,8 +133,8 @@ public class GrouponOrderServiceImpl implements PostOrderService {
     }
 
     @Override
-    public boolean deductStock(Long skuId, Integer quantity) {
-        return goodsService.deductGroStock(skuId,quantity);
+    public boolean deductStock(Long actId,Long skuId, Integer quantity) {
+        return preGroInner.deductGroStock(actId,skuId,quantity);
     }
 
 }

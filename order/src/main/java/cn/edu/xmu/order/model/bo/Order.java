@@ -3,8 +3,6 @@ package cn.edu.xmu.order.model.bo;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.order.model.po.OrderPo;
 import cn.edu.xmu.order.model.vo.OrderRetVo;
-import cn.edu.xmu.order_provider.goods.modol.Shop;
-import cn.edu.xmu.order_provider.other.model.Customer;
 import lombok.Data;
 
 import java.time.LocalDateTime;

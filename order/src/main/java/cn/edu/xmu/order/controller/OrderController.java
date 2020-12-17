@@ -34,7 +34,7 @@ import java.util.List;
 
 @Api(value = "商城订单服务", tags = "oomall")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "/order", produces = "application/json;charset=UTF-8")
 public class OrderController {
     private  static  final Logger logger = LoggerFactory.getLogger(OrderController.class);
 

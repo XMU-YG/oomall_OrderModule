@@ -37,10 +37,7 @@ public class OrderItemDao {
 
     public OrderItemPo getOrderItemPoById(Long id) {
         OrderItemPo po=orderItemPoMapper.selectByPrimaryKey(id);
-        if (po!=null){
-            return po;
-        }
-        return null;
+        return po;
     }
 
     public int updateOrderItem(OrderItemPo orderItemPo) {

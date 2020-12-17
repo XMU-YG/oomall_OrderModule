@@ -1,5 +1,6 @@
 package cn.edu.xmu.order.service.impl;
 
+import cn.edu.xmu.goodsprovider.activity.PreGroInner;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -38,8 +39,8 @@ public class PresaleOrderServiceImpl implements PostOrderService {
     @Autowired
     private TimeService timeService;
 
-    @DubboReference(version ="1.0-SNAPSHOT")
-    private IGoodsService goodsService;
+    @DubboReference(version ="0.0.1",check = false)
+    private PreGroInner preGroInner;
 
     @DubboReference(version ="1.0-SNAPSHOT")
     private IOtherService otherService;
@@ -61,7 +62,7 @@ public class PresaleOrderServiceImpl implements PostOrderService {
         //0普通 1团购 2预售
         orderPo.setOrderType(OrderType.PRESALE.getCode());
         //检查库存
-        String orderGoodsJson = goodsService.findGoodsBySkuId(orderItemVo.getSkuId());
+        String orderGoodsJson = null;//goodsService.findGoodsBySkuId(orderItemVo.getSkuId());
         OrderGoods order_goods = JacksonUtil.toObj(orderGoodsJson, OrderGoods.class);
         if (order_goods == null || orderItemVo.getQuantity() > order_goods.getQuantity()) {
             //库存不足
@@ -82,7 +83,7 @@ public class PresaleOrderServiceImpl implements PostOrderService {
         ArrayList<OrderGoods> norGoodsArrayList=new ArrayList<>();
         norGoodsArrayList.add(order_goods);
         //处理购买的普通商品：扣库存
-        ReturnObject nor = orderService.disposeNorGoodsList(norGoodsArrayList,"PreOrderService");
+        ReturnObject nor = orderService.disposeNorGoodsList(orderPo.getPresaleId(),norGoodsArrayList,"PreOrderService");
 
         if (!nor.getCode().equals(ResponseCode.OK)) {
             //库存不足
@@ -105,7 +106,7 @@ public class PresaleOrderServiceImpl implements PostOrderService {
         //子状态为新订单
         orderPo.setSubstate((byte) OrderStatus.NEW_ORDER.getCode());
         //预售订单第一次总价是预售之和
-        Long advancePrice=goodsService.getAdvancePrice(orderPo.getPresaleId(),orderItemPo.getGoodsSkuId())*orderItemPo.getQuantity();
+        Long advancePrice=preGroInner.getAdvancePrice(orderPo.getPresaleId(),orderItemPo.getGoodsSkuId())*orderItemPo.getQuantity();
         orderPo.setOriginPrice(advancePrice);
         orderPo.setGmtModified(LocalDateTime.now());
         //OrderPo写入数据库，返回orderId
@@ -129,8 +130,8 @@ public class PresaleOrderServiceImpl implements PostOrderService {
     }
 
     @Override
-    public boolean deductStock(Long skuId, Integer quantity) {
-        return goodsService.deductPreStock(skuId, quantity);
+    public boolean deductStock(Long actId,Long skuId, Integer quantity) {
+        return preGroInner.deductPreStock(actId,skuId, quantity);
     }
 
 }

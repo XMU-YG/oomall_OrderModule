@@ -1,8 +1,8 @@
 package cn.edu.xmu.order.model.vo;
 
-import cn.edu.xmu.order_provider.other.model.Customer;
+import cn.edu.xmu.order.model.bo.Customer;
 import cn.edu.xmu.order.model.bo.Order;
-import cn.edu.xmu.order_provider.goods.modol.Shop;
+import cn.edu.xmu.order.model.bo.Shop;
 import cn.edu.xmu.order.model.bo.SimpleOrderItem;
 import lombok.Data;
 

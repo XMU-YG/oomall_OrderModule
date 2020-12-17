@@ -9,5 +9,5 @@ import cn.edu.xmu.order.model.vo.OrderVo;
  */
 public interface PostOrderService {
     public ReturnObject addNewOrderByCustomer(Long customerId, OrderVo vo);
-    public boolean deductStock(Long skuId,Integer quantity);
+    public boolean deductStock(Long actId,Long skuId,Integer quantity);
 }

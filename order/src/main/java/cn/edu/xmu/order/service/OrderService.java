@@ -1,10 +1,11 @@
 package cn.edu.xmu.order.service;
 
+import cn.edu.xmu.goodsprovider.Module.ShopRetVo;
+import cn.edu.xmu.goodsprovider.goods.ShopService;
 import cn.edu.xmu.ooad.model.VoObject;
 
 import cn.edu.xmu.ooad.order.bo.COrderItem;
 import cn.edu.xmu.ooad.order.discount.BaseCouponDiscount;
-import cn.edu.xmu.ooad.order.discount.BaseCouponLimitation;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 
@@ -15,7 +16,8 @@ import cn.edu.xmu.order.dao.OrderItemDao;
 
 import cn.edu.xmu.order.util.PostOrderService;
 import cn.edu.xmu.order_provider.goods.modol.OrderGoods;
-import cn.edu.xmu.order_provider.model.OtherDTO;
+import cn.edu.xmu.order_provider.model.order.GoodsDTO;
+import cn.edu.xmu.order_provider.model.order.OtherDTO;
 import cn.edu.xmu.order.model.bo.Order;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrderPo;
@@ -53,7 +55,6 @@ import java.util.Map;
 public class OrderService {
     private Logger logger=LoggerFactory.getLogger(OrderService.class);
 
-
     @Autowired
     private OrderItemDao orderItemDao;
 
@@ -63,9 +64,10 @@ public class OrderService {
     @Autowired
     private ApplicationContext applicationContext;
 
-    @DubboReference
-    private IGoodsService goodsService;
+    @DubboReference(version = "0.0.1-SNAPSHOT", check=false)
+    private ShopService shopService;
 
+    private IGoodsService goodsService;
     @DubboReference
     private IOtherService otherService;
 
@@ -105,14 +107,17 @@ public class OrderService {
         if (returnObject.getCode().equals(ResponseCode.OK)){
             Order order=(Order) returnObject.getData();
             if(order.getCustomer().getCustomerId().equals(customerId)){
+                System.out.println("jinru: ");
                 //构造完整Order详情
                 List<SimpleOrderItem> orderItems=orderItemDao.getSimOrderItemsByOrderId(order.getId());
                 order.setSimpleOrderItemList(orderItems);
-                Long shopId=order.getShop().getShopId();
+                Long shopId=1L;
                 //Customer customer=JacksonUtil.toObj(otherService.findCustomerById(customerId),Customer.class);
-                //Shop shop=JacksonUtil.toObj(goodsService.findShopById(shopId),Shop.class);
+                ShopRetVo shopRetVo=JacksonUtil.toObj(shopService.getShopById(shopId),ShopRetVo.class);
+                assert shopRetVo != null;
+                Shop shop=new Shop(shopRetVo);
                 //order.setCustomer(customer);
-                //order.setShop(shop);
+                order.setShop(shop);
                 return new ReturnObject<>(order);
             }
             else{
@@ -138,7 +143,6 @@ public class OrderService {
     public ReturnObject modifySelfOrderAddressById(Long customerId, Long orderId, AddressVo vo){
         return orderDao.modifySelfOrderAddressById(customerId,orderId,vo);
     }
-
     /**
      * 顾客取消或者删除订单
      * @param customerId
@@ -147,14 +151,19 @@ public class OrderService {
      */
     @Transactional
     public ReturnObject deleteSelfOrderById(Long customerId, Long orderId) {
-        ReturnObject returnObject=orderDao.deleteOrderByCus(customerId,orderId);
-        if (returnObject.getErrmsg().equals("已取消")){
-            List<SimpleOrderItem> simpleOrderItems=orderItemDao.getSimOrderItemsByOrderId(orderId);
-            for (SimpleOrderItem item:simpleOrderItems) {
-                goodsService.addStock(item.getGoods_sku_id(),item.getQuantity());
+        ReturnObject check=verifyOrderByCustomerId(customerId,orderId);
+        if (check.getCode().equals(ResponseCode.OK)){
+            //是本人的
+            ReturnObject returnObject=orderDao.deleteOrderById(orderId);
+            if (returnObject.getErrmsg().equals("已取消")){
+                List<SimpleOrderItem> simpleOrderItems=orderItemDao.getSimOrderItemsByOrderId(orderId);
+                for (SimpleOrderItem item:simpleOrderItems) {
+                    goodsService.addStock(item.getGoods_sku_id(),item.getQuantity());
+                }
             }
+            return returnObject;
         }
-        return returnObject;
+        return check;
     }
     /**
      * 顾客确认收货
@@ -170,7 +179,6 @@ public class OrderService {
     public ReturnObject translateGroToNor(Long customerId, Long id) {
         return orderDao.transLateGroToNor(customerId,id);
     }
-
     @Transactional
     public ReturnObject<PageInfo<VoObject>> getShopSelfSimpleOrders(Long shopId, Long customerId, String orderSn, LocalDateTime beginTime, LocalDateTime endTime, Integer page, Integer pageSize) {
         return orderDao.getShopSelfSimpleOrders(shopId,customerId,orderSn,beginTime,endTime,page,pageSize);
@@ -197,8 +205,10 @@ public class OrderService {
                 Long customerId=order.getCustomer().getCustomerId();
                 //Customer customer=JacksonUtil.toObj(otherService.findCustomerById(customerId),Customer.class);
                 if(shopId!=0){
-                    //Shop shop=JacksonUtil.toObj(goodsService.findShopById(shopId),Shop.class);
-                    //order.setShop(shop);
+                    ShopRetVo shopRetVo=JacksonUtil.toObj(shopService.getShopById(shopId),ShopRetVo.class);
+                    assert shopRetVo != null;
+                    Shop shop=new Shop(shopRetVo);
+                    order.setShop(shop);
                 }
                 //order.setCustomer(customer);
                 return new ReturnObject<>(order);
@@ -248,12 +258,18 @@ public class OrderService {
      * @param orderId
      * @return
      */
-    public boolean verifyOrderByCustomerId(Long customerId,Long orderId) {
+    public ReturnObject verifyOrderByCustomerId(Long customerId, Long orderId) {
         ReturnObject<Order> ret=orderDao.getOrderById(orderId);
-        if (ret.getData()==null){
-            return false;
+        if (ret.getCode().equals(ResponseCode.OK)){
+            if (ret.getData().getCustomer().getCustomerId().equals(customerId)){
+                logger.debug("verify true!");
+                return new ReturnObject(ResponseCode.OK);
+            }else {
+                logger.debug("verify error!");
+                return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+            }
         }
-        return ret.getData().getCustomer().getCustomerId().equals(customerId);
+        return new ReturnObject(ret.getCode());
     }
 
     /**
@@ -262,12 +278,18 @@ public class OrderService {
      * @param orderId
      * @return
      */
-    public boolean verifyOrderByShopId(Long shopId,Long orderId) {
-        ReturnObject<Order> returnObject=orderDao.getOrderById(orderId);
-        if (returnObject.getData()==null){
-            return false;
+    public ReturnObject verifyOrderByShopId(Long shopId,Long orderId) {
+        ReturnObject<Order> ret=orderDao.getOrderById(orderId);
+        if (ret.getCode().equals(ResponseCode.OK)){
+            if (ret.getData().getShop().getShopId().equals(shopId)){
+                logger.debug("verify true!");
+                return new ReturnObject(ResponseCode.OK);
+            }else {
+                logger.debug("verify error!");
+                return new ReturnObject(ResponseCode.RESOURCE_ID_OUTSCOPE);
+            }
         }
-        return returnObject.getData().getShop().getShopId().equals(shopId);
+        return new ReturnObject(ret.getCode());
     }
 
     /**
@@ -278,7 +300,7 @@ public class OrderService {
      * @modified by Gang Ye  修改业务只有扣库存
      */
     @Transactional
-    public ReturnObject disposeNorGoodsList(List<OrderGoods> goodsList, String beanName)  {
+    public ReturnObject disposeNorGoodsList(Long actId,List<OrderGoods> goodsList, String beanName)  {
 
         PostOrderService deductService=applicationContext.getBean(beanName,PostOrderService.class);
         //扣库存
@@ -286,12 +308,12 @@ public class OrderService {
         Map<Long,Integer> map=new HashMap<>(goodsList.size());
         for (OrderGoods po:goodsList) {
             //扣库存
-            boolean deductSuccessful=deductService.deductStock(po.getGoods_sku_id(),po.getQuantity());
+            boolean deductSuccessful=deductService.deductStock(actId,po.getGoods_sku_id(),po.getQuantity());
             if (!deductSuccessful) {
                 //库存不足
                 //库存回滚
                 map.forEach((k,v)->{
-                    deductService.deductStock(k,-v);
+                    deductService.deductStock(actId,k,-v);
                 });
                 return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
             }
@@ -332,7 +354,7 @@ public class OrderService {
     }
 
     /**
-     * 计算优惠数额
+     * 计算优惠总数额
      * @return
      */
     public Long totalDiscount(List<OrderItem> orderItems){
@@ -382,10 +404,10 @@ public class OrderService {
      * 创建售后订单
      * @param shopId 发起售后的店铺id
      * @param orderVoJson 新订单信息视图Json
-     * @return
+     * @return >0 orderId  =0 库存不足 -1数据库错误
      * @author Gang Ye
      */
-    public ReturnObject createAfterSaleOrder(Long shopId, String orderVoJson) {
+    public Long createAfterSaleOrder(Long shopId, String orderVoJson) {
         OrderVo vo=JacksonUtil.toObj(orderVoJson,OrderVo.class);
         ReturnObject returnObject=null;
         assert vo != null;
@@ -396,7 +418,7 @@ public class OrderService {
 
         String orderSn= Common.genSeqNum();
         orderPo.setOrderSn(orderSn);
-        //orderPo.setOrderType((byte) 0);
+        orderPo.setOrderType((byte) 0);
         //普通商品
         ArrayList<OrderGoods> norGoodsArrayList=new ArrayList<>();
         //检查库存
@@ -406,7 +428,7 @@ public class OrderService {
             OrderGoods order_goods= JacksonUtil.toObj(orderGoodsJson,OrderGoods.class);
             if (order_goods==null||orderItemVo.getQuantity()>order_goods.getQuantity()){
                 //库存不足
-                return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
+                return 0L;
             }
             //构造OrderItemPo
             orderItemPo.setQuantity(orderItemVo.getQuantity());
@@ -422,10 +444,10 @@ public class OrderService {
             norGoodsArrayList.add(order_goods);
         }
         //处理购买的普通商品：扣库存
-        ReturnObject nor=this.disposeNorGoodsList(norGoodsArrayList,"NorOrderService");
+        ReturnObject nor=this.disposeNorGoodsList(0L,norGoodsArrayList,"NorOrderService");
         if (!nor.getCode().equals(ResponseCode.OK)){
             //库存不足
-            return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
+            return 0L;
         }
         //处理OrderPo
         orderPo.setShopId(shopId);
@@ -444,16 +466,14 @@ public class OrderService {
                 //写入
                 ReturnObject object=this.insertOrderItem(orderItemPo);
                 if (!object.getCode().equals(ResponseCode.OK)){
-                    return object;
+                    return -1L;
                 }
             }
-            returnObject=new ReturnObject(ResponseCode.OK);
+            return orderId;
         }
         else {
-            returnObject=new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
+            return -1L;
         }
-
-        return returnObject;
     }
 
     /**
@@ -487,7 +507,7 @@ public class OrderService {
             po.setState((byte)OrderStatus.WAIT_FOR_RECEIVE.getCode());
             po.setOriginPrice(this.calculateOriginPrice(v));
             po.setFreightPrice(order.getFreightPrice()*(po.getOriginPrice()/order.getOriginPrice()));
-            //po.setDiscountPrice(this.calculateDiscount(v));
+            po.setDiscountPrice(this.totalDiscount(v));
             po.setRebateNum(otherService.calculateRebateNum(JacksonUtil.toJson(v),po.getCustomerId()));
             po.setCouponId(order.getCouponId());
             po.setGmtModified(LocalDateTime.now());
@@ -501,42 +521,30 @@ public class OrderService {
             });
         });
     }
-    public List<Long> getOrderItemIdList(List<Long> skuIds,Long customerId){
-        List<Long> orderItemIds=new ArrayList<>(skuIds.size());
-
-        for (Long skuId:skuIds) {
-            List<OrderItemPo> orderItemPos=this.getItemsBySkuId(skuId);
-            orderItemPos.forEach(v->{
-                if (this.verifyOrderByCustomerId(customerId,v.getOrderId())){
-                    orderItemIds.add(v.getId());
-                }
-            });
-        }
-        return orderItemIds;
-    }
 
     /**
      * 内部接口
+     * 通过orderitemId获得orderItem对象
      * @param orderItemId
-     * @return
+     * @return OrderItem
      */
     public OrderItem getOrderItemById(Long orderItemId) {
         return orderItemDao.getOrderItemById(orderItemId);
     }
-//    public OrderPo getOrderByItemId(Long orderItemId) {
-//        OrderItemPo orderItemPo=this.getOrderItemById(orderItemId);
-//        return orderDao.getOrderPoById(orderItemPo.getOrderId());
-//    }
 
     /**
-     * 定时器调用任务
-     * @param customerId
+     * 检查订单状态 未付款则取消，已付款则分单
      * @param orderId
      */
-    public void checkOrderPayState(Long customerId,Long orderId){
+    public void checkOrderPayState(Long orderId){
         Byte state=orderDao.getOrderState(orderId);
-        if (state==OrderStatus.NEW_ORDER.getCode()){
-            this.deleteSelfOrderById(customerId,orderId);
+        if (state==OrderStatus.WAIT_FOR_PAID.getCode()){
+            logger.debug("order is canceled by system");
+            orderDao.deleteOrderById(orderId);
+        }
+        else if (state==OrderStatus.WAIT_FOR_RECEIVE.getCode()){
+            logger.debug("order has been classified");
+            this.classifyOrder(orderId);
         }
     }
 
@@ -568,8 +576,7 @@ public class OrderService {
         return null;
     }
 
-    private COrderItem translate(OrderItem orderItem)
-    {
+    private COrderItem translateForC(OrderItem orderItem) {
         //和core中类型不一致，转化一下
         COrderItem cOrderItem=new COrderItem();
         cOrderItem.setSkuId(orderItem.getSkuId());
@@ -584,8 +591,7 @@ public class OrderService {
         return cOrderItem;
     }
 
-    private OrderItem translateFor(COrderItem orderItem)
-    {
+    private OrderItem translateForO(COrderItem orderItem) {
         //和core中类型不一致，转化一下
         OrderItem cOrderItem=new OrderItem();
         cOrderItem.setSkuId(orderItem.getSkuId());
@@ -600,14 +606,25 @@ public class OrderService {
         return cOrderItem;
     }
 
+    /**
+     * 计算优惠折扣
+     * @param orderItems
+     * @return
+     * @throws JsonProcessingException
+     * @throws ClassNotFoundException
+     * @throws InvocationTargetException
+     * @throws NoSuchMethodException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     */
     public List<OrderItem> calculateDiscount(List<OrderItem> orderItems) throws JsonProcessingException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-
+        //存储转化后COrderItem
         List<COrderItem> orderItemList=new ArrayList<>(orderItems.size());
-
         Map<Long,List<COrderItem>> listMap=new HashMap<>(orderItems.size());
+        //将OrderItem转化为COrderItem，并按couponActivity分类
         for (OrderItem orderItem :orderItems) {
-            COrderItem cOrderItem=this.translate(orderItem);
-            listMap.computeIfAbsent(orderItem.getCouponActivityId(), k->new ArrayList<>()).add(cOrderItem);
+            COrderItem cOrderItem=this.translateForC(orderItem);
+            listMap.computeIfAbsent(cOrderItem.getCouponActivityId(), k->new ArrayList<>()).add(cOrderItem);
         }
         for (Map.Entry<Long, List<COrderItem>> entry : listMap.entrySet()) {
             Long k = entry.getKey();
@@ -616,11 +633,28 @@ public class OrderService {
             BaseCouponDiscount baseCouponDiscount = BaseCouponDiscount.getInstance(itemJson);
             orderItemList.addAll(baseCouponDiscount.compute(v));
         }
+        //COrderItem转化为OrderItem
         List<OrderItem> items=new ArrayList<>(orderItemList.size());
         orderItemList.forEach(v->{
-            OrderItem orderItem=this.translateFor(v);
+            OrderItem orderItem=this.translateForO(v);
             items.add(orderItem);
         });
         return  items;
+    }
+
+
+    public GoodsDTO getGoodsDTOForGoods(Long orderItemId) {
+        GoodsDTO goodsDTO=new GoodsDTO();
+        OrderItem orderItem=this.getOrderItemById(orderItemId);
+        if (orderItem!=null){
+            goodsDTO.setSkuId(orderItem.getSkuId());
+            Long orderId=orderItem.getOrderId();
+            Order order=orderDao.getOrderById(orderId).getData();
+            if (order!=null){
+                goodsDTO.setCustomerId(order.getCustomer().getCustomerId());
+                return goodsDTO;
+            }
+        }
+        return null;
     }
 }

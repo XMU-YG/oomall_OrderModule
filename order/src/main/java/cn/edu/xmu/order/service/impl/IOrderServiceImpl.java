@@ -3,32 +3,31 @@ package cn.edu.xmu.order.service.impl;
 import cn.edu.xmu.order_provider.IOrderService;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.order.service.OrderService;
-import cn.edu.xmu.order_provider.model.GoodsDTO;
-import cn.edu.xmu.order_provider.model.OrderVo;
-import cn.edu.xmu.order_provider.model.OtherDTO;
+import cn.edu.xmu.order_provider.model.order.GoodsDTO;
+import cn.edu.xmu.order_provider.model.order.OrderVo;
+import cn.edu.xmu.order_provider.model.order.OtherDTO;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+/**
+ * 订单提供接口 实现
+ * @author Gang Ye
+ */
 @DubboService(version ="0.0.1") // 注意这里的Serivce引用的是dubbo的包
 public class IOrderServiceImpl implements IOrderService {
 
     @Autowired
     private OrderService orderService;
 
-
     @Override
     public boolean changeOrderState(Long orderId, Byte state) {
         return false;
     }
 
-    @Override
-    public Long createAfterSaleOrder(Long shopId, OrderVo orderVo) {
-        return null;
-    }
 
-    //@Override
-    public String createAfterSaleOrder(Long shopId, String orderVoJson) {
-        return JacksonUtil.toJson(orderService.createAfterSaleOrder(shopId,orderVoJson));
+    @Override
+    public Long createAfterSaleOrder(Long shopId, String orderVoJson) {
+        return orderService.createAfterSaleOrder(shopId,orderVoJson);
     }
 
     @Override
@@ -37,13 +36,14 @@ public class IOrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public OtherDTO getOrderDTO(Long orderItemId) {
+    public OtherDTO getOtherDTO(Long orderItemId) {
+
         return orderService.getOrderDTOForOther(orderItemId);
     }
 
     @Override
     public GoodsDTO getGoodsDTO(Long orderItemId) {
-        return null;
+        return orderService.getGoodsDTOForGoods(orderItemId);
     }
 
     @Override

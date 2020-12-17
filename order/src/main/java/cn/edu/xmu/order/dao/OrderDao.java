@@ -200,57 +200,43 @@ public class OrderDao {
 
     /**
      * 买家取消本人已发货前订单，数据库中逻辑删除
-     * @param customerId
      * @param orderId
      * @return
      * @author Gang Ye
      * @created 2020/11/30
      * @modified Gang Ye 修改可取消的状态为待付款或待收货
      */
-    public ReturnObject deleteOrderByCus(Long customerId, Long orderId) {
+    public ReturnObject deleteOrderById(Long orderId) {
         ReturnObject orderReturnObject=null;
         OrderPo orderPo=null;
         try{
             orderPo=orderPoMapper.selectByPrimaryKey(orderId);
         }catch (DataAccessException e){
-            logger.error("deleteSelfOrderById:  DataAccessException:  "+e.getMessage());
+            logger.error("deleteOrderById:  DataAccessException:  "+e.getMessage());
             return  new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
         }
-        if (orderPo==null){
-            logger.debug("customer deleteSelfOrderById error: it's empty!  orderId:  "+orderId+"   customerId:  "+customerId);
-            return new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST,"订单号不存在");
-
+        //取消
+        if (orderPo.getState()==OrderStatus.WAIT_FOR_PAID.getCode()
+                ||orderPo.getState()==OrderStatus.WAIT_FOR_RECEIVE.getCode()){  //待付款 待收货
+            logger.debug("cancelSelfOrderById success！  orderId:  "+orderId+" state: "+orderPo.getState());
+            orderPo.setGmtModified(LocalDateTime.now());
+            orderPo.setState((byte)OrderStatus.CANCELED.getCode());//订单取消
+            orderPoMapper.updateByPrimaryKey(orderPo);
+            orderReturnObject=new ReturnObject(ResponseCode.OK,"已取消");
+            return orderReturnObject;
         }
-        else if(orderPo.getCustomerId().equals(customerId)){
-
-            //取消
-            if (orderPo.getState()==OrderStatus.WAIT_FOR_PAID.getCode()
-                    ||orderPo.getState()==OrderStatus.WAIT_FOR_RECEIVE.getCode()){  //待付款 待收货
-                logger.debug("customer cancelSelfOrderById success！  orderId:  "+orderId+"   customerId:  "+customerId+" state: "+orderPo.getState());
-                orderPo.setGmtModified(LocalDateTime.now());
-                orderPo.setState((byte)OrderStatus.CANCELED.getCode());//订单取消
-                orderPoMapper.updateByPrimaryKey(orderPo);
-                orderReturnObject=new ReturnObject(ResponseCode.OK,"已取消");
-                return orderReturnObject;
-            }
-            //逻辑删除
-            else if (orderPo.getState()==OrderStatus.FINISHED.getCode()){ //已完成
-                logger.debug("customer deleteSelfOrderById success！  orderId:  "+orderId+"   customerId:  "+customerId+" state: "+orderPo.getState());
-                orderPo.setGmtModified(LocalDateTime.now());
-                orderPo.setBeDeleted((byte) 1);//1为订单逻辑删除
-                orderPoMapper.updateByPrimaryKey(orderPo);
-                orderReturnObject=new ReturnObject(ResponseCode.OK,"订单删除成功");
-                return orderReturnObject;
-            }
-            else {
-                logger.debug("customer deleteSelfOrderById error！the order state: "+orderPo.getState());
-                return new ReturnObject(ResponseCode.ORDER_STATENOTALLOW);
-            }
-
+        //逻辑删除
+        else if (orderPo.getState()==OrderStatus.FINISHED.getCode()){ //已完成
+            logger.debug("deleteOrderById success！  orderId:  "+orderId+" state: "+orderPo.getState());
+            orderPo.setGmtModified(LocalDateTime.now());
+            orderPo.setBeDeleted((byte) 1);//1为订单逻辑删除
+            orderPoMapper.updateByPrimaryKey(orderPo);
+            orderReturnObject=new ReturnObject(ResponseCode.OK,"订单删除成功");
+            return orderReturnObject;
         }
-        else{
-            logger.debug("customer deleteSelfOrderById error: don't have privilege!   orderId:  "+orderId+"   customerId:  "+customerId);
-            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        else {
+            logger.debug("deleteOrderById error！the order state: "+orderPo.getState());
+            return new ReturnObject(ResponseCode.ORDER_STATENOTALLOW);
         }
     }
 

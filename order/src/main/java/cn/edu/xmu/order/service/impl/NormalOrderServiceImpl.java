@@ -1,5 +1,7 @@
 package cn.edu.xmu.order.service.impl;
 
+import cn.edu.xmu.goodsprovider.activity.PreGroInner;
+import cn.edu.xmu.goodsprovider.goods.GoodsInner;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -39,8 +41,8 @@ public class NormalOrderServiceImpl implements PostOrderService {
     @Autowired
     private TimeService timeService;
 
-    @DubboReference(version ="1.0-SNAPSHOT")
-    private IGoodsService goodsService;
+    @DubboReference(version ="0.0.1",check = false)
+    private GoodsInner goodsInner;
 
     @DubboReference(version ="1.0-SNAPSHOT")
     private IOtherService otherService;
@@ -69,7 +71,7 @@ public class NormalOrderServiceImpl implements PostOrderService {
         //检查库存
         for (OrderItemVo orderItemVo:orderItemVos) {
             OrderItemPo orderItemPo=new OrderItemPo();
-            String orderGoodsJson=goodsService.findGoodsBySkuId(orderItemVo.getSkuId());
+            String orderGoodsJson=null;
             OrderGoods order_goods= JacksonUtil.toObj(orderGoodsJson,OrderGoods.class);
             if (order_goods==null||orderItemVo.getQuantity()>order_goods.getQuantity()){
                 //库存不足
@@ -97,7 +99,7 @@ public class NormalOrderServiceImpl implements PostOrderService {
             goodsMap.put(orderItemPo.getGoodsSkuId(),orderItemPo.getQuantity());
         }
         //处理购买的普通商品：扣库存
-        ReturnObject nor=orderService.disposeNorGoodsList(norGoodsArrayList,"NorOrderService");
+        ReturnObject nor=orderService.disposeNorGoodsList(0L,norGoodsArrayList,"NorOrderService");
         //处理购买的秒杀商品：扣库存
         ReturnObject sec=orderService.disposeSecGoodsList(secGoodsArrayList);
         if (!nor.getCode().equals(ResponseCode.OK)||!sec.getCode().equals(ResponseCode.OK)){
@@ -145,8 +147,8 @@ public class NormalOrderServiceImpl implements PostOrderService {
     }
 
     @Override
-    public boolean deductStock(Long skuId, Integer quantity) {
-        return goodsService.deductNorStock(skuId, quantity);
+    public boolean deductStock(Long actId,Long skuId, Integer quantity) {
+        return goodsInner.deductNorStock(skuId, quantity);
     }
 
 
