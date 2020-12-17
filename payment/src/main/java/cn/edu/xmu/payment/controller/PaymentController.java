@@ -35,7 +35,7 @@ import java.util.List;
 
 @Api(value="支付服务",tags="payment")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(value="/payment",produces="application/json;charset=UTF-8")
+@RequestMapping(produces="application/json;charset=UTF-8")
 public class PaymentController {
 
     private  static  final Logger logger = LoggerFactory.getLogger(PaymentController.class);
@@ -200,18 +200,18 @@ public class PaymentController {
             @ApiResponse(code=505,message = "该订单无权访问"),
     })
     //@Auditid
-    @GetMapping("shops/{shopId}/orders/{id}/payments")
+    @GetMapping("/shops/{shopId}/orders/{id}/payments")
 
     public Object getOrderPaymentShop(@PathVariable Long id, @PathVariable Long shopId){
         Object ret=null;
 
-        ReturnObject<List> returnObject =  paymentService.findOrderPaymentShop(id, shopId);
+        ReturnObject returnObject =  paymentService.findOrderPaymentShop(id, shopId);
 
         if(returnObject.getCode().equals(ResponseCode.OK)){
             ret=Common.getListRetObject(returnObject);
         }
         else{
-            ret=ResponseUtil.fail(returnObject.getCode(),returnObject.getErrmsg());
+            ret=Common.getNullRetObj(returnObject,httpServletResponse);
         }
         return ret;
 
@@ -238,13 +238,13 @@ public class PaymentController {
     public Object getAftersalePaymentShop(@PathVariable Long id, @PathVariable Long shopId){
         Object ret=null;
 
-        ReturnObject<List> returnObject =  paymentService.findAftersalePaymentShop(id, shopId);
+        ReturnObject returnObject =  paymentService.findAftersalePaymentShop(id, shopId);
 
         if(returnObject.getCode().equals(ResponseCode.OK)){
             ret=Common.getListRetObject(returnObject);
         }
         else{
-            ret=ResponseUtil.fail(returnObject.getCode(),returnObject.getErrmsg());
+            ret=Common.getNullRetObj(returnObject,httpServletResponse);
         }
         return ret;
 
@@ -266,17 +266,17 @@ public class PaymentController {
             @ApiResponse(code=505,message = "该订单无权访问"),
     })
     //@Audit
-    @GetMapping("orders/{id}/payments")
+    @GetMapping("/orders/{id}/payments")
     public Object getOrderPaymentSelf(@LoginUser @ApiIgnore @RequestParam(required =false)  Long userId, @PathVariable  Long id){
         Object ret=null;
 
-        ReturnObject<List> object=paymentService.findOrderPaymentSelf(userId,id);
+        ReturnObject object=paymentService.findOrderPaymentSelf(userId,id);
 
         if(object.getCode().equals(ResponseCode.OK)){
             ret= Common.getListRetObject(object); //这里疑惑是要返回一个信息值还是一组信息值，下面管理员部分同理
         }
         else{
-            ret= ResponseUtil.fail(object.getCode(),object.getErrmsg());
+            ret= Common.getNullRetObj(object,httpServletResponse);
         }
         return ret;
     }
@@ -297,17 +297,17 @@ public class PaymentController {
             @ApiResponse(code=505,message = "该售后单无权访问"),
     })
     //@Audit
-    @GetMapping("aftersales/{id}/payments")
+    @GetMapping("/aftersales/{id}/payments")
     public Object getAftersalePaymentSelf(@LoginUser @ApiIgnore @RequestParam(required =false)  Long userId, @PathVariable  Long id){
         Object ret=null;
 
-        ReturnObject<List> object=paymentService.findAftersalePaymentSelf(userId,id);
+        ReturnObject object=paymentService.findAftersalePaymentSelf(userId,id);
 
         if(object.getCode().equals(ResponseCode.OK)){
             ret= Common.getListRetObject(object); //这里疑惑是要返回一个信息值还是一组信息值，下面管理员部分同理
         }
         else{
-            ret= ResponseUtil.fail(object.getCode(),object.getErrmsg());
+            ret=  Common.getNullRetObj(object,httpServletResponse);
         }
         return ret;
     }
@@ -379,12 +379,13 @@ public class PaymentController {
 
         Object returnObject=null;
 
-        ReturnObject<VoObject> refund=refundService.findOrderRefundShop(shopId,id);
+        ReturnObject refund=refundService.findOrderRefundShop(shopId,id);
 
         if(refund.getCode().equals(ResponseCode.OK)){
             returnObject=Common.getRetObject(refund);
         }else{
-            returnObject=Common.decorateReturnObject(refund);
+            //returnObject=Common.decorateReturnObject(refund);
+            returnObject=Common.getNullRetObj(refund,httpServletResponse);
         }
 
         return returnObject;
@@ -413,12 +414,12 @@ public class PaymentController {
 
         Object returnObject=null;
 
-        ReturnObject<VoObject> refund=refundService.findAftersaleRefundShop(shopId,id);
+        ReturnObject refund=refundService.findAftersaleRefundShop(shopId,id);
 
         if(refund.getCode().equals(ResponseCode.OK)){
             returnObject=Common.getRetObject(refund);
         }else{
-            returnObject=Common.decorateReturnObject(refund);
+            returnObject=Common.getNullRetObj(refund,httpServletResponse);
         }
 
         return returnObject;
@@ -442,18 +443,18 @@ public class PaymentController {
     })
     //@Audit
     @GetMapping("/orders/{id}/refunds")
-    public Object getOrderRefundSelf(@LoginUser @ApiIgnore @RequestParam(required =false)  Long userId,
+    public Object getOrdegetOrderRefundSelfrRefundSelf(@LoginUser @ApiIgnore @RequestParam(required =false)  Long userId,
                                      @PathVariable Long id){
         logger.debug("getOrderRefund: userid: "+userId+" orderId: "+id);
 
         Object returnObject;
 
-        ReturnObject<VoObject> refund=refundService.findOrderRefundSelf(userId,id);
+        ReturnObject refund=refundService.findOrderRefundSelf(userId,id);
 
         if(refund.getCode().equals(ResponseCode.OK)){
             returnObject=Common.getRetObject(refund);
         }else{
-            returnObject=Common.decorateReturnObject(refund);
+            returnObject=Common.getNullRetObj(refund,httpServletResponse);
         }
 
         return returnObject;
@@ -482,14 +483,14 @@ public class PaymentController {
 
         Object returnObject;
 
-        ReturnObject<VoObject> refund=refundService.findAftersaleRefundSelf(userId,id);
+        ReturnObject refund=refundService.findAftersaleRefundSelf(userId,id);
 
         returnObject=Common.getRetObject(refund);
 
         if(refund.getCode().equals(ResponseCode.OK)){
             returnObject=Common.getRetObject(refund);
         }else{
-            returnObject=Common.decorateReturnObject(refund);
+            returnObject=Common.getNullRetObj(refund,httpServletResponse);
         }
 
         return returnObject;
