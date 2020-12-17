@@ -210,7 +210,7 @@ public class FreightController {
             @ApiResponse(code = 0, message = "成功"),
     })
     //@Audit
-    @PostMapping("/shops/{shopId}/freightmodels/{id}/default")
+    @PostMapping("/shops/{shopId}/freight_models/{id}/default")
     public Object setDefaultModel(@PathVariable Long shopId,@PathVariable Long id,@LoginUser @ApiIgnore @RequestParam(required = false, defaultValue = "0") Long userId){
         logger.info("userId: "+userId);
         logger.debug("setDefaultModel: shopId : "+shopId+" id : "+id);
