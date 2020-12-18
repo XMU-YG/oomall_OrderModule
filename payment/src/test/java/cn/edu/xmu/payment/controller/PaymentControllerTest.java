@@ -3,8 +3,9 @@ package cn.edu.xmu.payment.controller;
 import cn.edu.xmu.payment.PaymentServiceApplication;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.JwtHelper;
-import cn.edu.xmu.ooad.util.ResponseCode;
-import cn.edu.xmu.ooad.util.encript.AES;
+import cn.edu.xmu.payment.model.vo.NewPaymentVo;
+import cn.edu.xmu.payment.model.vo.NewRefundVo;
+import cn.edu.xmu.payment.util.PaymentPatterns;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -15,10 +16,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
-import org.springframework.test.web.servlet.MockMvc;
-
-import java.io.UnsupportedEncodingException;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -42,6 +39,257 @@ public class PaymentControllerTest {
         logger.debug(token);
         return token;
     }
+
+    //查看所有支付方式
+    @Test
+    public void getAllPaymentPattern() {
+        String responseString = null;
+        String token = createToken(1L, 0L, 100);
+        try {
+            responseString = this.mvc.perform(get("/payments/patterns").header("authorization", token))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":[{\"code\":\"001\",\"name\":\"返点支付\"},{\"code\":\"002\",\"name\":\"正常支付\"}]}";
+        try {
+            JSONAssert.assertEquals(expectedResponse, responseString, false);
+        } catch (
+                JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //查看所有支付状态
+    @Test
+    public void getAllPaymentStates() {
+        String responseString = null;
+        String token = createToken(1L, 0L, 100);
+        try {
+            responseString = this.mvc.perform(get("/payments/states").header("authorization", token))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":[{\"code\":0,\"name\":\"未支付\"},{\"code\":1,\"name\":\"已支付\"},{\"code\":2,\"name\":\"支付失败\"}]}";
+        try {
+            JSONAssert.assertEquals(expectedResponse, responseString, false);
+        } catch (
+                JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //新建两个订单支付 管理员和用户查询订单支付
+    @Test
+    public void createOrderPayment() throws Exception{
+        String responseString=null;
+
+        String token = createToken(1L, 0L, 100);
+
+        //新建第一个订单支付
+        NewPaymentVo vo1 =new NewPaymentVo();
+        vo1.setPaymentPattern(PaymentPatterns.REBATEPAY.getCode());
+        vo1.setPrice(54L);
+
+        try{
+            responseString = this.mvc.perform(post("/orders/40000/payments").header("authorization",token)
+                    .contentType("application/json;charset=UTF-8")
+                    .content(JacksonUtil.toJson(vo1)))
+                    .andExpect(status().isCreated())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        }catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        //新建第二个订单支付
+        NewPaymentVo vo2 =new NewPaymentVo();
+        vo2.setPaymentPattern(PaymentPatterns.NORMALPAY.getCode());
+        vo2.setPrice(1104L);
+
+        try{
+            responseString = this.mvc.perform(post("/orders/40000/payments").header("authorization",token)
+                    .contentType("application/json;charset=UTF-8")
+                    .content(JacksonUtil.toJson(vo2)))
+                    .andExpect(status().isCreated())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        }catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        //买家查询上面创建的两个支付
+        try {
+            responseString = this.mvc.perform(get("/orders/40000/payments").header("authorization", token))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":[{\"amount\":54,\"actualAmount\":54,\"paymentPattern\":\"001\",\"orderId\":40000,\"state\":1,\"aftersaleId\":null},{\"amount\":1104,\"actualAmount\":1104,\"paymentPattern\":\"002\",\"orderId\":40000,\"state\":1,\"aftersaleId\":null}]}";
+        try {
+            JSONAssert.assertEquals(expectedResponse, responseString, false);
+        } catch (
+                JSONException e) {
+            e.printStackTrace();
+        }
+
+        //管理员查询
+        try {
+            responseString = this.mvc.perform(get("/shops/1/orders/40000/payments").header("authorization", token))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":[{\"amount\":54,\"actualAmount\":54,\"paymentPattern\":\"001\",\"orderId\":40000,\"state\":1,\"aftersaleId\":null},{\"amount\":1104,\"actualAmount\":1104,\"paymentPattern\":\"002\",\"orderId\":40000,\"state\":1,\"aftersaleId\":null}]}";
+        try {
+            JSONAssert.assertEquals(expectedResponse, responseString, false);
+        } catch (
+                JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    //新建两个售后支付 管理员和用户查询售后支付
+    @Test
+    public void createAftersalePayment() throws Exception{
+        String responseString=null;
+
+        String token = createToken(1L, 0L, 100);
+
+        //新建第一个售后单支付
+        NewPaymentVo vo1 =new NewPaymentVo();
+        vo1.setPaymentPattern(PaymentPatterns.REBATEPAY.getCode());
+        vo1.setPrice(54L);
+
+        try{
+            responseString = this.mvc.perform(post("/aftersales/1/payments").header("authorization",token)
+                    .contentType("application/json;charset=UTF-8")
+                    .content(JacksonUtil.toJson(vo1)))
+                    .andExpect(status().isCreated())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        }catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        //新建第二个售后单支付
+        NewPaymentVo vo2 =new NewPaymentVo();
+        vo2.setPaymentPattern(PaymentPatterns.NORMALPAY.getCode());
+        vo2.setPrice(1104L);
+
+        try{
+            responseString = this.mvc.perform(post("/aftersales/1/payments").header("authorization",token)
+                    .contentType("application/json;charset=UTF-8")
+                    .content(JacksonUtil.toJson(vo2)))
+                    .andExpect(status().isCreated())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        }catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        //买家查询售后单支付
+        try {
+            responseString = this.mvc.perform(get("/aftersales/1/payments").header("authorization", token))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":[{\"amount\":54,\"actualAmount\":54,\"paymentPattern\":\"001\",\"orderId\":null,\"state\":1,\"aftersaleId\":1},{\"amount\":1104,\"actualAmount\":1104,\"paymentPattern\":\"002\",\"orderId\":null,\"state\":1,\"aftersaleId\":1}]}";
+        try {
+            JSONAssert.assertEquals(expectedResponse, responseString, false);
+        } catch (
+                JSONException e) {
+            e.printStackTrace();
+        }
+
+        //管理员查询售后单支付
+        try {
+            responseString = this.mvc.perform(get("/shops/1/aftersales/1/payments").header("authorization", token))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":[{\"amount\":54,\"actualAmount\":54,\"paymentPattern\":\"001\",\"orderId\":null,\"state\":1,\"aftersaleId\":1},{\"amount\":1104,\"actualAmount\":1104,\"paymentPattern\":\"002\",\"orderId\":null,\"state\":1,\"aftersaleId\":1}]}";
+        try {
+            JSONAssert.assertEquals(expectedResponse, responseString, false);
+        } catch (
+                JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //新建订单退款
+    @Test
+    public void createRefund() throws Exception{
+        String responseString=null;
+        String token = createToken(1L, 0L, 100);
+
+        //新建订单退款
+        NewRefundVo vo=new NewRefundVo();
+        vo.setAmount(0L);
+
+        try{
+            responseString = this.mvc.perform(post("/shops/1/payments/1/refunds").header("authorization",token)
+                    .contentType("application/json;charset=UTF-8")
+                    .content(JacksonUtil.toJson(vo)))
+                    .andExpect(status().isCreated())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        }catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        //管理员查询订单退款
+        try {
+            responseString = this.mvc.perform(get("/shops/1/orders/1/refunds").header("authorization", token))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":{\"paymentId\":1,\"amount\":0,\"orderId\":1,\"aftersaleId\":null,\"state\":1}}";
+        try {
+            JSONAssert.assertEquals(expectedResponse, responseString, false);
+        } catch (
+                JSONException e) {
+            e.printStackTrace();
+        }
+
+        //买家查询自己订单的退款
+        try {
+            responseString = this.mvc.perform(get("/orders/1/refunds").header("authorization", token))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":{\"paymentId\":1,\"amount\":0,\"orderId\":1,\"aftersaleId\":null,\"state\":1}}";
+        try {
+            JSONAssert.assertEquals(expectedResponse, responseString, false);
+        } catch (
+                JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
     //买家查询自己订单的支付信息
     @Test
@@ -130,6 +378,7 @@ public class PaymentControllerTest {
             e.printStackTrace();
         }
     }
+
     //管理员查询订单的退款
     @Test
     public void getOrderRefundShop() {
@@ -152,7 +401,7 @@ public class PaymentControllerTest {
         }
     }
 
-    //买家查询自己售后单的退款
+    //管理员查询自己售后单的退款
     @Test
     public void getAftersaleRefundShop() {
         String responseString = null;
@@ -217,6 +466,5 @@ public class PaymentControllerTest {
             e.printStackTrace();
         }
     }
-
 
 }

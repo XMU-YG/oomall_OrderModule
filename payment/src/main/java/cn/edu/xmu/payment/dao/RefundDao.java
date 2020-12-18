@@ -88,9 +88,10 @@ public class RefundDao {
      * Modified at 2020/12/10
      */
     public ReturnObject<VoObject> createRefund(Refund refund) {
-        //在payment里填入时间、状态、生成sn
+        //在refund里填入时间、状态、生成sn
         refund.setGmtCreate(LocalDateTime.now());
         refund.setState((byte)RefundStates.REFUNDED.getCode());
+        refund.setGmtModified(LocalDateTime.now());
 
         //用bo创建po
         RefundPo po=refund.createPo();

@@ -18,6 +18,7 @@ import cn.edu.xmu.payment.util.PaymentPatterns;
 import cn.edu.xmu.payment.util.PaymentStates;
 import io.swagger.annotations.*;
 import net.bytebuddy.asm.Advice;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,8 +62,8 @@ public class PaymentController {
     })
     //@Auit
     @GetMapping("/payments/states")
-    public Object getAllPaymentStates(@LoginUser @ApiIgnore @RequestParam(required = false)  Long id){
-        logger.debug("getAllPaymentStates: id"+id);
+    public Object getAllPaymentStates(){
+        logger.debug("getAllPaymentStates: ");
 
         PaymentStates[] paymentStates=PaymentStates.class.getEnumConstants();
         List<StateVo> stateVos=new ArrayList<>(paymentStates.length);
@@ -130,12 +131,13 @@ public class PaymentController {
 
         //service层做其他校验
         Object retObject=null;
-        ReturnObject<VoObject> payment=paymentService.createOrderPayment(userId,id,vo);
+        ReturnObject payment=paymentService.createOrderPayment(userId,id,vo);
 
         if(payment.getCode().equals(ResponseCode.OK)){
+            httpServletResponse.setStatus(HttpStatus.SC_CREATED);
             retObject=Common.getRetObject(payment);
         }else{
-            retObject=Common.decorateReturnObject(payment);
+            retObject=Common.getNullRetObj(payment,httpServletResponse);
         }
 
         return retObject;
@@ -173,16 +175,18 @@ public class PaymentController {
 
         //service层做其他校验
         Object retObject=null;
-        ReturnObject<VoObject> payment=paymentService.createAftersalePayment(userId,id,vo);
+        ReturnObject payment=paymentService.createAftersalePayment(userId,id,vo);
 
         if(payment.getCode().equals(ResponseCode.OK)){
+            httpServletResponse.setStatus(HttpStatus.SC_CREATED);
             retObject=Common.getRetObject(payment);
         }else{
-            retObject=Common.decorateReturnObject(payment);
+            retObject=Common.getNullRetObj(payment,httpServletResponse);
         }
 
         return retObject;
     }
+
 
     /**
      * 管理员查询订单支付信息
@@ -344,12 +348,13 @@ public class PaymentController {
 
         //service层做其他校验
         Object retObject=null;
-        ReturnObject<VoObject> refund=refundService.createRefund(shopId,id,vo);
+        ReturnObject refund=refundService.createRefund(shopId,id,vo);
 
         if(refund.getCode().equals(ResponseCode.OK)){
+            httpServletResponse.setStatus(HttpStatus.SC_CREATED);
             retObject=Common.getRetObject(refund);
         }else{
-            retObject=Common.decorateReturnObject(refund);
+            retObject=Common.getNullRetObj(refund,httpServletResponse);
         }
 
         return retObject;
@@ -384,7 +389,6 @@ public class PaymentController {
         if(refund.getCode().equals(ResponseCode.OK)){
             returnObject=Common.getRetObject(refund);
         }else{
-            //returnObject=Common.decorateReturnObject(refund);
             returnObject=Common.getNullRetObj(refund,httpServletResponse);
         }
 

@@ -37,9 +37,10 @@ public class PaymentDao {
         //处理传入的bo对象
         payment.setActualAmount(payment.getAmount());
         payment.setGmtCreate(LocalDateTime.now());
-        payment.setBeginTime(payment.getGmtCreate());
-        payment.setEndTime(payment.getGmtCreate().plusMinutes(30));
+        payment.setBeginTime(LocalDateTime.now());
         payment.setPayTime(LocalDateTime.now());
+        payment.setEndTime(LocalDateTime.now());
+        payment.setGmtModified(LocalDateTime.now());
         payment.setState((byte) PaymentStates.PAYED.getCode());
         payment.setPaymentSn();
 
