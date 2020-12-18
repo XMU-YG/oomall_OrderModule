@@ -11,6 +11,7 @@ import cn.edu.xmu.payment.model.po.PaymentPoExample;
 import cn.edu.xmu.payment.model.po.RefundPo;
 import cn.edu.xmu.payment.model.vo.NewPaymentVo;
 import cn.edu.xmu.payment.service.PaymentService;
+import cn.edu.xmu.payment.util.PaymentPatterns;
 import cn.edu.xmu.payment.util.PaymentStates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,5 +118,20 @@ public class PaymentDao {
             ret.add(payment);
         }
         return ret;
+    }
+
+    /**
+     * 获取订单的现金支付id
+     * @param pid
+     * @return
+     */
+    public Long getOrderCashPaymentId(Long pid) {
+        List<Payment> payments=findPaymentByOrder(pid);
+
+        for(Payment pay:payments){
+            if(pay.getPaymentPattern()== PaymentPatterns.NORMALPAY.getCode())
+                return pay.getId();
+        }
+        return 0L;
     }
 }

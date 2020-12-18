@@ -87,8 +87,8 @@ public class PaymentController {
     })
     //@Auit
     @GetMapping("/payments/patterns")
-    public Object getAllPaymentPattern(@LoginUser @ApiIgnore @RequestParam(required = false)  Long id){
-        logger.debug("getAllPaymentPattern: id"+id);
+    public Object getAllPaymentPattern(){
+        logger.debug("getAllPaymentPattern: ");
 
         PaymentPatterns[] paymentPatterns=PaymentPatterns.class.getEnumConstants();
         List<PatternVo> patternVos=new ArrayList<>(paymentPatterns.length);
@@ -97,12 +97,12 @@ public class PaymentController {
         }
         return ResponseUtil.ok(new ReturnObject<List>(patternVos).getData());
     }
+
     /**
      * 买家为订单创建支付单
      * @author Yuting Zhong@3333
      * Modified at 2020.12.6
      */
-    //dataType: NewPaymentVo=>body
     @ApiOperation(value="买家为订单创建支付",produces = "application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType="header",dataType="String",name="authorization",value="用户token",required=true),
