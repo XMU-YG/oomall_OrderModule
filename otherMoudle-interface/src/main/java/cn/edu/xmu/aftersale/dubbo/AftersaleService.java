@@ -20,7 +20,7 @@ public interface AftersaleService {
      * 属于       1
      * Created in 2020/12/12
      */
-    public Integer checkShopAftersale(Long shopId,Long aftersaleId);
+    public Integer checkShopAftersale(Long shopId, Long aftersaleId);
 
     /**
      * 订单模块
@@ -32,7 +32,7 @@ public interface AftersaleService {
      * 属于       1
      * Created in 2020/12/12
      */
-    public Integer checkUserAftersale(Long customerId,Long aftersaleId);
+    public Integer checkUserAftersale(Long customerId, Long aftersaleId);
 
     /**
      * 分享模块

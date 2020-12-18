@@ -21,7 +21,7 @@ public interface ShareService {
     * @author: Zeyao Feng
     * @date: Created in 2020/12/15 10:30
     */
-    public Long fillOrderItemByBeShare(Long skuId,Long userId);
+    public Long fillOrderItemByBeShare(Long skuId, Long userId);
 
 
     /**
