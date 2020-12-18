@@ -3,17 +3,16 @@ package cn.edu.xmu.order.controller;
 import cn.edu.xmu.ooad.annotation.Audit;
 import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.model.VoObject;
-import cn.edu.xmu.ooad.util.Common;
-import cn.edu.xmu.ooad.util.ResponseCode;
-import cn.edu.xmu.ooad.util.ResponseUtil;
-import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.order.factory.PostOrderFactory;
+import cn.edu.xmu.ooad.util.*;
+import cn.edu.xmu.order.factory.CreateOrderFactory;
 import cn.edu.xmu.order.model.vo.AddressVo;
+import cn.edu.xmu.order.model.vo.OrderItemVo;
 import cn.edu.xmu.order.model.vo.StateRetVo;
 import cn.edu.xmu.order.service.OrderService;
 import cn.edu.xmu.order.util.OrderStatus;
 import cn.edu.xmu.order.model.vo.OrderVo;
-import cn.edu.xmu.order.util.PostOrderService;
+import cn.edu.xmu.order.util.CreateOrderService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
@@ -45,7 +44,7 @@ public class OrderController {
     private HttpServletResponse httpServletResponse;
 
     @Autowired
-    private PostOrderFactory postOrderFactory;
+    private CreateOrderFactory createOrderFactory;
 
     /**
      * 新增订单
@@ -58,10 +57,12 @@ public class OrderController {
      * @throws InvocationTargetException
      * @throws InstantiationException
      */
+
+
     @ApiOperation(value = "新增订单")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
-            @ApiImplicitParam(name="orderInfo", value="订单信息", required = true, dataType="object", paramType="body")
+            @ApiImplicitParam(paramType="body",dataType="OrderVo",name="orderInfo", value="订单信息", required = true)
 
     })
     @ApiResponses({
@@ -69,23 +70,28 @@ public class OrderController {
             @ApiResponse(code = 900, message = "商品库存不足")
     })
     @Audit
-    @PostMapping("orders")
-    public Object addNewOrderByCustomer(@ApiIgnore @LoginUser Long customerId, @Validated @RequestBody OrderVo orderInfo, BindingResult bindingResult) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    @RequestMapping(value = "orders",
+            produces = { "application/json;charset=UTF-8" },
+            method = RequestMethod.POST)
+    public Object createNewOrderByCustomer(
+            @ApiIgnore @LoginUser Long customerId,
+             @Validated  @RequestBody OrderVo orderInfo,
+            BindingResult bindingResult) throws JsonProcessingException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException {
 
+    logger.debug("in controller");
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
             return returnObject;
         }
         Object ret=null;
-
-        PostOrderService postOrderService=postOrderFactory.createService(orderInfo);
-        //System.out.println("***"+postOrderService.toString()+"   ");
+        System.out.println("****");
+        CreateOrderService createOrderService = createOrderFactory.createService(orderInfo);
         logger.debug("addNewOrder.  customerId: "+customerId);
-        ReturnObject object=postOrderService.addNewOrderByCustomer(customerId,orderInfo);
+        ReturnObject object= createOrderService.createOrderByCustomer(customerId,orderInfo);
 
         if (object.getCode().equals(ResponseCode.OK)){
-            ret=Common.getRetObject(object);
+            ret=Common.decorateReturnObject(object);
         }
         else{
             ret=Common.getNullRetObj(object,httpServletResponse);

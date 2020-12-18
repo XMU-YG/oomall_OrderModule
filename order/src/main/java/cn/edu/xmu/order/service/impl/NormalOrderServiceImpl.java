@@ -1,13 +1,14 @@
 package cn.edu.xmu.order.service.impl;
 
-import cn.edu.xmu.goodsprovider.activity.PreGroInner;
+import cn.edu.xmu.goodsprovider.flashsale.FlashService;
 import cn.edu.xmu.goodsprovider.goods.GoodsInner;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.order.model.bo.OrderItem;
 import cn.edu.xmu.order_provider.IFreightService;
-import cn.edu.xmu.order_provider.goods.modol.OrderGoods;
+import cn.edu.xmu.goodsprovider.Module.OrderGoods;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrderPo;
 import cn.edu.xmu.order.model.vo.OrderVo;
@@ -16,13 +17,14 @@ import cn.edu.xmu.order.service.OrderService;
 import cn.edu.xmu.order.service.time.TimeService;
 import cn.edu.xmu.order.util.OrderStatus;
 import cn.edu.xmu.order.util.OrderType;
-import cn.edu.xmu.order.util.PostOrderService;
-import cn.edu.xmu.order_provider.goods.IGoodsService;
+import cn.edu.xmu.order.util.CreateOrderService;
 import cn.edu.xmu.order_provider.other.IOtherService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +35,7 @@ import java.util.Map;
  * 普通订单创建服务
  */
 @Component("NorOrderService")
-public class NormalOrderServiceImpl implements PostOrderService {
+public class NormalOrderServiceImpl implements CreateOrderService {
 
     @Autowired
     private OrderService orderService;
@@ -44,21 +46,28 @@ public class NormalOrderServiceImpl implements PostOrderService {
     @DubboReference(version ="0.0.1",check = false)
     private GoodsInner goodsInner;
 
+    @DubboReference(version ="0.0.1",check = false)
+    private FlashService flashService;
+
+
     @DubboReference(version ="1.0-SNAPSHOT")
     private IOtherService otherService;
 
-    @DubboReference(version ="1.0-SNAPSHOT")
+    @DubboReference(version ="0.0.1")
     private IFreightService freightService;
 
     @Override
-    public ReturnObject addNewOrderByCustomer(Long customerId, OrderVo vo) {
+    public ReturnObject createOrderByCustomer(Long customerId, OrderVo vo) throws JsonProcessingException, InstantiationException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, ClassNotFoundException {
         ReturnObject<String> returnObject=null;
         OrderPo orderPo=vo.createOrderPo();
         orderPo.setGmtCreate(LocalDateTime.now());
         List<OrderItemVo> orderItemVos=vo.getOrderItems();
-        List<OrderItemPo> orderItemPos=vo.createOrderItemsPo();
+        List<OrderItemPo> orderItemPos=new ArrayList<>(orderItemVos.size());
+
+        List<OrderItem> orderItemList=new ArrayList<>(orderItemPos.size());
 
         String orderSn= Common.genSeqNum();
+        //System.out.println("***"+orderSn);
         orderPo.setOrderSn(orderSn);
         //0普通 1团购 2预售
         orderPo.setOrderType(OrderType.NORMAL.getCode());
@@ -71,12 +80,16 @@ public class NormalOrderServiceImpl implements PostOrderService {
         //检查库存
         for (OrderItemVo orderItemVo:orderItemVos) {
             OrderItemPo orderItemPo=new OrderItemPo();
-            String orderGoodsJson=null;
+            String orderGoodsJson=flashService.findGoodsBySkuId(orderItemVo.getSkuId());
+            //System.out.println(orderItemVo.getSkuId()+"  "+orderGoodsJson);
             OrderGoods order_goods= JacksonUtil.toObj(orderGoodsJson,OrderGoods.class);
+            order_goods.setSeckill(false);
+            //System.out.println(order_goods.getGoods_sku_id()+"  "+order_goods.getQuantity());
             if (order_goods==null||orderItemVo.getQuantity()>order_goods.getQuantity()){
                 //库存不足
                 return new ReturnObject<>(ResponseCode.SKU_NOTENOUGH);
             }
+
             //构造OrderItemPo
             orderItemPo.setCouponActivityId(orderItemVo.getCouponActId());
             orderItemPo.setQuantity(orderItemVo.getQuantity());
@@ -84,10 +97,13 @@ public class NormalOrderServiceImpl implements PostOrderService {
             orderItemPo.setPrice(order_goods.getPrice());
             orderItemPo.setGoodsSkuId(order_goods.getGoods_sku_id());
             orderItemPo.setGmtCreate(LocalDateTime.now());
-            orderItemPo.setBeShareId(otherService.getBeSharedId(orderItemPo.getGoodsSkuId(),customerId));
+            //todo otherService.getBeSharedId(orderItemPo.getGoodsSkuId(),customerId)
             orderItemPo.setGmtModified(LocalDateTime.now());
-            orderItemPos.add(orderItemPo);
 
+            orderItemPos.add(orderItemPo);
+            //用来算优惠
+            OrderItem orderItem=new OrderItem(orderItemPo);
+            orderItemList.add(orderItem);
             //商品数量属性设为购买数量，方便之后处理
             order_goods.setQuantity(orderItemVo.getQuantity());
             //将商品分类（普通和秒杀）
@@ -109,14 +125,22 @@ public class NormalOrderServiceImpl implements PostOrderService {
         //处理OrderPo
         orderPo.setCustomerId(customerId);
         //计算运费
-        String itemJson=JacksonUtil.toJson(goodsMap);
         orderPo.setFreightPrice(freightService.calculateFreight(orderPo.getRegionId(),goodsMap));
         //计算返点数
         String orderItemPosJson=JacksonUtil.toJson(orderItemPos);
-        orderPo.setRebateNum(otherService.calculateRebateNum(orderItemPosJson,customerId));
+        //todo otherService.calculateRebateNum(orderItemPosJson,customerId)
+        orderPo.setRebateNum(0);
 
-        /*todo 计算订单优惠，注意在函数中要设置OrderGoods的discount属性*/
-        //orderPo.setDiscountPrice(orderService.calculateDiscount());
+        //计算订单优惠，注意在函数中要设置OrderGoods的discount属性
+        //orderItemList=orderService.calculateDiscount(orderItemList);
+//        for (OrderItemPo o:orderItemPos) {
+//            orderItemList.forEach(v->{
+//                if (o.getId().equals(v.getId())){
+//                    o.setDiscount(v.getDiscount());
+//                }
+//            });
+//        }
+        //orderPo.setDiscountPrice(orderService.totalDiscount(orderItemList));
         //设为待支付状态
         orderPo.setState((byte) OrderStatus.WAIT_FOR_PAID.getCode());
         //计算原价
@@ -126,7 +150,7 @@ public class NormalOrderServiceImpl implements PostOrderService {
         ReturnObject<Long> orderRet=orderService.insertOrder(orderPo);
         Long orderId=orderRet.getData();
         //定时任务
-        timeService.createPayTask(customerId,orderId);
+        //timeService.createPayTask(customerId,orderId);
         if (orderRet.getCode().equals(ResponseCode.OK)){
             /*构造orderItems*/
             for (OrderItemPo orderItemPo:orderItemPos) {
@@ -138,6 +162,7 @@ public class NormalOrderServiceImpl implements PostOrderService {
                 }
             }
             returnObject=new ReturnObject(orderPo.getOrderSn());
+            System.out.println("SN: "+orderPo.getOrderSn());
         }
         else {
             returnObject=new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
@@ -148,6 +173,7 @@ public class NormalOrderServiceImpl implements PostOrderService {
 
     @Override
     public boolean deductStock(Long actId,Long skuId, Integer quantity) {
+        System.out.println("开始扣：");
         return goodsInner.deductNorStock(skuId, quantity);
     }
 

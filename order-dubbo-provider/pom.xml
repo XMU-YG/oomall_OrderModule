@@ -11,7 +11,7 @@
 
     <packaging>jar</packaging>
 
-    <artifactId>order-produce</artifactId>
+    <artifactId>order-dubbo-provider</artifactId>
     <dependencies>
 
         <dependency>

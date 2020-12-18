@@ -8,6 +8,7 @@ import cn.edu.xmu.freight.model.bo.PieceItem;
 import cn.edu.xmu.freight.model.po.PieceFreightPo;
 import cn.edu.xmu.freight.model.po.WeightFreightPo;
 import cn.edu.xmu.freight.model.vo.*;
+import cn.edu.xmu.goodsprovider.goods.GoodsInner;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -34,8 +35,8 @@ public class FreightService {
     @Autowired
     private FreightDao freightDao;
 
-    @DubboReference
-    private IFGoodsService goodsService;
+    @DubboReference(version = "0.0.1",check = false)
+    private GoodsInner goodsService;
     /**
      * 获取运费模板概要
      * @author 胡曼珑
@@ -168,7 +169,7 @@ public class FreightService {
 
         /*调用商品模块的删除与运费模板的联系*/
         ReturnObject<VoObject> ret= freightDao.deleteModel(shopId,id);
-        boolean judge=goodsService.cleanFreightIdById (id);
+        boolean judge=goodsService.cleanFreightById(id);
         if(judge)
             return ret;
         else
@@ -197,7 +198,7 @@ public class FreightService {
         String goodsInfoJson=null;
        ///InnerSkuFreightInfo info=null;
         for (Long id:skuIds) {
-            goodsInfoJson=goodsService.getGoodsInfoBySkuIds(id);
+            goodsInfoJson=goodsService.getFreightInfoBySkuId(id);
             InnerSkuFreightInfo info= JacksonUtil.toObj(goodsInfoJson,InnerSkuFreightInfo.class);
             weightSum+=info.getWeight();
             freightId=info.getFreightId();

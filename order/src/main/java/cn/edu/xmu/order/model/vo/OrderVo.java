@@ -2,6 +2,7 @@ package cn.edu.xmu.order.model.vo;
 
 import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrderPo;
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -11,9 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@ApiModel
 public class OrderVo {
 
-    //@NotEmpty
+    @NotEmpty(message = "商品不能为空")
     private List<OrderItemVo> orderItems;
     @NotBlank
     private String consignee;

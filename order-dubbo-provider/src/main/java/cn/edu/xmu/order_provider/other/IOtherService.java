@@ -27,12 +27,6 @@ public interface IOtherService {
 
     public Long getBeSharedId(Long skuId,Long customerId);
 
-    /**
-     * 查看是否有售后信息
-     * @param orderId
-     * @return
-     */
-    public boolean haveAfterSaleCode(Long orderId);
 
     /**
      * 创建订单后删除购物车商品

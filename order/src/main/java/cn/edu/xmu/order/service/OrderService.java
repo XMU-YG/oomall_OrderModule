@@ -1,6 +1,7 @@
 package cn.edu.xmu.order.service;
 
 import cn.edu.xmu.goodsprovider.Module.ShopRetVo;
+import cn.edu.xmu.goodsprovider.flashsale.FlashService;
 import cn.edu.xmu.goodsprovider.goods.ShopService;
 import cn.edu.xmu.ooad.model.VoObject;
 
@@ -14,8 +15,8 @@ import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.order.dao.OrderDao;
 import cn.edu.xmu.order.dao.OrderItemDao;
 
-import cn.edu.xmu.order.util.PostOrderService;
-import cn.edu.xmu.order_provider.goods.modol.OrderGoods;
+import cn.edu.xmu.order.util.CreateOrderService;
+import cn.edu.xmu.goodsprovider.Module.OrderGoods;
 import cn.edu.xmu.order_provider.model.order.GoodsDTO;
 import cn.edu.xmu.order_provider.model.order.OtherDTO;
 import cn.edu.xmu.order.model.bo.Order;
@@ -29,7 +30,7 @@ import cn.edu.xmu.order.model.bo.*;
 import cn.edu.xmu.order.model.vo.OrderItemVo;
 import cn.edu.xmu.order.model.vo.OrderVo;
 import cn.edu.xmu.order.util.OrderStatus;
-import cn.edu.xmu.order_provider.goods.IGoodsService;
+
 import cn.edu.xmu.order_provider.other.IOtherService;
 import org.apache.dubbo.config.annotation.DubboReference;
 
@@ -64,10 +65,10 @@ public class OrderService {
     @Autowired
     private ApplicationContext applicationContext;
 
-    @DubboReference(version = "0.0.1-SNAPSHOT", check=false)
+    @DubboReference(version = "0.0.1", check=false)
     private ShopService shopService;
 
-    private IGoodsService goodsService;
+    private FlashService goodsService;
     @DubboReference
     private IOtherService otherService;
 
@@ -158,7 +159,7 @@ public class OrderService {
             if (returnObject.getErrmsg().equals("已取消")){
                 List<SimpleOrderItem> simpleOrderItems=orderItemDao.getSimOrderItemsByOrderId(orderId);
                 for (SimpleOrderItem item:simpleOrderItems) {
-                    goodsService.addStock(item.getGoods_sku_id(),item.getQuantity());
+                   // goodsService.addStock(item.getGoods_sku_id(),item.getQuantity());
                 }
             }
             return returnObject;
@@ -302,7 +303,7 @@ public class OrderService {
     @Transactional
     public ReturnObject disposeNorGoodsList(Long actId,List<OrderGoods> goodsList, String beanName)  {
 
-        PostOrderService deductService=applicationContext.getBean(beanName,PostOrderService.class);
+        CreateOrderService deductService=applicationContext.getBean(beanName, CreateOrderService.class);
         //扣库存
         //存储以扣库存的商品skuId和quantity，便于回滚,局域变量，线程安全
         Map<Long,Integer> map=new HashMap<>(goodsList.size());
@@ -319,6 +320,7 @@ public class OrderService {
             }
             //扣成功则存入map
             map.put(po.getGoods_sku_id(),po.getQuantity());
+            System.out.println(po.getGoods_sku_id()+"  "+po.getQuantity()+"   成功");
         }
         return new ReturnObject<>(ResponseCode.OK);
     }
@@ -641,7 +643,6 @@ public class OrderService {
         });
         return  items;
     }
-
 
     public GoodsDTO getGoodsDTOForGoods(Long orderItemId) {
         GoodsDTO goodsDTO=new GoodsDTO();

@@ -1,5 +1,6 @@
 package cn.edu.xmu.order.dao;
 
+import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.order.mapper.OrderItemPoMapper;
@@ -46,6 +47,7 @@ public class OrderItemDao {
 
     public ReturnObject insertOrderItem(OrderItemPo orderItemPo) {
         ReturnObject returnObject=null;
+        System.out.println(" : "+JacksonUtil.toJson(orderItemPo));
         try{
             int ret=orderItemPoMapper.insert(orderItemPo);
             if (ret==1){

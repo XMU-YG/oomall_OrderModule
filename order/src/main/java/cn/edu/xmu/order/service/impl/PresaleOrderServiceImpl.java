@@ -6,7 +6,7 @@ import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.order_provider.IFreightService;
-import cn.edu.xmu.order_provider.goods.modol.OrderGoods;
+import cn.edu.xmu.goodsprovider.Module.OrderGoods;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrderPo;
 import cn.edu.xmu.order.model.vo.OrderItemVo;
@@ -15,8 +15,7 @@ import cn.edu.xmu.order.service.OrderService;
 import cn.edu.xmu.order.service.time.TimeService;
 import cn.edu.xmu.order.util.OrderStatus;
 import cn.edu.xmu.order.util.OrderType;
-import cn.edu.xmu.order.util.PostOrderService;
-import cn.edu.xmu.order_provider.goods.IGoodsService;
+import cn.edu.xmu.order.util.CreateOrderService;
 import cn.edu.xmu.order_provider.other.IOtherService;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +30,7 @@ import java.util.Map;
  * 预售订单创建服务
  */
 @Component("PreOrderService")
-public class PresaleOrderServiceImpl implements PostOrderService {
+public class PresaleOrderServiceImpl implements CreateOrderService {
 
     @Autowired
     private OrderService orderService;
@@ -49,7 +48,7 @@ public class PresaleOrderServiceImpl implements PostOrderService {
     private IFreightService freightService;
 
     @Override
-    public ReturnObject addNewOrderByCustomer(Long customerId, OrderVo vo) {
+    public ReturnObject createOrderByCustomer(Long customerId, OrderVo vo) {
         ReturnObject<String> returnObject = null;
         OrderPo orderPo = vo.createOrderPo();
         orderPo.setGmtCreate(LocalDateTime.now());

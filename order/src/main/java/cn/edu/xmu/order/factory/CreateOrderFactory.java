@@ -1,10 +1,10 @@
 package cn.edu.xmu.order.factory;
 
+import cn.edu.xmu.goodsprovider.activity.PreGroInner;
 import cn.edu.xmu.order.model.po.OrderItemPo;
 
 import cn.edu.xmu.order.model.vo.OrderVo;
-import cn.edu.xmu.order.util.PostOrderService;
-import cn.edu.xmu.order_provider.goods.IGoodsService;
+import cn.edu.xmu.order.util.CreateOrderService;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -18,17 +18,16 @@ import java.util.List;
 
 @Component
 @Slf4j
-public  class PostOrderFactory {
+public  class CreateOrderFactory {
 
     @Autowired
     private ApplicationContext applicationContext;
 
 
-    @DubboReference
-    private IGoodsService goodsService;
+    @DubboReference(version = "0.0.1",check = false)
+    private PreGroInner preGroInner;
 
-
-    public PostOrderService createService(OrderVo vo){
+    public CreateOrderService createService(OrderVo vo){
 
         List<OrderItemPo> itemPos=vo.createOrderItemsPo();
         ArrayList<Long> skuIds=new ArrayList<>(itemPos.size());
@@ -36,19 +35,20 @@ public  class PostOrderFactory {
             skuIds.add(o.getGoodsSkuId());
         }
         if (vo.getGrouponId()!=null){
-            boolean effective=goodsService.checkGrouponSkuId(vo.getPresaleId(),skuIds.get(0));
+            boolean effective=preGroInner.checkGrouponSkuId(vo.getPresaleId(),skuIds.get(0));
             if (effective){
-                return applicationContext.getBean("GroOrderService", PostOrderService.class);
+                return applicationContext.getBean("GroOrderService", CreateOrderService.class);
             }
         }
         if (vo.getPresaleId()!=null){
-            boolean effective=goodsService.checkPresaleSkuId(vo.getPresaleId(),skuIds.get(0));
+            boolean effective=preGroInner.checkPresaleSkuId(vo.getPresaleId(),skuIds.get(0));
             if (effective){
 
-                return applicationContext.getBean("PreOrderService", PostOrderService.class);
+                return applicationContext.getBean("PreOrderService", CreateOrderService.class);
             }
         }
-        return applicationContext.getBean("NorOrderService", PostOrderService.class);
+        System.out.println("####");
+        return applicationContext.getBean("NorOrderService", CreateOrderService.class);
 
     }
 }

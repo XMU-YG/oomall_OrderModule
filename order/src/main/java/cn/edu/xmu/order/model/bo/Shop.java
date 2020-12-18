@@ -2,7 +2,6 @@ package cn.edu.xmu.order.model.bo;
 
 import cn.edu.xmu.goodsprovider.Module.ShopRetVo;
 import lombok.Data;
-import sun.security.provider.SHA;
 
 import java.time.LocalDateTime;
 
@@ -19,6 +18,9 @@ public class Shop {
 
     private LocalDateTime shopGmtModified;
 
+    public Shop(){
+
+    }
     public Shop(ShopRetVo shopRetVo){
         this.setShopId(shopRetVo.getId());
         this.setShopName(shopRetVo.getName());

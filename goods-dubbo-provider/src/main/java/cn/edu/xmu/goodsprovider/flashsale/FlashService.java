@@ -6,4 +6,6 @@ public interface FlashService {
     //4. 将秒杀表中segID等于该时段ID的项的segID置为0
     boolean setFsSegIDZero(Long segId);
 
+    //    //7. 根据Goods by skuId
+    String findGoodsBySkuId(Long id);
 }

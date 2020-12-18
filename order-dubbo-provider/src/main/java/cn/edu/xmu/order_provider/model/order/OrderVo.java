@@ -4,11 +4,11 @@ package cn.edu.xmu.order_provider.model.order;
 import lombok.Data;
 
 
-
+import java.io.Serializable;
 import java.util.List;
 
 @Data
-public class OrderVo {
+public class OrderVo implements Serializable {
 
     private List<OrderItemVo> orderItems;
 

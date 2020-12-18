@@ -1,5 +1,7 @@
 package cn.edu.xmu.order.service.impl;
 
+import cn.edu.xmu.ooad.util.ResponseCode;
+import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.order_provider.IOrderService;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.order.service.OrderService;
@@ -37,7 +39,6 @@ public class IOrderServiceImpl implements IOrderService {
 
     @Override
     public OtherDTO getOtherDTO(Long orderItemId) {
-
         return orderService.getOrderDTOForOther(orderItemId);
     }
 
@@ -48,11 +49,29 @@ public class IOrderServiceImpl implements IOrderService {
 
     @Override
     public String checkUserOrder(Long userId, Long orderId) {
-        return null;
+        ReturnObject returnObject= orderService.verifyOrderByCustomerId(userId,orderId);
+        if (returnObject.getCode().equals(ResponseCode.OK)){
+            return "1";
+        }else if (returnObject.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST)){
+            return "-1";
+        }else if (returnObject.getCode().equals(ResponseCode.RESOURCE_ID_OUTSCOPE)){
+            return "0";
+        }else {
+            return "-2";
+        }
     }
 
     @Override
     public String checkShopOrder(Long shopId, Long orderId) {
-        return null;
+        ReturnObject returnObject= orderService.verifyOrderByShopId(shopId,orderId);
+        if (returnObject.getCode().equals(ResponseCode.OK)){
+            return "1";
+        }else if (returnObject.getCode().equals(ResponseCode.RESOURCE_ID_NOTEXIST)){
+            return "-1";
+        }else if (returnObject.getCode().equals(ResponseCode.RESOURCE_ID_OUTSCOPE)){
+            return "0";
+        }else {
+            return "-2";
+        }
     }
 }

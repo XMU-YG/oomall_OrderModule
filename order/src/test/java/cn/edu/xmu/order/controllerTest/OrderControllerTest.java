@@ -4,27 +4,24 @@ import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.order.OrderServiceApplication;
-import cn.edu.xmu.order.factory.PostOrderFactory;
+import cn.edu.xmu.order.factory.CreateOrderFactory;
 import cn.edu.xmu.order.model.vo.AddressVo;
+import cn.edu.xmu.order.model.vo.OrderItemVo;
 import cn.edu.xmu.order.model.vo.OrderVo;
-import cn.edu.xmu.order.util.PostOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
-import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpHeaders;
-import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -37,14 +34,14 @@ public class OrderControllerTest {
     @Autowired
     MockMvc mvc;
     @Autowired
-    PostOrderFactory postOrderFactory;
+    CreateOrderFactory createOrderFactory;
 
     @Test
     public void createToken(){
         String responseString = null;
         //eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE0MTUyMDE4NjBDIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjotMiwiZXhwIjoxNjA4NTMwNDE4LCJ1c2VySWQiOjMsImlhdCI6MTYwNzkzMDQxOH0.u_UhJ4T9IFcdi--E1Ka-w58yfQporUZfMn7McGs6w6o
 
-        String token=new JwtHelper().createToken(1L,-2l,600000);
+        String token=new JwtHelper().createToken(1L,-2l,60000000);
         System.out.println(token);
     }
 
@@ -612,31 +609,42 @@ public class OrderControllerTest {
 //        }
 //    }
 //
-//    @Test
-//    public void createNorOrderTest(){
-//        OrderVo orderVo=new OrderVo();
-//        orderVo.setAddress("厦门市");
-//        orderVo.setConsignee("xmu");
-//        orderVo.setMessage("nothing");
-//        orderVo.setMobile("123456");
-//        orderVo.setRegionId(2L);
-////        String orderInfo=JacksonUtil.toJson(orderVo);
-////        String responseString = null;
-////        String token = new JwtHelper().createToken(3L, -2L, 6000);
-////        try {
-////            responseString = this.mvc.perform(post("/order/orders").header("authorization", token)
-////                    .param("orderInfo",orderInfo))
-////                    .andExpect(status().isOk())
-////                    .andExpect(content().contentType("application/json;charset=UTF-8"))
-////                    .andReturn().getResponse().getContentAsString();
-////        } catch (Exception e) {
-////            e.printStackTrace();
-////        }
-//        //String expectedResponse = new String(Files.readAllBytes(Paths.get("src/test/resources/order_states.json")));
-////        try {
-////            JSONAssert.assertEquals(expectedResponse, responseString, false);
-////        } catch (JSONException e) {
-////            e.printStackTrace();
-////        }
-//    }
+    @Test
+    public void createNorOrderTest(){
+        OrderVo orderVo=new OrderVo();
+        orderVo.setAddress("厦门市");
+        orderVo.setConsignee("xmu");
+        orderVo.setMessage("nothing");
+        orderVo.setMobile("123456");
+        orderVo.setRegionId(2L);
+        String orderInfo=JacksonUtil.toJson(orderVo);
+        List<OrderItemVo> orderItemVos=new ArrayList<>();
+        OrderItemVo orderItemVo=new OrderItemVo();
+        orderItemVo.setSkuId(273L);
+        orderItemVo.setQuantity(2);
+        orderItemVos.add(orderItemVo);
+        orderItemVo.setSkuId(274L);
+        orderItemVo.setQuantity(3);
+        orderItemVos.add(orderItemVo);
+        orderVo.setOrderItems(orderItemVos);
+        System.out.println(JacksonUtil.toJson(orderVo));
+
+        String responseString = null;
+        String token = new JwtHelper().createToken(3L, -2L, 6000);
+        try {
+            responseString = this.mvc.perform(post("/order/orders").header("authorization", token)
+                    .param("orderInfo",orderInfo))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("application/json;charset=UTF-8"))
+                    .andReturn().getResponse().getContentAsString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+//        String expectedResponse = new String(Files.readAllBytes(Paths.get("src/test/resources/order_states.json")));
+//        try {
+//            JSONAssert.assertEquals(expectedResponse, responseString, false);
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+    }
 }

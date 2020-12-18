@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@DubboService(version ="1.0-SNAPSHOT") // 注意这里的Serivce引用的是dubbo的包
+@DubboService(version ="0.0.1") // 注意这里的Serivce引用的是dubbo的包
 public class FreightServiceImpl implements IFreightService {
     @Autowired
     private FreightService freightService;

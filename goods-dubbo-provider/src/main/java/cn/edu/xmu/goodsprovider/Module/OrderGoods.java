@@ -1,4 +1,4 @@
-package cn.edu.xmu.order_provider.goods.modol;
+package cn.edu.xmu.goodsprovider.Module;
 
 import lombok.Data;
 
@@ -14,6 +14,5 @@ public class OrderGoods {
     private String name;
     private Long shopId;
     private boolean isSeckill;
-
 
 }
