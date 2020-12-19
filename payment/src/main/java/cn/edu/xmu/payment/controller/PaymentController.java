@@ -277,7 +277,7 @@ public class PaymentController {
         ReturnObject object=paymentService.findOrderPaymentSelf(userId,id);
 
         if(object.getCode().equals(ResponseCode.OK)){
-            ret= Common.getListRetObject(object); //这里疑惑是要返回一个信息值还是一组信息值，下面管理员部分同理
+            ret= Common.getListRetObject(object);
         }
         else{
             ret= Common.getNullRetObj(object,httpServletResponse);
@@ -308,7 +308,7 @@ public class PaymentController {
         ReturnObject object=paymentService.findAftersalePaymentSelf(userId,id);
 
         if(object.getCode().equals(ResponseCode.OK)){
-            ret= Common.getListRetObject(object); //这里疑惑是要返回一个信息值还是一组信息值，下面管理员部分同理
+            ret= Common.getListRetObject(object);
         }
         else{
             ret=  Common.getNullRetObj(object,httpServletResponse);

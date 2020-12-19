@@ -229,7 +229,7 @@ public class RefundService {
     public ReturnObject<VoObject> createRefund(Long shopId, Long id, NewRefundVo vo) {
         ReturnObject<VoObject> retObject=null;
 
-        if(vo.getAmount().longValue()==0)
+        if(vo.getAmount()==0)
             return retObject=new ReturnObject<>(ResponseCode.OK,"退款金额为0，退款成功，但不产生退款记录");
 
 
@@ -259,7 +259,7 @@ public class RefundService {
                 if(payment.getPaymentPattern().equals(PaymentPatterns.REBATEPAY.getCode())){
                     //Long userId=orderService.getOrderUser(payment.getOrderId());
                     Long userId=1L;
-                    if(!userService.reduceRebate(userId,-payment.getActualAmount().longValue()))
+                    if(!userService.reduceRebate(userId,-payment.getActualAmount()))
                         return retObject=new ReturnObject<>(ResponseCode.REBATE_ADD_FAIL,"增加返点失败");
                 }
 

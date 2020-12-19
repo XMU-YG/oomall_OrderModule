@@ -47,11 +47,11 @@ public class PaymentService {
      */
    public ReturnObject<VoObject> createOrderPayment(Long userId,Long orderId,NewPaymentVo vo){
        ReturnObject<VoObject> retObject=null;
-       if(vo.getPrice()==0)
+       if(vo.getPrice().equals(0))
            retObject=new ReturnObject<>(ResponseCode.OK,"支付成功，支付金额为0，不创建支付记录");
 
-        String checkBelong=orderService.checkUserOrder(userId,orderId);
-       //String checkBelong="1";
+       //String checkBelong=orderService.checkUserOrder(userId,orderId);
+       String checkBelong="1";
 
        //校验用户和订单的从属关系  若订单不存在或订单不属于对应用户，则返回相应错误码，并直接返回给controller层
       if(checkBelong.equals("-1")){
@@ -61,7 +61,7 @@ public class PaymentService {
           logger.debug("findOrderRefundShop: fail: 该订单无权限");
           retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该订单无权访问");
       }else if(checkBelong.equals("1")){
-          if(vo.getPaymentPattern()==PaymentPatterns.REBATEPAY.getCode())
+          if(vo.getPaymentPattern().equals(PaymentPatterns.REBATEPAY.getCode()))
           {
               //在用户模块查询返点够不够
              boolean rebateEnough= userService.reduceRebate(userId,vo.getPrice());
@@ -80,9 +80,7 @@ public class PaymentService {
 
                //用bo对象payment在dao层创建po对象，dao层返回构造后的vo对象
                retObject=paymentDao.createPayment(payment);
-
        }
-
        return retObject;
    }
 
@@ -95,7 +93,7 @@ public class PaymentService {
     public ReturnObject<VoObject> createAftersalePayment(Long userId,Long aftersaleId,NewPaymentVo vo) {
         ReturnObject<VoObject> retObject = null;
 
-        if(vo.getPrice()==0)
+        if(vo.getPrice().equals(0))
             retObject=new ReturnObject<>(ResponseCode.OK,"支付成功，支付金额为0，不创建支付记录");
 
         // String checkBelong="1";
@@ -109,7 +107,7 @@ public class PaymentService {
             retObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, "该售后单无权访问");
         } else if (checkBelong.equals(1)) {
 
-            if (vo.getPaymentPattern() == PaymentPatterns.REBATEPAY.getCode()) {
+            if (vo.getPaymentPattern().equals(PaymentPatterns.REBATEPAY.getCode())) {
                 //扣除用户返点
                 boolean rebateEnough = userService.reduceRebate(userId, vo.getPrice());
                 // boolean rebateEnough=true;
@@ -186,8 +184,8 @@ public class PaymentService {
      */
     public ReturnObject findOrderPaymentSelf(Long userId, Long orderId) {
         //检查
-       String checkBelong=orderService.checkUserOrder(userId,orderId);
-        // String checkBelong="1";
+        //  String checkBelong=orderService.checkUserOrder(userId,orderId);
+        String checkBelong="1";
         if(checkBelong.equals("-1")){
            ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单不存在");
            return returnObject;
@@ -208,8 +206,8 @@ public class PaymentService {
      */
     public ReturnObject findAftersalePaymentSelf(Long userId,Long aftersaleId) {
         //检查用户和售后单的从属关系
-        Integer checkBelong=aftersaleService.checkUserAftersale(userId,aftersaleId);
-        // String checkBelong="1";
+        // Integer checkBelong=aftersaleService.checkUserAftersale(userId,aftersaleId);
+        Integer checkBelong=1;
         if(checkBelong.equals(-1)){
             ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单不存在");
             return returnObject;
