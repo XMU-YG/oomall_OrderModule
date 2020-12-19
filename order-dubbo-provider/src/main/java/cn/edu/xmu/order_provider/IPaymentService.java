@@ -22,7 +22,7 @@ public interface IPaymentService {
      * @param customerId  顾客id
      * @param pid  父订单id
      * @param amount  退款金额
-     * @return
+     * @return 1退款成功 0退款金额大于支付金额 -1退款创建失败 -2 支付方面问题
      */
     public Integer couponRefund(Long shopId,Long customerId,Long pid,Long amount);
 
@@ -32,7 +32,7 @@ public interface IPaymentService {
      * @param customerId  顾客id
      * @param pid  父订单id
      * @param amount  退款金额
-     * @return
+     * @return 1退款成功 0退款金额大于支付金额 -1退款创建失败 -2 支付方面问题
      */
     public Integer normalRefund(Long shopId,Long customerId,Long pid,Long amount);
 
@@ -42,7 +42,7 @@ public interface IPaymentService {
      * @param customerId
      * @param orderItemId
      * @param amount
-     * @return
+     * @return 1退款成功 0退款金额大于支付金额 -1退款创建失败 -2 支付方面问题
      */
     public Integer aftersaleRefund(Long shopId,Long customerId,Long orderItemId,Integer amount);
 }
