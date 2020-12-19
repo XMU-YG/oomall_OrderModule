@@ -349,7 +349,7 @@ public class FreightService {
         FreightItem freightItem=vo.createFreightItem();
         freightItem.setId(id);
         freightItem.setGmtModified(LocalDateTime.now().withNano(0));
-        ReturnObject<FreightItem> retObj=freightDao.editFreightItem(freightItem);
+        ReturnObject<FreightItem> retObj=freightDao.editFreightItem(shopId,freightItem);
         return new ReturnObject<>(retObj.getCode(),retObj.getErrmsg());
     }
 
@@ -367,7 +367,7 @@ public class FreightService {
         PieceItem pieceItem=vo.createPieceItem();
         pieceItem.setId(id);
         pieceItem.setGmtModified(LocalDateTime.now().withNano(0));
-        ReturnObject<PieceItem> retObj=freightDao.editPieceItem(pieceItem);
+        ReturnObject<PieceItem> retObj=freightDao.editPieceItem(shopId,pieceItem);
         return new ReturnObject<>(retObj.getCode(),retObj.getErrmsg());
     }
 
