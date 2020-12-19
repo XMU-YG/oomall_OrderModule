@@ -1,7 +1,6 @@
 package cn.edu.xmu.order_provider;
 
 import cn.edu.xmu.order_provider.model.order.GoodsDTO;
-import cn.edu.xmu.order_provider.model.order.OrderVo;
 import cn.edu.xmu.order_provider.model.order.OtherDTO;
 
 /**
@@ -23,11 +22,19 @@ public interface IOrderService {
     /**
      * 创建售后订单
      * @param shopId
-     * @param orderVo
+     * @param
      * @return orderId
      * @author Gang Ye
      */
-    public Long createAfterSaleOrder(Long shopId, String orderVo);
+    public Long createAfterSaleOrder(
+                                     Long customerId,
+                                     Long shopId,
+                                     Long orderItemId,
+                                     String consignee,
+                                     Long regionId,
+                                     String mobile,
+                                     Integer quantity,
+                                     String address);
 
     /**
      * 支付后分单
@@ -58,5 +65,16 @@ public interface IOrderService {
      * @return 1：订单属于该店铺  0：订单不属于该店铺  -1：订单不存在  -2：数据库错误
      */
     public String checkShopOrder(Long shopId,Long orderId);
+
+    public boolean haveOrder(Long shopId);
+
+    public boolean orderIsDone(Long orderItemId);
+
+    /**
+     *
+     * @param orderId
+     * @return 0查找失败 >0 userId
+     */
+    public Long getOrderUser(Long orderId);
 
 }

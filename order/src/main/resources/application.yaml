@@ -6,8 +6,8 @@ management:
 
 server:
   port: 8083
-  servlet:
-    context-path: /order
+#  servlet:
+#    context-path: /order
   tomcat:
     threads:
       max: 1000
@@ -26,7 +26,7 @@ dubbo:
   # 设置协议-协议由提供方指定消费方被动接受
   protocol:
     name: dubbo
-    port: 20881
+    port: 20889
     # 设置超时时间
   consumer:
     timeout: 4000
@@ -40,9 +40,9 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
-    initialization-mode: always
-    schema: classpath:schema.sql
-    data: classpath:data.sql
+    initialization-mode: never
+#    schema: classpath:schema.sql
+#    data: classpath:data.sql
     druid:
       #初始化时建立物理连接的个数
       initial-size: 3

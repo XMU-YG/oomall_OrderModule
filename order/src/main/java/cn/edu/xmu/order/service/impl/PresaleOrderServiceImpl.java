@@ -16,7 +16,7 @@ import cn.edu.xmu.order.service.time.TimeService;
 import cn.edu.xmu.order.util.OrderStatus;
 import cn.edu.xmu.order.util.OrderType;
 import cn.edu.xmu.order.util.CreateOrderService;
-import cn.edu.xmu.order_provider.other.IOtherService;
+
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -41,10 +41,10 @@ public class PresaleOrderServiceImpl implements CreateOrderService {
     @DubboReference(version ="0.0.1",check = false)
     private PreGroInner preGroInner;
 
-    @DubboReference(version ="1.0-SNAPSHOT")
-    private IOtherService otherService;
+    //@DubboReference(version ="1.0-SNAPSHOT")
+    //private IOtherService otherService;
 
-    @DubboReference(version ="1.0-SNAPSHOT")
+    @DubboReference(version = "0.0.1",check = false)
     private IFreightService freightService;
 
     @Override
@@ -75,7 +75,7 @@ public class PresaleOrderServiceImpl implements CreateOrderService {
         orderItemPo.setPrice(order_goods.getPrice());
         orderItemPo.setGoodsSkuId(order_goods.getGoods_sku_id());
         orderItemPo.setGmtCreate(LocalDateTime.now());
-        orderItemPo.setBeShareId(otherService.getBeSharedId(orderItemPo.getGoodsSkuId(), customerId));
+        //orderItemPo.setBeShareId(otherService.getBeSharedId(orderItemPo.getGoodsSkuId(), customerId));
         orderItemPo.setGmtModified(LocalDateTime.now());
         //商品数量属性设为购买数量，方便之后处理
         order_goods.setQuantity(orderItemVo.getQuantity());
@@ -98,7 +98,7 @@ public class PresaleOrderServiceImpl implements CreateOrderService {
         orderPo.setFreightPrice(freightService.calculateFreight(orderPo.getRegionId(),goodsMap));
         //计算返点数
         String orderItemPosJson = JacksonUtil.toJson(orderItemPo);
-        orderPo.setRebateNum(otherService.calculateRebateNum(orderItemPosJson, customerId));
+        //orderPo.setRebateNum(otherService.calculateRebateNum(orderItemPosJson, customerId));
 
         //设为待支付状态
         orderPo.setState((byte) OrderStatus.WAIT_FOR_PAID.getCode());

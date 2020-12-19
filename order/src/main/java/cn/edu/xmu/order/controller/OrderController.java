@@ -94,7 +94,7 @@ public class OrderController {
             ret=Common.decorateReturnObject(object);
         }
         else{
-            ret=Common.getNullRetObj(object,httpServletResponse);
+            ret=Common.decorateReturnObject(object);
         }
         return ret;
 
@@ -150,7 +150,7 @@ public class OrderController {
             ret=Common.getPageRetObject(object);
         }
         else{
-            ret=Common.getNullRetObj(new ReturnObject<>(object),httpServletResponse);
+            ret=Common.decorateReturnObject(new ReturnObject<>(object));
         }
 
         return ret;
@@ -182,10 +182,10 @@ public class OrderController {
         ReturnObject object=orderService.getCusOrderById(customerId,id);
         logger.debug("customer getOrderById: orderId : "+id+"   customerId:  "+customerId);
         if (object.getCode().equals(ResponseCode.OK)){
-            ret=Common.getRetObject(object);
+            ret=Common.decorateReturnObject(object);
         }
         else{
-            ret=Common.getNullRetObj(object,httpServletResponse);
+            ret=Common.decorateReturnObject(object);
         }
         return ret;
     }
@@ -225,8 +225,7 @@ public class OrderController {
         }
         Object ret=null;
         ReturnObject object=orderService.modifySelfOrderAddressById(customerId,orderId,vo);
-        System.out.println("***");
-        ret=Common.getNullRetObj(object,httpServletResponse);
+        ret=Common.decorateReturnObject(object);
         return ret;
 
     }
@@ -257,7 +256,7 @@ public class OrderController {
         Object ret=null;
         ReturnObject object=orderService.deleteSelfOrderById(customerId,orderId);
         //System.out.println(object.getCode()+"  "+object.getErrmsg());
-        ret=Common.getNullRetObj(object,httpServletResponse);
+        ret=Common.decorateReturnObject(object);
         return ret;
     }
 
@@ -287,7 +286,7 @@ public class OrderController {
 
         logger.debug("customer confirms order state. customerId: "+customerId+"  orderId: "+id);
         ReturnObject object=orderService.confirmSelfOrderById(customerId,id);
-        ret=Common.getNullRetObj(object,httpServletResponse);
+        ret=Common.decorateReturnObject(object);
         return ret;
     }
 
@@ -317,7 +316,7 @@ public class OrderController {
             ret=ResponseUtil.ok();
         }
         else{
-            ret=Common.getNullRetObj(object,httpServletResponse);
+            ret=Common.decorateReturnObject(object);
         }
         return ret;
     }
@@ -356,8 +355,8 @@ public class OrderController {
             @RequestParam(required = false) String orderSn,
             @RequestParam(required = false) String beginTime,
             @RequestParam(required = false) String endTime,
-            @RequestParam(required = true) Integer page,
-            @RequestParam(required = true) Integer pageSize){
+            @RequestParam(required = true, defaultValue = "1") Integer page,
+            @RequestParam(required = true,defaultValue = "10") Integer pageSize){
 
         logger.debug("getShopSelfSimpleOrders:  shopId:  "+shopId);
         ReturnObject<PageInfo<VoObject>> object=null;
@@ -409,12 +408,11 @@ public class OrderController {
         logger.debug("shop getOrderById: orderId : "+id+"   shopId:  "+shopId);
         ReturnObject object=orderService.getShopSelfOrder(shopId,id);
 
-        System.out.println(object.getCode()+"   ***");
         if (object.getCode().equals(ResponseCode.OK)){
             ret=Common.getRetObject(object);
         }
         else{
-            ret=Common.getNullRetObj(object,httpServletResponse);
+            ret=Common.decorateReturnObject(object);
         }
         return ret;
     }
@@ -443,12 +441,14 @@ public class OrderController {
     @PutMapping("shops/{shopId}/orders/{id}")
     public Object modifyOrderMessage(@PathVariable(name = "shopId") Long shopId,@PathVariable(name = "id") Long orderId,@RequestBody(required = true) String message){
         Object ret=null;
+        System.out.println("111");
+        logger.debug("shop modify message. shopId: "+shopId+"  orderId: "+orderId);
         if (message==null){
-            ret=Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
+            ret=Common.decorateReturnObject(new ReturnObject<>(ResponseCode.FIELD_NOTVALID));
         }
         else{
             ReturnObject object=orderService.modifyOrderMessage(shopId,orderId,message);
-            ret=Common.getNullRetObj(object,httpServletResponse);
+            ret=Common.decorateReturnObject(object);
         }
         return ret;
     }
@@ -478,7 +478,7 @@ public class OrderController {
     public Object deleteShopOrder(@PathVariable(name = "shopId") Long shopId,@PathVariable(name = "id") Long orderId){
         Object ret=null;
         ReturnObject object=orderService.deleteShopOrder(shopId,orderId);
-        ret=Common.getNullRetObj(object,httpServletResponse);
+        ret=Common.decorateReturnObject(object);
         return ret;
     }
 
@@ -511,7 +511,7 @@ public class OrderController {
         }
         else{
             ReturnObject object=orderService.deliverShopOrder(shopId,orderId,freightSn);
-            ret=Common.getNullRetObj(object,httpServletResponse);
+            ret=Common.decorateReturnObject(object);
         }
         return ret;
     }

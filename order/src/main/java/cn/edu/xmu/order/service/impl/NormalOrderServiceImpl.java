@@ -18,7 +18,8 @@ import cn.edu.xmu.order.service.time.TimeService;
 import cn.edu.xmu.order.util.OrderStatus;
 import cn.edu.xmu.order.util.OrderType;
 import cn.edu.xmu.order.util.CreateOrderService;
-import cn.edu.xmu.order_provider.other.IOtherService;
+
+import cn.edu.xmu.share.dubbo.ShareService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,11 +50,10 @@ public class NormalOrderServiceImpl implements CreateOrderService {
     @DubboReference(version ="0.0.1",check = false)
     private FlashService flashService;
 
+    @DubboReference(version = "0.0.1",check = false)
+    private ShareService otherService;
 
-    @DubboReference(version ="1.0-SNAPSHOT")
-    private IOtherService otherService;
-
-    @DubboReference(version ="0.0.1")
+    @DubboReference(version = "0.0.1",check = false)
     private IFreightService freightService;
 
     @Override

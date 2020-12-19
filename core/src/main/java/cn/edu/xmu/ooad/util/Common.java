@@ -195,13 +195,24 @@ public class Common {
                 return new ResponseEntity(
                         ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
                         HttpStatus.INTERNAL_SERVER_ERROR);
+            case FIELD_NOTVALID:
+                return new ResponseEntity(
+                        ResponseUtil.fail(returnObject.getCode(),returnObject.getErrmsg()),
+                        HttpStatus.BAD_REQUEST
+                );
+            case RESOURCE_ID_OUTSCOPE:
+                return new ResponseEntity(
+                        ResponseUtil.fail(returnObject.getCode(),returnObject.getErrmsg()),
+                        HttpStatus.FORBIDDEN
+                );
+
             case OK:
                 // 200: 无错误
                 Object data = returnObject.getData();
                 if (data != null){
                     return ResponseUtil.ok(data);
                 }else{
-                    return ResponseUtil.ok();
+                    return ResponseUtil.ok(returnObject.getCode());
                 }
             default:
                 return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());

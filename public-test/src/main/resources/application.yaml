@@ -1,3 +1,0 @@
-public-test:
-  managementgate: @management.gate@
-  mallgate: @mall.gate@

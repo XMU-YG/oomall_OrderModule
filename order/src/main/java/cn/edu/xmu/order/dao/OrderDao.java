@@ -73,6 +73,7 @@ public class OrderDao {
 
         //System.out.println("DAO:"+customerId+" "+orderSn+" "+state+" "+beginTime+" "+endTime+" "+page+" "+pageSize);
         //设置查询条件
+        PageHelper.startPage(page,pageSize);
         OrderPoExample example=new OrderPoExample();
         OrderPoExample.Criteria criteria=example.createCriteria();
         criteria.andCustomerIdEqualTo(customerId);
@@ -109,7 +110,7 @@ public class OrderDao {
          * simpleOrderPoPage可以看做分页的大容器，由po构造
          * simpleOrderPage 是返回的分页对象，由ret构造，大小由simpleOrderPoPage确定
          */
-        PageHelper.startPage(page,pageSize);
+
         PageInfo<OrderPo> simpleOrderPoPage=PageInfo.of(orderPos);
         PageInfo<VoObject> simpleOrderPage=new PageInfo<>(ret);
         simpleOrderPage.setPages(simpleOrderPoPage.getPages());
@@ -334,6 +335,7 @@ public class OrderDao {
      */
     public ReturnObject<PageInfo<VoObject>> getShopSelfSimpleOrders(Long shopId, Long customerId, String orderSn, LocalDateTime beginTime, LocalDateTime endTime, Integer page, Integer pageSize) {
         //设置查询条件
+        PageHelper.startPage(page,pageSize);
         OrderPoExample example=new OrderPoExample();
         OrderPoExample.Criteria criteria=example.createCriteria();
         if (customerId!=null){
@@ -364,13 +366,13 @@ public class OrderDao {
             SimpleOrder simpleOrder=new SimpleOrder(po);
             ret.add(simpleOrder);
         }
-
+        System.out.println(ret.size());
         /**
          * ret 分页内容，其内容为bo（实现VoObject接口）对象
          * simpleOrderPoPage可以看做分页的大容器，由po构造
          * simpleOrderPage 是返回的分页对象，由ret构造，大小由simpleOrderPoPage确定
          */
-        PageHelper.startPage(page,pageSize);
+
         PageInfo<OrderPo> simpleOrderPoPage=PageInfo.of(orderPos);
         PageInfo<VoObject> simpleOrderPage=new PageInfo<>(ret);
         simpleOrderPage.setPages(simpleOrderPoPage.getPages());
@@ -597,5 +599,12 @@ public class OrderDao {
             }
         }
         return simpleOrders;
+    }
+
+    public boolean haveOrder(Long shopId) {
+        OrderPoExample example=new OrderPoExample();
+        OrderPoExample.Criteria criteria=example.createCriteria();
+        criteria.andShopIdEqualTo(shopId);
+        return !orderPoMapper.selectByExample(example).isEmpty();
     }
 }
