@@ -220,7 +220,6 @@ public class FreightDao {
 
         }
        else  freightPo=freightPoMapper.selectByPrimaryKey(id);
-       logger.info("id"+freightPo.getId());
         if(freightPo==null)
         {
             logger.error("null");
@@ -306,7 +305,7 @@ public class FreightDao {
         FreightPoExample example=new FreightPoExample();
         FreightPoExample.Criteria criteria=example.createCriteria();
         List<FreightPo> freightPos=null;
-
+        PageHelper.startPage(page,pageSize);
         criteria.andShopIdEqualTo(id);
         try {
             if (name == null) {
@@ -331,14 +330,15 @@ public class FreightDao {
             ret.add(freight);
         }
 
-        PageHelper.startPage(page,pageSize);
-        PageInfo<FreightPo> freightPoPage=PageInfo.of(freightPos);
-        PageInfo<VoObject> freightPage=new PageInfo<>(ret);
+
+       PageInfo<FreightPo> freightPoPage=PageInfo.of(freightPos);
+        PageInfo<VoObject> freightPage=PageInfo.of(ret);
         freightPage.setPages(freightPoPage.getPages());
         freightPage.setPageNum(freightPoPage.getPageNum());
         freightPage.setPageSize(freightPoPage.getPageSize());
         freightPage.setTotal(freightPoPage.getTotal());
 
+        //PageInfo<VoObject> freightPage=PageInfo.of(ret);
         return new ReturnObject<>(freightPage);
 
     }
@@ -451,7 +451,7 @@ public class FreightDao {
         //模板初始为非默认
         freightPo.setDefaultModel((byte)0);
         //更新创建时间
-        freightPo.setGmtCreate(LocalDateTime.now());
+        freightPo.setGmtCreate(LocalDateTime.now().withNano(0));
         freightPo.setGmtModified(null);
         //克隆主模板
         try {
@@ -495,7 +495,7 @@ public class FreightDao {
               for(WeightFreightPo po:pos)
               {
                   po.setFreightModelId(newId);
-                  po.setGmtCreate(LocalDateTime.now());
+                  po.setGmtCreate(LocalDateTime.now().withNano(0));
                   po.setGmtModified(null);
                   ret1=weightFreightPoMapper.insertSelective(po);
                   if(ret1==0)
@@ -512,7 +512,7 @@ public class FreightDao {
                 for(PieceFreightPo po:pos)
                 {
                     po.setFreightModelId(newId);
-                    po.setGmtCreate(LocalDateTime.now());
+                    po.setGmtCreate(LocalDateTime.now().withNano(0));
                     po.setGmtModified(null);
                     ret1=pieceFreightPoMapper.insertSelective(po);
                     if(ret1==0)

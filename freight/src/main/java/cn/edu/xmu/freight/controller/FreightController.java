@@ -13,6 +13,7 @@ import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.freight.service.FreightService;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +28,8 @@ import java.util.List;
 
 @Api(value = "运费服务", tags = "freight")
 @RestController /*Restful的Controller对象*/
-//@RequestMapping(value = "/freight", produces = "application/json;charset=UTF-8")
-@RequestMapping(produces = "application/json;charset=UTF-8")
+@RequestMapping(value = "/freight", produces = "application/json;charset=UTF-8")
+//@RequestMapping(produces = "application/json;charset=UTF-8")
 public class FreightController {
     private  static  final Logger logger = LoggerFactory.getLogger(FreightController.class);
 
@@ -47,7 +48,7 @@ public class FreightController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    //@Audit
+    @Audit
     @PostMapping("/region/{rid}/price")
     public Object calculateFreight(@PathVariable Long rid, @RequestBody List<ItemsVo> vos){
         logger.debug("calculate freight by shopId:"+rid);
@@ -75,13 +76,18 @@ public class FreightController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    //@Audit
+    @Audit
     @GetMapping("/shops/{shopId}/freightmodels/{id}")
     public Object getFreModelSummeryByModelId(@PathVariable Long shopId,@PathVariable Long id){
         Object ret=null;
-            ReturnObject<VoObject> object=freightService.getFreModelSummeryByModelId(shopId,id);
+            ReturnObject object=freightService.getFreModelSummeryByModelId(shopId,id);
             logger.debug("getAllSimpleOrders: id : "+id+" shopId: "+shopId);
-            ret=Common.getRetObject(object);
+            if(object.getCode().equals(ResponseCode.OK))
+            {
+                ret=Common.getRetObject(object);
+            }
+            else
+            ret=Common.getNullRetObj(object,httpServletResponse);
 
         return ret;
     }
@@ -103,7 +109,7 @@ public class FreightController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    //@Audit
+    @Audit
     @PostMapping("/shops/{id}/freightmodels")
     public Object createFreightModel(@PathVariable Long id, @Validated @RequestBody FreightInfoVo vo, BindingResult bindingResult){
         logger.debug("create freight model by shopId:"+id);
@@ -114,9 +120,15 @@ public class FreightController {
             return returnObject;
         }
         Object ret=null;
-        ReturnObject<VoObject> object=freightService.createFreightModel(id,vo);
+        ReturnObject object=freightService.createFreightModel(id,vo);
         logger.debug("createFreightModel by: shopId : "+id);
-        ret=Common.getRetObject(object);
+        if(object.getCode().equals(ResponseCode.OK))
+        {
+            httpServletResponse.setStatus(HttpStatus.SC_CREATED);
+            ret=Common.getRetObject(object);
+        }
+        else
+            ret=Common.getNullRetObj(object,httpServletResponse);
 
         return ret;
     }
@@ -138,13 +150,13 @@ public class FreightController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    //@Audit
+    @Audit
     @GetMapping("/shops/{id}/freightmodels")
     public Object getFreModelByShopId(@PathVariable Long id,@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer pageSize,@RequestParam(required = false) String name){
         logger.debug("getFreModelByShopId: page = " + page + " pageSize = "+ pageSize);
 
-        page=(page==null)?1:page;
-        pageSize=(pageSize==null)?10:pageSize;
+        page=(page==null||page<=0)?1:page;
+        pageSize=(pageSize==null||page<=0)?10:pageSize;
 
         Object ret=null;
         ReturnObject<PageInfo<VoObject>> object=freightService.getFreModelByShopId(id,name,page,pageSize);
@@ -173,7 +185,7 @@ public class FreightController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    //@Audit
+    @Audit
     @PutMapping("/shops/{shopId}/freightmodels/{id}")
     public Object editFreightModel(@PathVariable Long shopId,@PathVariable Long id, @Validated @RequestBody FreightSimpInfoVo freightModelInfo, BindingResult bindingResult){
         logger.debug("create freight model by shopId: "+ shopId + " id: "+id);
@@ -186,9 +198,14 @@ public class FreightController {
             return returnObject;
         }
         Object ret=null;
-        ReturnObject<VoObject> object=freightService.editFreightModel(shopId,id,freightModelInfo);
+        ReturnObject object=freightService.editFreightModel(shopId,id,freightModelInfo);
         logger.debug("createFreightModel by: shopId : "+shopId + " id: "+id);
-        ret=Common.getRetObject(object);
+        if(object.getCode().equals(ResponseCode.OK))
+        {
+            ret=Common.getRetObject(object);
+        }
+        else
+            ret=Common.getNullRetObj(object,httpServletResponse);
 
         return ret;
     }
@@ -209,15 +226,21 @@ public class FreightController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    //@Audit
+    @Audit
     @PostMapping("/shops/{shopId}/freight_models/{id}/default")
     public Object setDefaultModel(@PathVariable Long shopId,@PathVariable Long id,@LoginUser @ApiIgnore @RequestParam(required = false, defaultValue = "0") Long userId){
         logger.info("userId: "+userId);
         logger.debug("setDefaultModel: shopId : "+shopId+" id : "+id);
         Object ret=null;
-        ReturnObject<VoObject> object=freightService.setDefaultModel(shopId,id);
+        ReturnObject object=freightService.setDefaultModel(shopId,id);
         logger.debug("getAllSimpleOrders: id : "+id);
-        ret=Common.getRetObject(object);
+        if(object.getCode().equals(ResponseCode.OK))
+        {
+            httpServletResponse.setStatus(HttpStatus.SC_CREATED);
+            ret=Common.getRetObject(object);
+        }
+        else
+            ret=Common.getNullRetObj(object,httpServletResponse);
 
         return ret;
     }
@@ -238,15 +261,22 @@ public class FreightController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    //@Audit
+    @Audit
     @PostMapping("/shops/{shopId}/freightmodels/{id}/clone")
     public Object cloneModel(@PathVariable Long shopId,@PathVariable Long id){
 
         logger.info("cloneModel: shopId : "+shopId+" id : "+id);
         Object ret=null;
-        ReturnObject<VoObject> object=freightService.cloneModel(shopId,id);
+        ReturnObject object=freightService.cloneModel(shopId,id);
         logger.debug("cloneModel: id : "+id);
-        ret=Common.getRetObject(object);
+        if(object.getCode().equals(ResponseCode.OK))
+        {
+            httpServletResponse.setStatus(HttpStatus.SC_CREATED);
+            ret=Common.getRetObject(object);
+        }
+        else
+            ret=Common.getNullRetObj(object,httpServletResponse);
+
 
         return ret;
     }
@@ -267,15 +297,23 @@ public class FreightController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    //@Audit
+    @Audit
     @DeleteMapping("/shops/{shopId}/freightmodels/{id}")
     public Object deleteModel(@PathVariable Long shopId,@PathVariable Long id){
 
         logger.info("deleteModel: shopId : "+shopId+" id : "+id);
         Object ret=null;
-        ReturnObject<VoObject> object=freightService.deleteModel(shopId,id);
+        ReturnObject object=freightService.deleteModel(shopId,id);
         logger.debug("deleteModel: id : "+id);
-        ret=Common.getRetObject(object);
+        if(object.getCode().equals(ResponseCode.OK))
+        {
+
+            ret=Common.getRetObject(object);
+        }
+        else
+            ret=Common.getNullRetObj(object,httpServletResponse);
+
+
 
         return ret;
     }
@@ -298,7 +336,8 @@ public class FreightController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    @GetMapping("shops/{shopId}/freightmodels/{id}/weightItems")
+    @Audit
+    @GetMapping("/shops/{shopId}/freightmodels/{id}/weightItems")
     public Object getFreightItemsById(@PathVariable(name = "shopId") Long shopId, @PathVariable(name = "id") Long id) {
         Object ret = null;
         ReturnObject<List> returnObject = freightService.findFreightItemsById(shopId, id);
@@ -329,7 +368,8 @@ public class FreightController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    @GetMapping("shops/{shopId}/freightmodels/{id}/pieceItems")
+    @Audit
+    @GetMapping("/shops/{shopId}/freightmodels/{id}/pieceItems")
     public Object getPieceItemsById(@PathVariable(name = "shopId") Long shopId, @PathVariable(name = "id") Long id) {
         Object ret = null;
         ReturnObject<List> returnObject = freightService.findPieceItemsById(shopId, id);
@@ -360,10 +400,19 @@ public class FreightController {
             @ApiResponse(code = 0, message = "成功"),
 
     })
-    //@Audit
-    @DeleteMapping("shops/{shopId}/weightItems/{id}")
+    @Audit
+    @DeleteMapping("/shops/{shopId}/weightItems/{id}")
     public Object deleteWeightItem(@PathVariable(name = "shopId") Long shopId,@PathVariable(name = "id") Long id){
-        return freightService.deleteWeightItem(shopId,id);
+        Object ret = null;
+        ReturnObject object=freightService.deleteWeightItem(shopId,id);
+
+        if(object.getCode().equals(ResponseCode.OK))
+        {
+            ret=Common.getRetObject(object);
+        }
+        else
+            ret=Common.getNullRetObj(object,httpServletResponse);
+        return ret;
     }
 
     /**
@@ -384,10 +433,20 @@ public class FreightController {
             @ApiResponse(code = 0, message = "成功"),
 
     })
-    //@Audit
-    @DeleteMapping("shops/{shopId}/pieceItems/{id}")
+    @Audit
+    @DeleteMapping("/shops/{shopId}/pieceItems/{id}")
     public Object deletePieceItem(@PathVariable(name = "shopId") Long shopId,@PathVariable(name = "id") Long id){
-        return freightService.deletePieceItem(shopId,id);
+        Object ret = null;
+        ReturnObject object=freightService.deletePieceItem(shopId,id);
+        if(object.getCode().equals(ResponseCode.OK))
+        {
+            httpServletResponse.setStatus(HttpStatus.SC_CREATED);
+            ret=Common.getRetObject(object);
+        }
+        else
+            ret=Common.getNullRetObj(object,httpServletResponse);
+        return ret;
+
     }
 
     /**
@@ -409,7 +468,7 @@ public class FreightController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    //@Audit
+    @Audit
     @PostMapping("/shops/{shopId}/freightmodels/{id}/weightItems")
     public Object createWeightItem(@PathVariable(name="shopId") Long shopId, @PathVariable(name="id") Long id, @Validated @RequestBody WeightItemVo vo, BindingResult bindingResult){
         logger.debug("create weightItem by id:"+id);
@@ -420,9 +479,17 @@ public class FreightController {
             return returnObject;
         }
         Object ret=null;
-        ReturnObject<VoObject> object=freightService.createWeightItem(shopId,id,vo);
+        ReturnObject object=freightService.createWeightItem(shopId,id,vo);
         logger.debug("createWeightItem by: id : "+id);
-        ret=Common.getRetObject(object);
+        if(object.getCode().equals(ResponseCode.OK))
+        {
+            httpServletResponse.setStatus(HttpStatus.SC_CREATED);
+            ret=Common.getRetObject(object);
+        }
+        else
+            ret=Common.getNullRetObj(object,httpServletResponse);
+
+
 
         return ret;
     }
@@ -446,7 +513,7 @@ public class FreightController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    //@Audit
+    @Audit
     @PostMapping("/shops/{shopId}/freightmodels/{id}/pieceItems")
     public Object createPieceItem(@PathVariable(name="shopId") Long shopId, @PathVariable(name="id") Long id, @Validated @RequestBody PieceItemVo vo, BindingResult bindingResult){
         logger.debug("create pieceItem by id:"+id);
@@ -457,9 +524,16 @@ public class FreightController {
             return returnObject;
         }
         Object ret=null;
-        ReturnObject<VoObject> object=freightService.createPieceItem(shopId,id,vo);
+        ReturnObject object=freightService.createPieceItem(shopId,id,vo);
         logger.debug("createPieceItem by: id : "+id);
-        ret=Common.getRetObject(object);
+        if(object.getCode().equals(ResponseCode.OK))
+        {
+            httpServletResponse.setStatus(HttpStatus.SC_CREATED);
+            ret=Common.getRetObject(object);
+        }
+        else
+            ret=Common.getNullRetObj(object,httpServletResponse);
+
 
         return ret;
     }
@@ -483,7 +557,7 @@ public class FreightController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    //@Audit
+    @Audit
     @PutMapping("/shops/{shopId}/weightItems/{id}")
     public Object editFreightItem(@PathVariable(name="shopId") Long shopId,@PathVariable(name="id") Long id, @Validated @RequestBody WeightItemVo freightModelInfo, BindingResult bindingResult){
         logger.debug("edit freightItem by shopId: "+ shopId + " id: "+id);
@@ -496,9 +570,17 @@ public class FreightController {
             return returnObject;
         }
         Object ret=null;
-        ReturnObject<VoObject> object=freightService.editFreightItem(shopId,id,freightModelInfo);
+        ReturnObject object=freightService.editFreightItem(shopId,id,freightModelInfo);
         logger.debug("editFreightItem by: shopId : "+shopId + " id: "+id);
-        ret=Common.getRetObject(object);
+        if(object.getCode().equals(ResponseCode.OK))
+        {
+
+            ret=Common.getRetObject(object);
+        }
+        else
+            ret=Common.getNullRetObj(object,httpServletResponse);
+
+
 
         return ret;
     }
@@ -522,7 +604,7 @@ public class FreightController {
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
     })
-    //@Audit
+    @Audit
     @PutMapping("/shops/{shopId}/pieceItems/{id}")
     public Object editPieceItem(@PathVariable(name="shopId") Long shopId, @PathVariable(name="id") Long id, @Validated @RequestBody PieceItemVo freightModelInfo, BindingResult bindingResult){
         logger.debug("edit pieceItem by shopId: "+ shopId + " id: "+id);
@@ -535,9 +617,16 @@ public class FreightController {
             return returnObject;
         }
         Object ret=null;
-        ReturnObject<VoObject> object=freightService.editPieceItem(shopId,id,freightModelInfo);
+        ReturnObject object=freightService.editPieceItem(shopId,id,freightModelInfo);
         logger.debug("editPieceItem by: shopId : "+shopId + " id: "+id);
-        ret=Common.getRetObject(object);
+        if(object.getCode().equals(ResponseCode.OK))
+        {
+            httpServletResponse.setStatus(HttpStatus.SC_CREATED);
+            ret=Common.getRetObject(object);
+        }
+        else
+            ret=Common.getNullRetObj(object,httpServletResponse);
+
 
         return ret;
     }

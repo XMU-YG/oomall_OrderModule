@@ -23,7 +23,7 @@ dubbo:
   # 设置协议-协议由提供方指定消费方被动接受
   protocol:
     name: dubbo
-    port: 20882
+    port: 20887
     # 设置超时时间
   consumer:
     timeout: 4000

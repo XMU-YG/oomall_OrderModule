@@ -13,7 +13,6 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.order_provider.goods.IFGoodsService;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +70,7 @@ public class FreightService {
     {
         Freight freight=vo.createFreight();
         freight.setShopId(shopId);
-        freight.setGmtCreate(LocalDateTime.now());
+        freight.setGmtCreate(LocalDateTime.now().withNano(0));
         freight.setDefaultModel((byte) 0);
         ReturnObject<Freight> ret=freightDao.createFreightModel(freight);
         ReturnObject<VoObject> retObj=null;
@@ -114,10 +113,13 @@ public class FreightService {
     @Transactional
     public ReturnObject<VoObject> editFreightModel(Long shopId,Long id, FreightSimpInfoVo vo)
     {
+        ReturnObject ret=freightDao.getFreModelSummeryByModelId(shopId, id);
+        if(!ret.getCode().equals(ResponseCode.OK))
+            return new ReturnObject<>(ret.getCode(), ret.getErrmsg());
         Freight freight=vo.createFreight();
         freight.setId(id);
         freight.setShopId(shopId);
-        freight.setGmtModified(LocalDateTime.now());
+        freight.setGmtModified(LocalDateTime.now().withNano(0));
         ReturnObject<Freight> retObj=freightDao.editFreightModel(freight);
         return new ReturnObject<>(retObj.getCode(),retObj.getErrmsg());
 
@@ -134,6 +136,9 @@ public class FreightService {
     @Transactional
     public ReturnObject<VoObject> setDefaultModel(Long shopId,Long id)
     {
+        ReturnObject ret=freightDao.getFreModelSummeryByModelId(shopId, id);
+        if(!ret.getCode().equals(ResponseCode.OK))
+            return new ReturnObject<>(ret.getCode(), ret.getErrmsg());
         Freight freight=new Freight();
         freight.setId(id);
         freight.setShopId(shopId);
@@ -166,12 +171,12 @@ public class FreightService {
     @Transactional
     public ReturnObject<VoObject> deleteModel(Long shopId,Long id)
     {
-
         /*调用商品模块的删除与运费模板的联系*/
-        ReturnObject<VoObject> ret= freightDao.deleteModel(shopId,id);
-        boolean judge=goodsService.cleanFreightById(id);
+        ReturnObject<VoObject> ret1= freightDao.deleteModel(shopId,id);
+        boolean judge= true;
+        //judge=goodsService.cleanFreightById(id);
         if(judge)
-            return ret;
+            return ret1;
         else
             return new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR);
     }
@@ -284,7 +289,7 @@ public class FreightService {
         //vo创建bo
         FreightItem freightItem=vo.createFreightItem();
         freightItem.setFreightModelId(id);
-        freightItem.setGmtCreate(LocalDateTime.now());
+        freightItem.setGmtCreate(LocalDateTime.now().withNano(0));
 
         ReturnObject<FreightItem> ret=freightDao.createFreightItem(freightItem);
 
@@ -314,7 +319,7 @@ public class FreightService {
         //vo创建bo
         PieceItem pieceItem=vo.createPieceItem();
         pieceItem.setFreightModelId(id);
-        pieceItem.setGmtCreate(LocalDateTime.now());
+        pieceItem.setGmtCreate(LocalDateTime.now().withNano(0));
 
         ReturnObject<PieceItem> ret=freightDao.createPieceItem(pieceItem);
 
@@ -343,7 +348,7 @@ public class FreightService {
     {
         FreightItem freightItem=vo.createFreightItem();
         freightItem.setId(id);
-        freightItem.setGmtModified(LocalDateTime.now());
+        freightItem.setGmtModified(LocalDateTime.now().withNano(0));
         ReturnObject<FreightItem> retObj=freightDao.editFreightItem(freightItem);
         return new ReturnObject<>(retObj.getCode(),retObj.getErrmsg());
     }
@@ -361,7 +366,7 @@ public class FreightService {
     {
         PieceItem pieceItem=vo.createPieceItem();
         pieceItem.setId(id);
-        pieceItem.setGmtModified(LocalDateTime.now());
+        pieceItem.setGmtModified(LocalDateTime.now().withNano(0));
         ReturnObject<PieceItem> retObj=freightDao.editPieceItem(pieceItem);
         return new ReturnObject<>(retObj.getCode(),retObj.getErrmsg());
     }
