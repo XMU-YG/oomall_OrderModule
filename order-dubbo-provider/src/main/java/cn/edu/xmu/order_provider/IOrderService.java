@@ -83,4 +83,11 @@ public interface IOrderService {
      * @return  父订单id  -1:orderItemId不存在
      */
    // public Long getOrderItemPid(Long orderItemId);
+
+    /**
+     * 获得订单总价
+     * @param orderId
+     * @return -1 order不存在  其他 订单总价
+     */
+    public Long getOrderAmount(Long orderId);
 }

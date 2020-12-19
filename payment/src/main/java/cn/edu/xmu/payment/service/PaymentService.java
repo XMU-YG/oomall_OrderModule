@@ -80,6 +80,18 @@ public class PaymentService {
 
                //用bo对象payment在dao层创建po对象，dao层返回构造后的vo对象
                retObject=paymentDao.createPayment(payment);
+
+               if(retObject.getCode().equals(ResponseCode.OK))
+               {
+                   //修改订单状态
+                   Long amount=orderService.getOrderAmount(orderId);
+
+                   if(!amount.equals(-1)&&orderPayed(orderId,amount))
+                   {
+                       orderService.changeOrderState(orderId,(byte)21);
+                   }
+               }
+
        }
        return retObject;
    }
@@ -152,7 +164,6 @@ public class PaymentService {
         }
         return null;
     }
-
 
     /**
      * 管理员查看售后单支付信息
@@ -239,5 +250,26 @@ public class PaymentService {
     public List<PaymentPo> findOrderPayment(Long pid) {
         List<PaymentPo> ret = paymentDao.findOrderPayment(pid);
         return ret;
+    }
+
+    /**
+     * 查询订单是否支付完成
+     * @param orderId 订单id
+     * @param amount  订单总价
+     * @return true订单支付完成  false订单支付未完成
+     */
+    public boolean orderPayed(Long orderId,Long amount){
+        List<PaymentPo> paymentPos=paymentDao.findOrderPayment(orderId);
+        if(paymentPos==null||paymentPos.isEmpty())
+            return false;
+
+        Long totalAmount=0L;
+        for(PaymentPo po:paymentPos){
+            totalAmount=totalAmount+po.getAmount();
+        }
+        if(amount.equals(totalAmount))
+            return true;
+
+        return false;
     }
 }
