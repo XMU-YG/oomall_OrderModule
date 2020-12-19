@@ -12,11 +12,14 @@ import cn.edu.xmu.payment.model.bo.Payment;
 import cn.edu.xmu.payment.model.bo.Refund;
 import cn.edu.xmu.payment.model.vo.NewRefundVo;
 
+import cn.edu.xmu.payment.util.PaymentPatterns;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * 退款服务
@@ -32,10 +35,10 @@ public class RefundService {
     @Autowired
     private PaymentDao paymentDao;
 
-    @DubboReference(version ="1.0-SNAPSHOT")
+    @DubboReference(version = "0.0.1",check = false)
     private IOrderService orderService;
 
-    @DubboReference(version="1.0-SNAPSHOT")
+    @DubboReference(version = "0.0.1",check = false)
     private IPOtherService otherService;
 
    @Autowired
@@ -47,21 +50,24 @@ public class RefundService {
      * @author Yuting Zhong@3333
      * Modified at 2020/12/6
      */
-    public ReturnObject<VoObject> findOrderRefundShop(Long shopId,Long orderId){
-        ReturnObject<VoObject> returnObject=null;
+    public ReturnObject findOrderRefundShop(Long shopId,Long orderId){
+
 
         //check=1 属于 check=0 不属于 check=-1 不存在
-        String checkBelong=orderService.checkShopOrder(shopId,orderId);
-        //String checkBelong="1";
+        //String checkBelong=orderService.checkShopOrder(shopId,orderId);
+        String checkBelong="1";
 
         if(checkBelong.equals("-1")){
-            returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单不存在");
+            ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单不存在");
+            return returnObject;
         }else if(checkBelong.equals("0")){
-            returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该订单无权限");
+            ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该订单无权限");
+            return returnObject;
         }else if(checkBelong.equals("1")){
-            returnObject=refundDao.findRefundByOrder(orderId);
+            ReturnObject<List> ret=new ReturnObject<>(refundDao.findRefundByOrder(orderId));
+            return ret;
         }
-        return returnObject;
+        return null;
     }
 
     /**
@@ -70,20 +76,22 @@ public class RefundService {
      * @author Yuting Zhong@3333
      * Modified at 2020/12/6
      */
-    public ReturnObject<VoObject> findAftersaleRefundShop(Long shopId,Long aftersaleId){
-        ReturnObject<VoObject> returnObject=null;
+    public ReturnObject findAftersaleRefundShop(Long shopId,Long aftersaleId){
         //check=1 属于 check=0 资源不存在 check=-1 不属于
-        String checkBelong=otherService.checkShopAftersale(shopId,aftersaleId);
-        // String checkBelong="1";
+        //String checkBelong=otherService.checkShopAftersale(shopId,aftersaleId);
+         String checkBelong="1";
 
         if(checkBelong.equals("-1")){
-            returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"售后单不存在");
+            ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"售后单不存在");
+            return returnObject;
         }else if(checkBelong.equals("0")){
-            returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该售后单无权限");
+            ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该售后单无权限");
+            return returnObject;
         }else if(checkBelong.equals("1")){
-            returnObject=refundDao.findRefundByAftersale(aftersaleId);
+            ReturnObject<List> ret=new ReturnObject<>(refundDao.findRefundByAftersale(aftersaleId));
+            return ret;
         }
-        return returnObject;
+        return null;
     }
     /**
      * 买家查看自己的订单退款信息
@@ -91,22 +99,23 @@ public class RefundService {
      * @author Yuting Zhong@3333
      * Modified at 2020/12/2
      */
-    public ReturnObject<VoObject> findOrderRefundSelf(Long userId,Long orderId){
-        ReturnObject<VoObject> returnObject=null;
-
+    public ReturnObject findOrderRefundSelf(Long userId,Long orderId){
         //check=1 属于 check=0 资源不存在 check=-1 不属于
-        String checkBelong=orderService.checkUserOrder(userId,orderId);
+        //String checkBelong=orderService.checkUserOrder(userId,orderId);
 
-        // String checkBelong="1";
+         String checkBelong="1";
 
         if(checkBelong.equals("-1")){
-            returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单不存在");
+            ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单不存在");
+            return returnObject;
         }else if(checkBelong.equals("0")){
-            returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该订单无权限");
+            ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该订单无权限");
+            return returnObject;
         }else if(checkBelong.equals("1")){
-            returnObject=refundDao.findRefundByOrder(orderId);
+            ReturnObject<List> ret=new ReturnObject<>(refundDao.findRefundByOrder(orderId));
+            return ret;
         }
-        return returnObject;
+        return null;
     }
 
     /**
@@ -115,23 +124,99 @@ public class RefundService {
      * @author Yuting Zhong@3333
      * Modified at 2020/12/6
      */
-    public ReturnObject<VoObject> findAftersaleRefundSelf(Long userId,Long aftersaleId){
-        ReturnObject<VoObject> returnObject=null;
-
+    public ReturnObject findAftersaleRefundSelf(Long userId,Long aftersaleId){
         //check=1 属于 check=0 资源不存在 check=-1 不属于
-       String checkBelong=otherService.checkUserAftersale(userId,aftersaleId);
-        //String checkBelong="1";
+        //String checkBelong=otherService.checkUserAftersale(userId,aftersaleId);
+        String checkBelong="1";
+
 
         if(checkBelong.equals("-1")){
-            returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"售后单不存在");
+            ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"售后单不存在");
+            return returnObject;
         }else if(checkBelong.equals("0")){
-            returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该售后单无权限");
+            ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该售后单无权限");
+            return returnObject;
         }else if(checkBelong.equals("1")){
-            returnObject=refundDao.findRefundByAftersale(aftersaleId);
+            ReturnObject<List> ret=new ReturnObject<>(refundDao.findRefundByAftersale(aftersaleId));
+            return ret;
         }
-        return returnObject;
+        return null;
     }
 
+    /**
+     * 内部创建退款接口
+     * @param shopId
+     * @param paymentId
+     * @param customerId
+     * @param vo
+     * @return
+     */
+    public ReturnObject<VoObject> create(Long shopId,Long paymentId,Long customerId,NewRefundVo vo){
+        ReturnObject<VoObject> retObject=null;
+
+        //跟据支付id获取支付
+        Payment payment=paymentService.getPaymentById(paymentId);
+
+        //若支付不存在 返回支付不存在  若退款金额大于支付金额 返回退款金额大于支付金额
+        if(payment==null){
+            return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"该支付不存在");
+        }else if(payment.getAmount()<vo.getAmount()){
+            return retObject=new ReturnObject<>(ResponseCode.REFUND_MORE,"退款金额大于支付金额");
+        }else{
+            //判断支付是订单支付还是售后支付
+
+            //订单支付
+            if(payment.getOrderId()!=null){
+                //校验订单和商店的关系  -1订单不存在  0订单不属于商店  1订单属于店铺
+                // String checkBelong=orderService.checkShopOrder(shopId,payment.getOrderId());
+                String checkBelong="1";
+                if(checkBelong.equals("-1")){
+                    return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单不存在");
+                }else if(checkBelong.equals("0")){
+                    return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该订单无权访问");
+                }
+
+                //订单属于店铺  判断是否是返点支付  如果是返点支付  获取顾客id 添加用户返点  若新增失败  返回错误信息
+                if(payment.getPaymentPattern().equals(PaymentPatterns.REBATEPAY.getCode())){
+
+                    if(!otherService.reduceRebate(customerId,-payment.getActualAmount().longValue()))
+                        return retObject=new ReturnObject<>(ResponseCode.REBATE_ADD_FAIL,"增加返点失败");
+                }
+
+            }else if(payment.getAftersaleId()!=null){//售后单支付
+                //校验售后单和店铺的关系 -1售后单不存在  0售后单不属于店铺  1售后单属于店铺
+                // String checkBelong=otherService.checkShopAftersale(shopId,payment.getAftersaleId());
+                String checkBelong="1";
+
+                if(checkBelong.equals("-1")){
+                    return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"售后单不存在");
+                }else if(checkBelong.equals("0")){
+                    return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该售后单无权访问");
+                }
+
+                //售后单属于店铺  获取顾客id 返还返点
+                if(payment.getPaymentPattern().equals(PaymentPatterns.REBATEPAY.getCode())){
+
+                    if(!otherService.reduceRebate(customerId,-payment.getActualAmount().longValue()))
+                        return retObject=new ReturnObject<>(ResponseCode.REBATE_ADD_FAIL,"增加返点失败");
+                }
+            }
+        }
+
+        //用vo创建bo对象，将orderId和aftersaleid填入bo
+        Refund refund=vo.createRefund();
+
+        refund.setPaymentId(paymentId);
+        refund.setAftersaleId(payment.getAftersaleId());
+        refund.setOrderId(payment.getOrderId());
+
+        //将bo传入dao
+        retObject=refundDao.createRefund(refund);
+
+        //拿到dao返回的vo
+        return retObject;
+
+    }
     /**
      * 管理员创建退款
      * @author Yuting Zhong@3333
@@ -140,30 +225,55 @@ public class RefundService {
     public ReturnObject<VoObject> createRefund(Long shopId, Long id, NewRefundVo vo) {
         ReturnObject<VoObject> retObject=null;
 
+        if(vo.getAmount().longValue()==0)
+            return retObject=new ReturnObject<>(ResponseCode.OK,"退款金额为0，退款成功，但不产生退款记录");
+
+
+        //跟据支付id获取支付
         Payment payment=paymentService.getPaymentById(id);
 
+        //若支付不存在 返回支付不存在  若退款金额大于支付金额 返回退款金额大于支付金额
         if(payment==null){
             return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"该支付不存在");
         }else if(payment.getAmount()<vo.getAmount()){
             return retObject=new ReturnObject<>(ResponseCode.REFUND_MORE,"退款金额大于支付金额");
         }else{
-            //若支付orderId不为空，则支付为订单支付，验证订单和店铺的关系；若支付aftersalId不为空，则支付为售后支付
-            if(payment.getOrderId()!=null){
-                String checkBelong=orderService.checkShopOrder(shopId,payment.getOrderId());
+            //判断支付是订单支付还是售后支付
 
+            //订单支付
+            if(payment.getOrderId()!=null){
+                //校验订单和商店的关系  -1订单不存在  0订单不属于商店  1订单属于店铺
+               // String checkBelong=orderService.checkShopOrder(shopId,payment.getOrderId());
+                String checkBelong="1";
                 if(checkBelong.equals("-1")){
                   return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单不存在");
                 }else if(checkBelong.equals("0")){
                     return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该订单无权访问");
                 }
-            }else if(payment.getAftersaleId()!=null){
-                String checkBelong=otherService.checkShopAftersale(shopId,payment.getAftersaleId());
 
+                //订单属于店铺  判断是否是返点支付  如果是返点支付  获取顾客id 添加用户返点  若新增失败  返回错误信息
+                if(payment.getPaymentPattern().equals(PaymentPatterns.REBATEPAY.getCode())){
+                    Long userId=orderService.getOrderUser(payment.getOrderId());
+                    if(!otherService.reduceRebate(userId,-payment.getActualAmount().longValue()))
+                        return retObject=new ReturnObject<>(ResponseCode.REBATE_ADD_FAIL,"增加返点失败");
+                }
+
+            }else if(payment.getAftersaleId()!=null){//售后单支付
+                //校验售后单和店铺的关系 -1售后单不存在  0售后单不属于店铺  1售后单属于店铺
+               // String checkBelong=otherService.checkShopAftersale(shopId,payment.getAftersaleId());
+                String checkBelong="1";
 
                 if(checkBelong.equals("-1")){
                     return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"售后单不存在");
                 }else if(checkBelong.equals("0")){
                     return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该售后单无权访问");
+                }
+
+                //售后单属于店铺  获取顾客id 返还返点
+                if(payment.getPaymentPattern().equals(PaymentPatterns.REBATEPAY.getCode())){
+                    Long userId=otherService.getAftersaleUser(payment.getAftersaleId());
+                    if(!otherService.reduceRebate(userId,-payment.getAmount().longValue()))
+                        return retObject=new ReturnObject<>(ResponseCode.REBATE_ADD_FAIL,"增加返点失败");
                 }
             }
         }

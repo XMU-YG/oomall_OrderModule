@@ -134,4 +134,18 @@ public class PaymentDao {
         }
         return 0L;
     }
+
+    /**
+     * 查询订单的所有支付
+     * @param pid
+     * @return
+     */
+    public List<PaymentPo> findOrderPayment(Long pid) {
+        PaymentPoExample example=new PaymentPoExample();
+        PaymentPoExample.Criteria criteria= example.createCriteria();
+        criteria.andAftersaleIdEqualTo(pid);
+        List<PaymentPo> paymentPos=paymentPoMapper.selectByExample(example); //得到满足条件的po对象
+        return paymentPos;
+
+    }
 }

@@ -17,7 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import javax.naming.ldap.Rdn;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,48 +40,38 @@ public class RefundDao {
      * 通过订单号查找退款信息
      * createdBy: Yuting Zhong 2020-12-5
      */
-    public ReturnObject<VoObject> findRefundByOrder(Long id){
+    public List<Refund> findRefundByOrder(Long id){
         RefundPoExample example=new RefundPoExample();
         RefundPoExample.Criteria criteria=example.createCriteria();
         criteria.andOrderIdEqualTo(id);
-
         List<RefundPo> refundPos=refundPoMapper.selectByExample(example);
 
-        ReturnObject<VoObject> returnObject=null;
+        List<Refund> ret=new ArrayList<>(refundPos.size());
+       for(RefundPo re:refundPos){
+           Refund refund=new Refund(re);
+           ret.add(refund);
+       }
 
-        if(refundPos==null||refundPos.isEmpty()){
-            returnObject = new ReturnObject<>(ResponseCode.OK,"该订单无退款");
-            logger.debug("findRefundByOrder: 该订单无退款");
-        }else {
-            returnObject = new ReturnObject<>(new Refund(refundPos.get(0)));
-            logger.debug("findRefunfByOrder: refund: "+returnObject.toString());
-        }
-
-        return returnObject;
+        return ret;
     }
 
     /**
      * 通过售后单号查找退款信息
      * CreateBy: Yuting Zhong 2020-12-6
      */
-    public ReturnObject<VoObject> findRefundByAftersale(Long id){
+    public List<Refund> findRefundByAftersale(Long id){
         RefundPoExample example=new RefundPoExample();
         RefundPoExample.Criteria criteria=example.createCriteria();
         criteria.andAftersaleIdEqualTo(id);
-
         List<RefundPo> refundPos=refundPoMapper.selectByExample(example);
 
-        ReturnObject<VoObject> returnObject=null;
-
-        if(refundPos==null||refundPos.isEmpty()){
-            returnObject=new ReturnObject<>(ResponseCode.OK,"该售后单无退款");
-            logger.debug("findRefundByAftersale:  售后单无退款");
-        }else{
-            returnObject=new ReturnObject<>(new Refund(refundPos.get(0)));
-            logger.debug("findRefunByAftersale: refund: "+returnObject.toString());
+        List<Refund> ret=new ArrayList<>(refundPos.size());
+        for(RefundPo re:refundPos){
+            Refund refund=new Refund(re);
+            ret.add(refund);
         }
 
-        return returnObject;
+       return ret;
     }
 
     /**

@@ -263,7 +263,7 @@ public class PaymentControllerTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":{\"paymentId\":1,\"amount\":0,\"orderId\":1,\"aftersaleId\":null,\"state\":1}}";
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":[{\"paymentId\":1,\"amount\":0,\"orderId\":1,\"aftersaleId\":null,\"state\":1}]}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, false);
         } catch (
@@ -280,7 +280,7 @@ public class PaymentControllerTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":{\"paymentId\":1,\"amount\":0,\"orderId\":1,\"aftersaleId\":null,\"state\":1}}";
+        expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":[{\"paymentId\":1,\"amount\":0,\"orderId\":1,\"aftersaleId\":null,\"state\":1}]}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, false);
         } catch (

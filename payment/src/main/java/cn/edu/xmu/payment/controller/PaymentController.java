@@ -387,7 +387,7 @@ public class PaymentController {
         ReturnObject refund=refundService.findOrderRefundShop(shopId,id);
 
         if(refund.getCode().equals(ResponseCode.OK)){
-            returnObject=Common.getRetObject(refund);
+            returnObject=Common.getListRetObject(refund);
         }else{
             returnObject=Common.getNullRetObj(refund,httpServletResponse);
         }
@@ -421,7 +421,7 @@ public class PaymentController {
         ReturnObject refund=refundService.findAftersaleRefundShop(shopId,id);
 
         if(refund.getCode().equals(ResponseCode.OK)){
-            returnObject=Common.getRetObject(refund);
+            returnObject=Common.getListRetObject(refund);
         }else{
             returnObject=Common.getNullRetObj(refund,httpServletResponse);
         }
@@ -456,7 +456,7 @@ public class PaymentController {
         ReturnObject refund=refundService.findOrderRefundSelf(userId,id);
 
         if(refund.getCode().equals(ResponseCode.OK)){
-            returnObject=Common.getRetObject(refund);
+            returnObject=Common.getListRetObject(refund);
         }else{
             returnObject=Common.getNullRetObj(refund,httpServletResponse);
         }
@@ -492,7 +492,7 @@ public class PaymentController {
         returnObject=Common.getRetObject(refund);
 
         if(refund.getCode().equals(ResponseCode.OK)){
-            returnObject=Common.getRetObject(refund);
+            returnObject=Common.getListRetObject(refund);
         }else{
             returnObject=Common.getNullRetObj(refund,httpServletResponse);
         }
