@@ -77,4 +77,10 @@ public interface IOrderService {
      */
     public Long getOrderUser(Long orderId);
 
+    /**
+     * 跟据orderItemId获得父订单id
+     * @param orderItemId
+     * @return  父订单id  -1:orderItemId不存在
+     */
+    public Long getOrderItemPid(Long orderItemId);
 }

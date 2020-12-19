@@ -3,7 +3,6 @@
 //import cn.edu.xmu.ooad.util.ResponseCode;
 //import cn.edu.xmu.ooad.util.ReturnObject;
 //import cn.edu.xmu.order_provider.IOrderService;
-//import cn.edu.xmu.order_provider.other.IPOtherService;
 //import cn.edu.xmu.payment.model.bo.Payment;
 //import cn.edu.xmu.payment.model.po.PaymentPo;
 //import cn.edu.xmu.payment.model.vo.NewRefundVo;
@@ -26,9 +25,6 @@
 //
 //    @Autowired
 //    private RefundService refundService;
-//
-//    @DubboReference(version = "0.0.1",check = false)
-//    private IPOtherService otherSerivice;
 //
 //    @DubboReference(version = "0.0.1",check = false)
 //    private IOrderService orderService;
@@ -185,7 +181,6 @@
 //            }else{
 //                cashAmount=amount;
 //            }
-//
 //
 //            NewRefundVo voCash=new NewRefundVo();
 //            voCash.setAmount(cashAmount);

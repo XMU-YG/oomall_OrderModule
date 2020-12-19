@@ -4,7 +4,8 @@ import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.order_provider.IOrderService;
-import cn.edu.xmu.order_provider.other.IPOtherService;
+import cn.edu.xmu.aftersale.dubbo.AftersaleService;
+import cn.edu.xmu.user.dubbo.UserService;
 import cn.edu.xmu.payment.dao.PaymentDao;
 import cn.edu.xmu.payment.model.bo.Payment;
 import cn.edu.xmu.payment.model.po.PaymentPo;
@@ -12,6 +13,7 @@ import cn.edu.xmu.payment.model.vo.NewPaymentVo;
 
 import cn.edu.xmu.payment.util.PaymentPatterns;
 
+import io.swagger.models.auth.In;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +32,10 @@ public class PaymentService {
     private IOrderService orderService;
 
     @DubboReference(version = "0.0.1",check = false)
-    private IPOtherService otherSerivice;
+    private AftersaleService aftersaleService;
+
+    @DubboReference(version = "0.0.1",check = false)
+    private UserService userService;
 
     private Logger logger= LoggerFactory.getLogger(PaymentService.class);
 
@@ -45,8 +50,8 @@ public class PaymentService {
        if(vo.getPrice()==0)
            retObject=new ReturnObject<>(ResponseCode.OK,"支付成功，支付金额为0，不创建支付记录");
 
-       // String checkBelong=orderService.checkUserOrder(userId,orderId);
-       String checkBelong="1";
+        String checkBelong=orderService.checkUserOrder(userId,orderId);
+       //String checkBelong="1";
 
        //校验用户和订单的从属关系  若订单不存在或订单不属于对应用户，则返回相应错误码，并直接返回给controller层
       if(checkBelong.equals("-1")){
@@ -59,8 +64,8 @@ public class PaymentService {
           if(vo.getPaymentPattern()==PaymentPatterns.REBATEPAY.getCode())
           {
               //在用户模块查询返点够不够
-              //boolean rebateEnough= otherSerivice.reduceRebate(userId,vo.getPrice());
-              boolean rebateEnough=true;
+             boolean rebateEnough= userService.reduceRebate(userId,vo.getPrice());
+              //boolean rebateEnough=true;
 
               if(!rebateEnough){
                   retObject=new ReturnObject<>(ResponseCode.REBATE_NOTENOUGH,"返点不足");
@@ -93,21 +98,21 @@ public class PaymentService {
         if(vo.getPrice()==0)
             retObject=new ReturnObject<>(ResponseCode.OK,"支付成功，支付金额为0，不创建支付记录");
 
-        String checkBelong="1";
-        //String checkBelong = otherSerivice.checkUserAftersale(userId, aftersaleId);
+        // String checkBelong="1";
+        Integer checkBelong = aftersaleService.checkUserAftersale(userId, aftersaleId);
         //校验用户和售后单的从属关系  若订单不存在或订单不属于对应用户，则返回相应错误码，并直接返回给controller层
-        if (checkBelong.equals("-1")) {
+        if (checkBelong.equals(-1)) {
             logger.debug("findOrderRefundShop: fail: 售后单不存在");
             retObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, "售后单不存在");
-        } else if (checkBelong.equals("0")) {
+        } else if (checkBelong.equals(0)) {
             logger.debug("findOrderRefundShop: fail: 该售后单无权限");
             retObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, "该售后单无权访问");
-        } else if (checkBelong.equals("1")) {
+        } else if (checkBelong.equals(1)) {
 
             if (vo.getPaymentPattern() == PaymentPatterns.REBATEPAY.getCode()) {
                 //扣除用户返点
-                //boolean rebateEnough = otherSerivice.reduceRebate(userId, vo.getPrice());
-                 boolean rebateEnough=true;
+                boolean rebateEnough = userService.reduceRebate(userId, vo.getPrice());
+                // boolean rebateEnough=true;
                 if (!rebateEnough) {
                     retObject = new ReturnObject<>(ResponseCode.REBATE_NOTENOUGH, "返点不足");
                     logger.debug("findOrderRefundShop: fail: 返点不足");
@@ -134,8 +139,8 @@ public class PaymentService {
      */
     public ReturnObject findOrderPaymentShop(Long orderId, Long shopId) {
 
-        //String checkBelong=orderService.checkShopOrder(shopId,orderId);
-        String checkBelong="1";
+        String checkBelong=orderService.checkShopOrder(shopId,orderId);
+        // String checkBelong="1";
 
         if(checkBelong.equals("-1")){
             ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单不存在");
@@ -159,15 +164,15 @@ public class PaymentService {
     public ReturnObject findAftersalePaymentShop(Long aftersaleId, Long shopId) {
 
         //检查店铺和售后单的从属关系
-       //String checkBelong=otherSerivice.checkShopAftersale(shopId,aftersaleId);
-         String checkBelong="1";
-        if(checkBelong.equals("-1")){
+       Integer checkBelong=aftersaleService.checkShopAftersale(shopId,aftersaleId);
+        // String checkBelong="1";
+        if(checkBelong.equals(-1)){
             ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单不存在");
             return returnObject;
-        }else if(checkBelong.equals("0")){
+        }else if(checkBelong.equals(0)){
             ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该订单无权限");
             return returnObject;
-        }else if(checkBelong.equals("1")){
+        }else if(checkBelong.equals(1)){
             ReturnObject<List> ret = new ReturnObject<>(paymentDao.findPaymentByAftersale(aftersaleId));
             return ret;
         }
@@ -181,8 +186,8 @@ public class PaymentService {
      */
     public ReturnObject findOrderPaymentSelf(Long userId, Long orderId) {
         //检查
-        //String checkBelong=orderService.checkUserOrder(userId,orderId);
-        String checkBelong="1";
+       String checkBelong=orderService.checkUserOrder(userId,orderId);
+        // String checkBelong="1";
         if(checkBelong.equals("-1")){
            ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单不存在");
            return returnObject;
@@ -203,15 +208,15 @@ public class PaymentService {
      */
     public ReturnObject findAftersalePaymentSelf(Long userId,Long aftersaleId) {
         //检查用户和售后单的从属关系
-        //String checkBelong=otherSerivice.checkUserAftersale(userId,aftersaleId);
-        String checkBelong="1";
-        if(checkBelong.equals("-1")){
+        Integer checkBelong=aftersaleService.checkUserAftersale(userId,aftersaleId);
+        // String checkBelong="1";
+        if(checkBelong.equals(-1)){
             ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单不存在");
             return returnObject;
-        }else if(checkBelong.equals("0")){
+        }else if(checkBelong.equals(0)){
             ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该订单无权限");
             return returnObject;
-        }else if(checkBelong.equals("1")){
+        }else if(checkBelong.equals(1)){
             ReturnObject<List> ret = new ReturnObject<>(paymentDao.findPaymentByAftersale(aftersaleId));
             return ret;
         }
