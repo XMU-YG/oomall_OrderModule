@@ -895,13 +895,30 @@ public class FreightDao {
      * @param freightItem
      * @return
      */
-    public ReturnObject<FreightItem> editFreightItem(FreightItem freightItem)
+    public ReturnObject<FreightItem> editFreightItem(Long shopId,FreightItem freightItem)
     {
+
         WeightFreightPo weightFreightPo=freightItem.getWeightFreightPo();
         WeightFreightPo originalWeightFreightPo=weightFreightPoMapper.selectByPrimaryKey(weightFreightPo.getId());
+
+        if(originalWeightFreightPo==null)
+        {
+            logger.error("没有该运费模板明细");
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+
         weightFreightPo.setFreightModelId(originalWeightFreightPo.getFreightModelId());
 
         //校验
+        FreightPo freightPo = freightPoMapper.selectByPrimaryKey(weightFreightPo.getFreightModelId());
+        if (freightPo == null) {
+            logger.error("没有该运费模板");
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
+        } else if (freightPo.getShopId() != shopId) {
+            logger.error("没有查询该模板的权限");
+            return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
+        }
+
         WeightFreightPoExample weightFreightPoExample = new WeightFreightPoExample();
         WeightFreightPoExample.Criteria criteria = weightFreightPoExample.createCriteria();
         criteria.andRegionIdEqualTo(weightFreightPo.getRegionId());
