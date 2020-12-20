@@ -55,12 +55,11 @@ public class PaymentController {
      */
     @ApiOperation(value="获得订单所有状态",produces = "application/json")
     @ApiImplicitParams({
-            @ApiImplicitParam(paramType="header",dataType="String",name="authorization",value="用户token",required=true),
     })
     @ApiResponses({
             @ApiResponse(code=0,message="成功")
     })
-    @Audit
+   // @Audit
     @GetMapping("/payments/states")
     public Object getAllPaymentStates(){
         logger.debug("getAllPaymentStates: ");
@@ -80,7 +79,7 @@ public class PaymentController {
      **/
     @ApiOperation(value="获得支付渠道",produces = "application/json")
     @ApiImplicitParams({
-        @ApiImplicitParam(paramType="header",dataType="String",name="authorization",value="用户token",required=true),
+
     })
     @ApiResponses({
             @ApiResponse(code=0,message="成功")
@@ -117,7 +116,7 @@ public class PaymentController {
     })
     //@Audit
     @PostMapping("/orders/{id}/payments")
-    public Object createOrderPayment(@LoginUser @ApiIgnore @RequestParam(required =false)  Long userId,
+    public Object createOrderPayment(@ApiIgnore @LoginUser   Long userId,
                                      @Validated @RequestBody NewPaymentVo vo, BindingResult bindingResult,
                                      @PathVariable Long id){
         logger.debug("insert order payment orderid: "+id);
@@ -137,7 +136,7 @@ public class PaymentController {
             httpServletResponse.setStatus(HttpStatus.SC_CREATED);
             retObject=Common.getRetObject(payment);
         }else{
-            retObject=Common.getNullRetObj(payment,httpServletResponse);
+            retObject=Common.decorateReturnObject(payment);
         }
 
         return retObject;
@@ -161,7 +160,7 @@ public class PaymentController {
     })
     //@Audit
     @PostMapping("/aftersales/{id}/payments")
-    public Object createAftersalePayment(@LoginUser @ApiIgnore @RequestParam(required =false)  Long userId,
+    public Object createAftersalePayment(@ApiIgnore @LoginUser    Long userId,
                                      @Validated @RequestBody NewPaymentVo vo, BindingResult bindingResult,
                                      @PathVariable Long id){
         logger.debug("insert aftersale payment: orderid: "+id);
@@ -181,7 +180,7 @@ public class PaymentController {
             httpServletResponse.setStatus(HttpStatus.SC_CREATED);
             retObject=Common.getRetObject(payment);
         }else{
-            retObject=Common.getNullRetObj(payment,httpServletResponse);
+            retObject=Common.decorateReturnObject(payment);
         }
 
         return retObject;
@@ -247,7 +246,7 @@ public class PaymentController {
             ret=Common.getListRetObject(returnObject);
         }
         else{
-            ret=Common.getNullRetObj(returnObject,httpServletResponse);
+            ret=Common.decorateReturnObject(returnObject);
         }
         return ret;
 
@@ -270,8 +269,10 @@ public class PaymentController {
     })
     //@Audit
     @GetMapping("/orders/{id}/payments")
-    public Object getOrderPaymentSelf(@LoginUser @ApiIgnore @RequestParam(required =false)  Long userId, @PathVariable  Long id){
+    public Object getOrderPaymentSelf(@ApiIgnore @LoginUser  Long userId, @PathVariable  Long id){
         Object ret=null;
+        System.out.println("userId");
+        System.out.println(userId);
 
         ReturnObject object=paymentService.findOrderPaymentSelf(userId,id);
 
@@ -279,7 +280,7 @@ public class PaymentController {
             ret= Common.getListRetObject(object);
         }
         else{
-            ret= Common.getNullRetObj(object,httpServletResponse);
+            ret= Common.decorateReturnObject(object);
         }
         return ret;
     }
@@ -301,8 +302,10 @@ public class PaymentController {
     })
     //@Audit
     @GetMapping("/aftersales/{id}/payments")
-    public Object getAftersalePaymentSelf(@LoginUser @ApiIgnore @RequestParam(required =false)  Long userId, @PathVariable  Long id){
+    public Object getAftersalePaymentSelf(@ApiIgnore @LoginUser   Long userId, @PathVariable  Long id){
         Object ret=null;
+        System.out.println("userId");
+        System.out.println(userId);
 
         ReturnObject object=paymentService.findAftersalePaymentSelf(userId,id);
 
@@ -310,7 +313,7 @@ public class PaymentController {
             ret= Common.getListRetObject(object);
         }
         else{
-            ret=  Common.getNullRetObj(object,httpServletResponse);
+            ret=  Common.decorateReturnObject(object);
         }
         return ret;
     }
@@ -333,7 +336,7 @@ public class PaymentController {
             @ApiResponse(code=505,message = "该退款无权访问")
     })
     @PostMapping("/shops/{shopId}/payments/{id}/refunds")
-    public Object createRefund(@LoginUser @ApiIgnore @RequestParam(required =false)  Long userId,
+    public Object createRefund(@LoginUser @ApiIgnore Long userId,
                                          @Validated @RequestBody NewRefundVo vo, BindingResult bindingResult,
                                          @PathVariable Long shopId, @PathVariable Long id){
         logger.debug("insert aftersale payment orderid: "+id);
@@ -353,7 +356,7 @@ public class PaymentController {
             httpServletResponse.setStatus(HttpStatus.SC_CREATED);
             retObject=Common.getRetObject(refund);
         }else{
-            retObject=Common.getNullRetObj(refund,httpServletResponse);
+            retObject=Common.decorateReturnObject(refund);
         }
 
         return retObject;
@@ -388,7 +391,7 @@ public class PaymentController {
         if(refund.getCode().equals(ResponseCode.OK)){
             returnObject=Common.getListRetObject(refund);
         }else{
-            returnObject=Common.getNullRetObj(refund,httpServletResponse);
+            returnObject=Common.decorateReturnObject(refund);
         }
 
         return returnObject;
@@ -422,7 +425,7 @@ public class PaymentController {
         if(refund.getCode().equals(ResponseCode.OK)){
             returnObject=Common.getListRetObject(refund);
         }else{
-            returnObject=Common.getNullRetObj(refund,httpServletResponse);
+            returnObject=Common.decorateReturnObject(refund);
         }
 
         return returnObject;
@@ -446,9 +449,11 @@ public class PaymentController {
     })
     @Audit
     @GetMapping("/orders/{id}/refunds")
-    public Object getOrdegetOrderRefundSelfrRefundSelf(@LoginUser @ApiIgnore @RequestParam(required =false)  Long userId,
+    public Object getOrderRefundSelf(@ApiIgnore @LoginUser Long userId,
                                      @PathVariable Long id){
         logger.debug("getOrderRefund: userid: "+userId+" orderId: "+id);
+        System.out.println("userId");
+        System.out.println(userId);
 
         Object returnObject;
 
@@ -457,7 +462,7 @@ public class PaymentController {
         if(refund.getCode().equals(ResponseCode.OK)){
             returnObject=Common.getListRetObject(refund);
         }else{
-            returnObject=Common.getNullRetObj(refund,httpServletResponse);
+            returnObject=Common.decorateReturnObject(refund);
         }
 
         return returnObject;
@@ -471,7 +476,7 @@ public class PaymentController {
     @ApiOperation(value="买家查询自己的售后单退款信息")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType="header",dataType="String",name="authorization",value="用户token",required=true),
-            @ApiImplicitParam(paramType="path",dataType="int",name="id",value="售后单id",required=true,example="1"),
+            @ApiImplicitParam(paramType="path",dataType="Long",name="id",value="售后单id",required=true,example="1"),
     })
     @ApiResponses({
             @ApiResponse(code=0,message="成功"),
@@ -480,11 +485,12 @@ public class PaymentController {
     })
     @Audit
     @GetMapping("/aftersales/{id}/refunds")
-    public Object getAftersaleRefundSelf(@LoginUser @ApiIgnore @RequestParam(required =false)  Long userId,
-                                         @PathVariable Long id){
+    public Object getAftersaleRefundSelf(@ApiIgnore @LoginUser Long userId,@PathVariable Long id){
         logger.debug("getAftersaleRefundSelf: userid"+userId+" aftersaleId: "+id);
 
         Object returnObject;
+        System.out.println("userId");
+        System.out.println(userId);
 
         ReturnObject refund=refundService.findAftersaleRefundSelf(userId,id);
 
@@ -492,7 +498,7 @@ public class PaymentController {
         if(refund.getCode().equals(ResponseCode.OK)){
             returnObject=Common.getListRetObject(refund);
         }else{
-            returnObject=Common.getNullRetObj(refund,httpServletResponse);
+            returnObject=Common.decorateReturnObject(refund);
         }
 
         return returnObject;
