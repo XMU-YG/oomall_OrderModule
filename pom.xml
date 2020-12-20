@@ -9,7 +9,6 @@
         <module>payment</module>
         <module>freight</module>
         <module>order-dubbo-provider</module>
-        <module>order-dubbo-test</module>
     </modules>
 
     <parent>

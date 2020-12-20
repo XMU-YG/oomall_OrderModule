@@ -79,7 +79,7 @@ public class GrouponOrderServiceImpl implements CreateOrderService {
         orderItemPo.setPrice(order_goods.getPrice());
         orderItemPo.setGoodsSkuId(order_goods.getGoods_sku_id());
         orderItemPo.setGmtCreate(LocalDateTime.now());
-        //orderItemPo.setBeShareId(otherService.getBeSharedId(orderItemPo.getGoodsSkuId(), customerId));
+        orderItemPo.setBeShareId(otherService.fillOrderItemByBeShare(orderItemPo.getGoodsSkuId(), customerId));
         orderItemPo.setGmtModified(LocalDateTime.now());
 
         //商品数量属性设为购买数量，方便之后处理
@@ -97,7 +97,7 @@ public class GrouponOrderServiceImpl implements CreateOrderService {
         //todo 计算优惠额
         orderPo.setDiscountPrice(11L);
         //计算运费
-        String itemMap=JacksonUtil.toJson(goodsMap);
+        //String itemMap=JacksonUtil.toJson(goodsMap);
         //这里错了吧，应该用的是
         orderPo.setFreightPrice(freightService.calculateFreight(orderPo.getRegionId(), goodsMap));
         //计算返点数

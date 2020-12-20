@@ -1,11 +1,13 @@
 package cn.edu.xmu.user.model;
 
+import java.io.Serializable;
+
 /**
  * @author ：Zeyao Feng
  * @date ：Created in 2020/12/18 0:26
  */
 
-public class User {
+public class User implements Serializable {
     private Long id;
     private String userName;
     private String name;

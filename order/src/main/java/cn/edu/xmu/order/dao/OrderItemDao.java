@@ -92,6 +92,7 @@ public class OrderItemDao {
      * @author Gang Ye
      */
     public List<SimpleOrderItem> getSimOrderItemsByOrderId(Long orderId) {
+        logger.debug("getSimpleOrderItemsByOrderId:  "+orderId);
         OrderItemPoExample itemPoExample=new OrderItemPoExample();
         OrderItemPoExample.Criteria criteria=itemPoExample.createCriteria();
         criteria.andOrderIdEqualTo(orderId);

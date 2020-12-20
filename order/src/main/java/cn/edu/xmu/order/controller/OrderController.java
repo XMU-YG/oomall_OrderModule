@@ -408,6 +408,7 @@ public class OrderController {
         logger.debug("shop getOrderById: orderId : "+id+"   shopId:  "+shopId);
         ReturnObject object=orderService.getShopSelfOrder(shopId,id);
 
+        System.out.println(JacksonUtil.toJson(object.getData()));
         if (object.getCode().equals(ResponseCode.OK)){
             ret=Common.getRetObject(object);
         }

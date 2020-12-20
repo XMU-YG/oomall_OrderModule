@@ -25,6 +25,7 @@ import cn.edu.xmu.order.model.po.OrderPo;
 import cn.edu.xmu.order.model.vo.AddressVo;
 
 import cn.edu.xmu.share.dubbo.ShareService;
+import cn.edu.xmu.user.dubbo.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.pagehelper.PageInfo;
 import cn.edu.xmu.order.model.bo.*;
@@ -74,6 +75,9 @@ public class OrderService {
     @DubboReference(version = "0.0.1", check=false)
     private ShareService shareService;
 
+    @DubboReference(version = "0.0.1", check=false)
+    private UserService otherService;
+
     /**
      * 根据订单号查询订单明细
      * @param orderId
@@ -83,9 +87,6 @@ public class OrderService {
         return orderItemDao.getOrderItemsByOrderId(orderId);
     }
 
-    public List<OrderItemPo> getItemsBySkuId(Long skuId) {
-        return orderItemDao.getItemsBySkuId(skuId);
-    }
 
     public ReturnObject insertOrderItem(OrderItemPo orderItemPo) {
         return orderItemDao.insertOrderItem(orderItemPo);
@@ -110,16 +111,22 @@ public class OrderService {
         if (returnObject.getCode().equals(ResponseCode.OK)){
             Order order=(Order) returnObject.getData();
             if(order.getCustomer().getCustomerId().equals(customerId)){
-                System.out.println("jinru: ");
+
                 //构造完整Order详情
                 List<SimpleOrderItem> orderItems=orderItemDao.getSimOrderItemsByOrderId(order.getId());
                 order.setSimpleOrderItemList(orderItems);
                 Long shopId=1L;
-                //Customer customer=JacksonUtil.toObj(otherService.findCustomerById(customerId),Customer.class);
+                Customer customer=JacksonUtil.toObj(otherService.findCustomerById(customerId),Customer.class);
+
+                System.out.println("Customer");
                 ShopRetVo shopRetVo=JacksonUtil.toObj(shopService.getShopById(shopId),ShopRetVo.class);
+                logger.debug("after interface:");
+                if (shopRetVo == null) {
+                    logger.debug("shopRetVo is null");
+                }
                 assert shopRetVo != null;
                 Shop shop=new Shop(shopRetVo);
-                //order.setCustomer(customer);
+                order.setCustomer(customer);
                 order.setShop(shop);
                 return new ReturnObject<>(order);
             }
@@ -207,12 +214,13 @@ public class OrderService {
                 Long customerId=order.getCustomer().getCustomerId();
                 //Customer customer=JacksonUtil.toObj(otherService.findCustomerById(customerId),Customer.class);
                 if(shopId!=0){
-                    ShopRetVo shopRetVo=JacksonUtil.toObj(shopService.getShopById(shopId),ShopRetVo.class);
-                    assert shopRetVo != null;
-                    Shop shop=new Shop(shopRetVo);
-                    order.setShop(shop);
+                    //ShopRetVo shopRetVo=JacksonUtil.toObj(shopService.getShopById(shopId),ShopRetVo.class);
+                    //assert shopRetVo != null;
+                    //Shop shop=new Shop(shopRetVo);
+                    //order.setShop(shop);
                 }
                 //order.setCustomer(customer);
+                logger.debug(JacksonUtil.toJson(order));
                 return new ReturnObject<>(order);
             } else{
                 logger.debug("shop getOrderById error: don't have privilege!   orderId:  "+id+"  shopId:  "+shopId);

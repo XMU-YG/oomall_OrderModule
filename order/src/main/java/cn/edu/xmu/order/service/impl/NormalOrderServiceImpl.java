@@ -97,7 +97,7 @@ public class NormalOrderServiceImpl implements CreateOrderService {
             orderItemPo.setPrice(order_goods.getPrice());
             orderItemPo.setGoodsSkuId(order_goods.getGoods_sku_id());
             orderItemPo.setGmtCreate(LocalDateTime.now());
-            //todo otherService.getBeSharedId(orderItemPo.getGoodsSkuId(),customerId)
+            orderItemPo.setBeShareId(otherService.fillOrderItemByBeShare(orderItemPo.getGoodsSkuId(), customerId));
             orderItemPo.setGmtModified(LocalDateTime.now());
 
             orderItemPos.add(orderItemPo);
