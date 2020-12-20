@@ -5,7 +5,7 @@ management:
         include: "*"
 
 server:
-  port: 8080
+  port: 10202
   tomcat:
     threads:
       max: 1000
@@ -18,11 +18,11 @@ dubbo:
     qos-accept-foreign-ip: false
   # 配置注册中心
   registry:
-    address: nacos://127.0.0.1:8848
+    address: nacos://47.75.67.96:8848
   # 设置协议-协议由提供方指定消费方被动接受
   protocol:
     name: dubbo
-    port: 20880
+    port: 20889
     # 设置超时时间
   consumer:
     timeout: 4000
@@ -37,8 +37,8 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
     initialization-mode: always
-    schema: classpath:schema.sql
-    data: classpath:data.sql
+   # schema: classpath:schema.sql
+   # data: classpath:data.sql
     druid:
       #初始化时建立物理连接的个数
       initial-size: 3
@@ -56,6 +56,12 @@ spring:
           slow-sql-millis: 100
       validation-query: select 1
     sql-script-encoding: UTF-8
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 47.75.67.96:8848
+
+
   redis:
     # Redis数据库索引（默认为0）
     database: 0

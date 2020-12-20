@@ -189,7 +189,7 @@ spring:
             - Auth=authorization
       # 支付
         - id: payment
-          uri: http://localhost:9201/
+          uri: http://localhost:10202/
           predicates:
             - Path=/payments/patterns,/orders/{id}/payments,/aftersales/{id}/payments,/aftersales/{id}/refunds,/orders/{id}/refunds
           filters:
@@ -197,9 +197,9 @@ spring:
             - Auth=authorization
         # 支付状态 无token
         - id: paymentState
-          uri: http://localhost:9201/
+          uri: http://localhost:10202/
           predicates:
-            - Path=/payments/states
+            - Path=/payments/states,/payments/patterns
           filters:
             - PrefixPath=/payment
 
