@@ -20,4 +20,8 @@ spring:
     # Redis服务器连接端口
     port: 6379
     # Redis服务器连接密码
-    password:
+    password: 123456
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 47.75.67.96:8848

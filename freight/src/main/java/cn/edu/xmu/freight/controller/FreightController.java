@@ -50,7 +50,7 @@ public class FreightController {
     })
     @Audit
     @PostMapping("/region/{rid}/price")
-    public Object calculateFreight(@PathVariable Long rid, @RequestBody List<ItemsVo> vos){
+    public Object calculateFreight(@PathVariable Long rid, @RequestBody List<ItemsVo> vos,@PathVariable Long shopId){
         logger.debug("calculate freight by shopId:"+rid);
         //当返回值为-1时，出错，其他情况下正常
         Long ret1=freightService.calculateFreight(rid,vos);
@@ -340,11 +340,12 @@ public class FreightController {
     @GetMapping("/shops/{shopId}/freightmodels/{id}/weightItems")
     public Object getFreightItemsById(@PathVariable(name = "shopId") Long shopId, @PathVariable(name = "id") Long id) {
         Object ret = null;
-        ReturnObject<List> returnObject = freightService.findFreightItemsById(shopId, id);
+        ReturnObject returnObject = freightService.findFreightItemsById(shopId, id);
         if (returnObject.getCode() == ResponseCode.OK) {
             ret = Common.getListRetObject(returnObject);
         } else {
-            ret = ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
+            ret=Common.getNullRetObj(returnObject,httpServletResponse);
+            //ret = ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
             //ret=Common.decorateReturnObject(returnObject);
         }
         return ret;
@@ -560,21 +561,20 @@ public class FreightController {
     @Audit
     @PutMapping("/shops/{shopId}/weightItems/{id}")
     public Object editFreightItem(@PathVariable(name="shopId") Long shopId,@PathVariable(name="id") Long id, @Validated @RequestBody WeightItemVo freightModelInfo, BindingResult bindingResult){
-        logger.debug("edit freightItem by shopId: "+ shopId + " id: "+id);
+        logger.info("edit freightItem by shopId: "+ shopId + " id: "+id);
 
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
 
         if (null != returnObject) {
-            logger.debug("validate fail");
+            logger.info("validate fail");
             return returnObject;
         }
         Object ret=null;
         ReturnObject object=freightService.editFreightItem(shopId,id,freightModelInfo);
-        logger.debug("editFreightItem by: shopId : "+shopId + " id: "+id);
+        logger.info("editFreightItem by: shopId : "+shopId + " id: "+id);
         if(object.getCode().equals(ResponseCode.OK))
         {
-
             ret=Common.getRetObject(object);
         }
         else
