@@ -1,6 +1,8 @@
 package cn.edu.xmu.order.service.impl;
 
 import cn.edu.xmu.goodsprovider.activity.PreGroInner;
+import cn.edu.xmu.goodsprovider.flashsale.FlashService;
+import cn.edu.xmu.goodsprovider.goods.GoodsInner;
 import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -47,6 +49,12 @@ public class GrouponOrderServiceImpl implements CreateOrderService {
     @DubboReference(version = "0.0.1",check = false)
     private IFreightService freightService;
 
+    @DubboReference(version = "0.0.1",check = false)
+    private GoodsInner goodsInner;
+
+    @DubboReference(version = "0.0.1",check = false)
+    private FlashService flashService;
+
     @Override
     public ReturnObject createOrderByCustomer(Long customerId, OrderVo vo) {
         ReturnObject<String> returnObject = null;
@@ -64,7 +72,7 @@ public class GrouponOrderServiceImpl implements CreateOrderService {
         //所有商品skuId与quantity的Map，用于计算运费
         Map<Long, Integer> goodsMap = new HashMap<>();
         //检查库存
-        String orderGoodsJson = null;
+        String orderGoodsJson = flashService.findGoodsBySkuId(orderItemVo.getSkuId());
         OrderGoods order_goods = JacksonUtil.toObj(orderGoodsJson, OrderGoods.class);
 
         if (order_goods == null || orderItemVo.getQuantity() > order_goods.getQuantity()) {
@@ -97,12 +105,9 @@ public class GrouponOrderServiceImpl implements CreateOrderService {
         //todo 计算优惠额
         orderPo.setDiscountPrice(11L);
         //计算运费
-        //String itemMap=JacksonUtil.toJson(goodsMap);
-        //这里错了吧，应该用的是
         orderPo.setFreightPrice(freightService.calculateFreight(orderPo.getRegionId(), goodsMap));
         //计算返点数
-        String orderItemPosJson = JacksonUtil.toJson(orderItemPo);
-        //orderPo.setRebateNum(otherService.calculateRebateNum(orderItemPosJson, customerId));
+        orderPo.setRebateNum(0);
         //计算团购优惠
         orderPo.setGrouponDiscount(0L);
         //设为待支付状态

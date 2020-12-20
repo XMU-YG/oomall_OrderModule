@@ -120,12 +120,13 @@ public class OrderController {
     })
     @Audit
     @GetMapping("orders")
-    public Object getALLSimpleOrders(@ApiIgnore @LoginUser Long customerId, @RequestParam(required = false) String orderSn, @RequestParam(required = false) Integer state, @RequestParam(required = false) String beginTime, @RequestParam(required = false) String endTime, @RequestParam(required = false,defaultValue = "1") Integer page , @RequestParam(required = false,defaultValue = "10") Integer pageSize){
+    public Object getALLSimpleOrders(@ApiIgnore @LoginUser Long customerId, @RequestParam(required = false,name = "orderSn") String orderSn, @RequestParam(required = false,name = "state") Integer state, @RequestParam(required = false,name = "beginTime") String beginTime, @RequestParam(required = false,name = "endTime") String endTime, @RequestParam(required = false,defaultValue = "1") Integer page , @RequestParam(required = false,defaultValue = "10") Integer pageSize){
         Object ret=null;
         LocalDateTime begin=null,end=null;
         if (beginTime!=null){
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             begin=LocalDateTime.parse(beginTime,dateTimeFormatter);
+            System.out.println(begin);
         }
         if (endTime!=null){
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
