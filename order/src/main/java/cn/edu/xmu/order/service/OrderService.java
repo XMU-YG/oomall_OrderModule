@@ -267,6 +267,7 @@ public class OrderService {
      */
     public ReturnObject verifyOrderByCustomerId(Long customerId, Long orderId) {
         ReturnObject<Order> ret=orderDao.getOrderById(orderId);
+        logger.debug("verify...  ");
         if (ret.getCode().equals(ResponseCode.OK)){
             if (ret.getData().getCustomer().getId().equals(customerId)){
                 logger.debug("verify true!");
@@ -365,7 +366,7 @@ public class OrderService {
      * 计算优惠总数额
      * @return
      */
-    private Long totalDiscount(List<OrderItem> orderItems){
+    public Long totalDiscount(List<OrderItem> orderItems){
         Long sum=0L;
         for (OrderItem po:orderItems) {
             sum+=po.getDiscount();
@@ -383,7 +384,9 @@ public class OrderService {
         for (OrderItem o:orderGoods) {
             sum+=o.getPrice()*o.getQuantity();
         }
+        logger.debug("计算总价："+sum);
         return sum;
+
     }
 
     /**
@@ -565,13 +568,14 @@ public class OrderService {
      * @return
      */
     public OtherDTO getOrderDTOForOther(Long orderItemId) {
-        logger.debug("");
+        logger.debug("dubbo service getOrderDTO for Other");
         OtherDTO otherOrder=new OtherDTO();
         OrderItem orderItem=this.getOrderItemById(orderItemId);
         if (orderItem!=null){
             otherOrder.setSkuId(orderItem.getSkuId());
             otherOrder.setSkuName(orderItem.getName());
             Long orderId=orderItem.getOrderId();
+            otherOrder.setOrderId(orderId);
             Order order=orderDao.getOrderById(orderId).getData();
             if (order!=null){
                 otherOrder.setShopId(order.getShop().getId());
@@ -649,6 +653,7 @@ public class OrderService {
     }
 
     public GoodsDTO getGoodsDTOForGoods(Long orderItemId) {
+        logger.debug("dubbo service getGoodsDTO for Goods");
         GoodsDTO goodsDTO=new GoodsDTO();
         OrderItem orderItem=this.getOrderItemById(orderItemId);
         if (orderItem!=null){
@@ -668,10 +673,12 @@ public class OrderService {
     }
 
     public Byte getOrderState(Long orderId) {
+        logger.debug("dubbo service: getOrderState.");
         return orderDao.getOrderState(orderId);
     }
 
     public Long getOrderUser(Long orderId) {
+        logger.debug("dubbo service: getOrderUser.");
         ReturnObject returnObject=orderDao.getOrderById(orderId);
         if (returnObject.getCode().equals(ResponseCode.OK)){
             Order order= (Order) returnObject.getData();

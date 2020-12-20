@@ -64,6 +64,7 @@ public class IOrderServiceImpl implements IOrderService{
 
     @Override
     public String checkUserOrder(Long userId, Long orderId) {
+        System.out.println("检查");
         ReturnObject returnObject= orderService.verifyOrderByCustomerId(userId,orderId);
         if (returnObject.getCode().equals(ResponseCode.OK)){
             return "1";

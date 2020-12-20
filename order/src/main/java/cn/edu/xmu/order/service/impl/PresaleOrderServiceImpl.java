@@ -70,7 +70,7 @@ public class PresaleOrderServiceImpl implements CreateOrderService {
         //0普通 1团购 2预售
         orderPo.setOrderType(OrderType.PRESALE.getCode());
         //检查库存
-        String orderGoodsJson = null;//goodsService.findGoodsBySkuId(orderItemVo.getSkuId());
+        String orderGoodsJson = flashService.findGoodsBySkuId(orderItemVo.getSkuId());
         OrderGoods order_goods = JacksonUtil.toObj(orderGoodsJson, OrderGoods.class);
         if (order_goods == null || orderItemVo.getQuantity() > order_goods.getQuantity()) {
             //库存不足
@@ -106,16 +106,15 @@ public class PresaleOrderServiceImpl implements CreateOrderService {
 
         orderPo.setFreightPrice(freightService.calculateFreight(orderPo.getRegionId(),goodsMap));
         //计算返点数
-        String orderItemPosJson = JacksonUtil.toJson(orderItemPo);
-        //orderPo.setRebateNum(otherService.calculateRebateNum(orderItemPosJson, customerId));
-
+        orderPo.setRebateNum(0);
         //设为待支付状态
         orderPo.setState((byte) OrderStatus.WAIT_FOR_PAID.getCode());
         //子状态为新订单
         orderPo.setSubstate((byte) OrderStatus.NEW_ORDER.getCode());
         //预售订单第一次总价是预售之和
         Long advancePrice=preGroInner.getAdvancePrice(orderPo.getPresaleId(),orderItemPo.getGoodsSkuId())*orderItemPo.getQuantity();
-        orderPo.setOriginPrice(advancePrice);
+        Long finalPrice=preGroInner.getFinalPrice(orderPo.getPresaleId(),orderItemPo.getGoodsSkuId());
+        orderPo.setOriginPrice(advancePrice+finalPrice);
         orderPo.setGmtModified(LocalDateTime.now());
         //OrderPo写入数据库，返回orderId
         ReturnObject<Long> orderRet = orderService.insertOrder(orderPo);
