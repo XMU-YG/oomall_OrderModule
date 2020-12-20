@@ -108,6 +108,11 @@ public class IOrderServiceImpl implements IOrderService{
     }
 
     @Override
+    public Long getOrderItemPid(Long orderItemId) {
+        return null;
+    }
+
+    @Override
     public Long getOrderAmount(Long orderId) {
         return null;
     }

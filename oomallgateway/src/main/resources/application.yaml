@@ -166,14 +166,14 @@ spring:
 
       # 订单模块路由
         - id: order
-          uri: http://localhost:8083/
+          uri: http://localhost:10201/
           predicates:
             - Path=/orders,/orders/{id},/orders/{id}/**
           filters:
             - PrefixPath=/order
             - Auth=authorization
         - id: orderState
-          uri: http://localhost:8083/
+          uri: http://localhost:10201/
           predicates:
               - Path=/orders/states
           filters:

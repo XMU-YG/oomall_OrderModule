@@ -1,5 +1,9 @@
 package cn.edu.xmu.order.service;
 
+import cn.edu.xmu.goodsprovider.Module.ShopRetVo;
+import cn.edu.xmu.goodsprovider.flashsale.FlashService;
+import cn.edu.xmu.goodsprovider.goods.GoodsInner;
+import cn.edu.xmu.goodsprovider.goods.ShopService;
 import cn.edu.xmu.ooad.model.VoObject;
 
 import cn.edu.xmu.ooad.order.bo.COrderItem;
@@ -21,6 +25,8 @@ import cn.edu.xmu.order.model.po.OrderItemPo;
 import cn.edu.xmu.order.model.po.OrderPo;
 import cn.edu.xmu.order.model.vo.AddressVo;
 
+import cn.edu.xmu.share.dubbo.ShareService;
+import cn.edu.xmu.user.dubbo.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.pagehelper.PageInfo;
 import cn.edu.xmu.order.model.bo.*;
@@ -28,6 +34,7 @@ import cn.edu.xmu.order.model.vo.OrderItemVo;
 import cn.edu.xmu.order.model.vo.OrderVo;
 import cn.edu.xmu.order.util.OrderStatus;
 
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,17 +66,20 @@ public class OrderService {
     @Autowired
     private ApplicationContext applicationContext;
 
-//    @DubboReference(version = "0.0.1", check=false)
-//    private ShopService shopService;
+    @DubboReference(version = "0.0.1", check=false)
+    private ShopService shopService;
 
-//    @DubboReference(version = "0.0.1", check=false)
-//    private FlashService goodsService;
-//
-//    @DubboReference(version = "0.0.1", check=false)
-//    private ShareService shareService;
-//
-//    @DubboReference(version = "0.0.1", check=false)
-//    private UserService otherService;
+    @DubboReference(version = "0.0.1", check=false)
+    private GoodsInner goodsInner;
+
+    @DubboReference(version = "0.0.1", check=false)
+    private FlashService flashService;
+
+    @DubboReference(version = "0.0.1", check=false)
+    private ShareService shareService;
+
+    @DubboReference(version = "0.0.1", check=false)
+    private UserService otherService;
 
     /**
      * 根据订单号查询订单明细
@@ -109,18 +119,12 @@ public class OrderService {
                 List<SimpleOrderItem> orderItems=orderItemDao.getSimOrderItemsByOrderId(order.getId());
                 order.setSimpleOrderItemList(orderItems);
                 Long shopId=1L;
-                //Customer customer=JacksonUtil.toObj(otherService.findCustomerById(customerId),Customer.class);
-
-                System.out.println("Customer");
-                //ShopRetVo shopRetVo=JacksonUtil.toObj(shopService.getShopById(shopId),ShopRetVo.class);
-                logger.debug("after interface:");
-//                if (shopRetVo == null) {
-//                    logger.debug("shopRetVo is null");
-//                }
-//                assert shopRetVo != null;
-//                Shop shop=new Shop(shopRetVo);
-//                order.setCustomer(customer);
-                //order.setShop(shop);
+                Customer customer=JacksonUtil.toObj(otherService.findCustomerById(customerId),Customer.class);
+                ShopRetVo shopRetVo=JacksonUtil.toObj(shopService.getShopById(shopId),ShopRetVo.class);
+                assert shopRetVo != null;
+                Shop shop=new Shop(shopRetVo);
+                order.setCustomer(customer);
+                order.setShop(shop);
                 return new ReturnObject<>(order);
             }
             else{
@@ -158,10 +162,11 @@ public class OrderService {
         if (check.getCode().equals(ResponseCode.OK)){
             //是本人的
             ReturnObject returnObject=orderDao.deleteOrderById(orderId);
+            //加库存
             if (returnObject.getErrmsg().equals("已取消")){
                 List<SimpleOrderItem> simpleOrderItems=orderItemDao.getSimOrderItemsByOrderId(orderId);
                 for (SimpleOrderItem item:simpleOrderItems) {
-                   // goodsService.addStock(item.getGoods_sku_id(),item.getQuantity());
+                    goodsInner.deductNorStock(item.getSkuId(),item.getQuantity());
                 }
             }
             return returnObject;
@@ -205,14 +210,13 @@ public class OrderService {
                 List<SimpleOrderItem> orderItems=orderItemDao.getSimOrderItemsByOrderId(order.getId());
                 order.setSimpleOrderItemList(orderItems);
                 Long customerId=order.getCustomer().getId();
-                //Customer customer=JacksonUtil.toObj(otherService.findCustomerById(customerId),Customer.class);
-                if(shopId!=0){
-                    //ShopRetVo shopRetVo=JacksonUtil.toObj(shopService.getShopById(shopId),ShopRetVo.class);
-                    //assert shopRetVo != null;
-                    //Shop shop=new Shop(shopRetVo);
-                    //order.setShop(shop);
-                }
-                //order.setCustomer(customer);
+                Long sid=order.getShop().getId();
+                Customer customer=JacksonUtil.toObj(otherService.findCustomerById(customerId),Customer.class);
+                ShopRetVo shopRetVo=JacksonUtil.toObj(shopService.getShopById(sid),ShopRetVo.class);
+                assert shopRetVo != null;
+                Shop shop=new Shop(shopRetVo);
+                order.setShop(shop);
+                order.setCustomer(customer);
                 logger.debug(JacksonUtil.toJson(order));
                 return new ReturnObject<>(order);
             } else{
@@ -310,7 +314,7 @@ public class OrderService {
         //存储以扣库存的商品skuId和quantity，便于回滚,局域变量，线程安全
         Map<Long,Integer> map=new HashMap<>(goodsList.size());
         for (OrderGoods po:goodsList) {
-            //扣库存
+            //扣库存,不同类型的商品扣普通的库存（普通，团购，预售）
             boolean deductSuccessful=deductService.deductStock(actId,po.getGoods_sku_id(),po.getQuantity());
             if (!deductSuccessful) {
                 //库存不足
@@ -361,11 +365,9 @@ public class OrderService {
      * 计算优惠总数额
      * @return
      */
-    public Long totalDiscount(List<OrderItem> orderItems){
-
+    private Long totalDiscount(List<OrderItem> orderItems){
         Long sum=0L;
-        for (OrderItem po:orderItems
-             ) {
+        for (OrderItem po:orderItems) {
             sum+=po.getDiscount();
         }
         return sum;
@@ -412,7 +414,7 @@ public class OrderService {
      * @author Gang Ye
      */
     public Long createAfterSaleOrder(Long customerId,Long shopId, OrderVo vo) {
-        ReturnObject returnObject=null;
+
         OrderPo orderPo=vo.createOrderPo();
         orderPo.setGmtCreate(LocalDateTime.now());
         List<OrderItemVo> orderItemVos=vo.getOrderItems();
@@ -427,7 +429,7 @@ public class OrderService {
         //检查库存
         for (OrderItemVo orderItemVo:orderItemVos) {
             OrderItemPo orderItemPo=new OrderItemPo();
-            String orderGoodsJson=null;//goodsService.findGoodsBySkuId(orderItemVo.getSkuId());
+            String orderGoodsJson=flashService.findGoodsBySkuId(orderItemVo.getSkuId());
             OrderGoods order_goods= JacksonUtil.toObj(orderGoodsJson,OrderGoods.class);
             if (order_goods==null||orderItemVo.getQuantity()>order_goods.getQuantity()){
                 //库存不足
@@ -438,7 +440,7 @@ public class OrderService {
             orderItemPo.setName(order_goods.getName());
             orderItemPo.setPrice(order_goods.getPrice());
             orderItemPo.setGoodsSkuId(order_goods.getGoods_sku_id());
-            //orderItemPo.setBeShareId(shareService.fillOrderItemByBeShare(orderItemPo.getGoodsSkuId(),customerId));
+            orderItemPo.setBeShareId(shareService.fillOrderItemByBeShare(orderItemPo.getGoodsSkuId(),customerId));
             orderItemPo.setGmtCreate(LocalDateTime.now());
             orderItemPo.setGmtModified(LocalDateTime.now());
             orderItemPos.add(orderItemPo);
@@ -493,7 +495,7 @@ public class OrderService {
         List<OrderItem> orderItems=this.findOrderItemsByOrderId(orderId);
         Map<Long,List<OrderItem>> goodsMapByShop=new HashMap<>(orderItems.size());
         for (OrderItem orderItem :orderItems) {
-            String goodsJson=null;//goodsService.findGoodsBySkuId(orderItem.getSkuId());
+            String goodsJson=flashService.findGoodsBySkuId(orderItem.getSkuId());
             OrderGoods goods= JacksonUtil.toObj(goodsJson,OrderGoods.class);
             assert goods != null;
             goodsMapByShop.computeIfAbsent(goods.getShopId(), k->new ArrayList<>()).add(orderItem);
@@ -563,6 +565,7 @@ public class OrderService {
      * @return
      */
     public OtherDTO getOrderDTOForOther(Long orderItemId) {
+        logger.debug("");
         OtherDTO otherOrder=new OtherDTO();
         OrderItem orderItem=this.getOrderItemById(orderItemId);
         if (orderItem!=null){
