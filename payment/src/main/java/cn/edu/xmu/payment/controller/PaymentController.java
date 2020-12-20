@@ -36,7 +36,7 @@ import java.util.List;
 
 @Api(value="支付服务",tags="payment")
 @RestController /*Restful的Controller对象*/
-@RequestMapping(produces="application/json;charset=UTF-8")
+@RequestMapping(value="/payment",produces="application/json;charset=UTF-8")
 public class PaymentController {
 
     private  static  final Logger logger = LoggerFactory.getLogger(PaymentController.class);
@@ -60,7 +60,7 @@ public class PaymentController {
     @ApiResponses({
             @ApiResponse(code=0,message="成功")
     })
-    //@Auit
+    @Audit
     @GetMapping("/payments/states")
     public Object getAllPaymentStates(){
         logger.debug("getAllPaymentStates: ");
@@ -85,7 +85,7 @@ public class PaymentController {
     @ApiResponses({
             @ApiResponse(code=0,message="成功")
     })
-    //@Auit
+    //@Audit
     @GetMapping("/payments/patterns")
     public Object getAllPaymentPattern(){
         logger.debug("getAllPaymentPattern: ");
@@ -203,9 +203,8 @@ public class PaymentController {
             @ApiResponse(code=504,message = "订单不存在"),
             @ApiResponse(code=505,message = "该订单无权访问"),
     })
-    //@Auditid
+    @Audit
     @GetMapping("/shops/{shopId}/orders/{id}/payments")
-
     public Object getOrderPaymentShop(@PathVariable Long id, @PathVariable Long shopId){
         Object ret=null;
 
@@ -236,7 +235,7 @@ public class PaymentController {
             @ApiResponse(code=504,message = "售后单不存在"),
             @ApiResponse(code=505,message = "该售后单无权访问"),
     })
-    //@Auditid
+    @Audit
     @GetMapping("/shops/{shopId}/aftersales/{id}/payments")
 
     public Object getAftersalePaymentShop(@PathVariable Long id, @PathVariable Long shopId){
