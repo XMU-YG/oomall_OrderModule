@@ -9,6 +9,7 @@ import cn.edu.xmu.freight.model.po.PieceFreightPo;
 import cn.edu.xmu.freight.model.po.WeightFreightPo;
 import cn.edu.xmu.freight.model.vo.*;
 import cn.edu.xmu.goodsprovider.goods.GoodsInner;
+import cn.edu.xmu.address.dubbo.AddressDubboService;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
@@ -36,6 +37,9 @@ public class FreightService {
 
     @DubboReference(version = "0.0.1",check = false)
     private GoodsInner goodsService;
+
+    @DubboReference(version = "0.0.1",check = false)
+    private AddressDubboService addressDubboService;
     /**
      * 获取运费模板概要
      * @author 胡曼珑
@@ -207,23 +211,24 @@ public class FreightService {
             InnerSkuFreightInfo info= JacksonUtil.toObj(goodsInfoJson,InnerSkuFreightInfo.class);
             weightSum+=info.getWeight();
             freightId=info.getFreightId();
+            shopId=info.getShopId();
             models.put(freightId,shopId);
         }
 
-
-        /*for(Long a : weights)
-        {
-            weightSum+=a;
-        }*/
         for(ItemsVo b : vos)
         {
             counts+=b.getCount();
         }
+
+        //List<Long> pids=addressDubboService.getPidsById(rid);
+          List<Long> pids=new ArrayList<>();
+        pids.add(154L);
+        pids.add(14L);
         /*调用商品模块的接口
         * 获得重量
         * */
 
-        return freightDao.calculateFreight(models,weightSum,counts,rid);
+        return freightDao.calculateFreight(models,weightSum,counts,rid,pids);
     }
     @Transactional
     public ReturnObject<List> findFreightItemsById(Long shopId, Long id){

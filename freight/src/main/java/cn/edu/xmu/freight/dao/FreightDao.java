@@ -50,7 +50,7 @@ public class FreightDao {
      * @param rid
      * @return
      */
-    public Long calculateFreight(Map<Long,Long> models, Long weightSum,Integer counts,Long rid)
+    public Long calculateFreight(Map<Long,Long> models, Long weightSum,Integer counts,Long rid,List<Long> pids)
     {
         //Boolean check=checkMix(models);
         ReturnObject<VoObject>ret=null;
@@ -78,31 +78,43 @@ public class FreightDao {
             if(type==0)
             {
                 unit=((FreightModelVo)ret.getData().createVo()).getUnit();
-                freight=calWeightFreight(modelId,weightSum,rid,unit);
+                freight=calWeightFreight(modelId,weightSum,rid,unit,pids);
                 freights.add(freight);
             }
             else if(type==1)
             {
-                freight=calPieceFreight(modelId,counts,rid);
+                freight=calPieceFreight(modelId,counts,rid,pids);
                 freights.add(freight);
             }
         }
         for(Long b:freights)
         {
-            if(maxFreight<b)
+            if(maxFreight.longValue()<b.longValue())
                 maxFreight=b;
         }
 
         //return  ResponseUtil.ok(maxFreight);
         return maxFreight;
     }
-    public Long calPieceFreight(Long modelId,Integer counts,Long rid)
+    public Long calPieceFreight(Long modelId,Integer counts,Long rid,List<Long> pids)
     {
         PieceFreightPoExample example=new PieceFreightPoExample();
         PieceFreightPoExample.Criteria criteria= example.createCriteria();
         criteria.andFreightModelIdEqualTo(modelId);
         criteria.andRegionIdEqualTo(rid);
         List<PieceFreightPo> pos=pieceFreightPoMapper.selectByExample(example);
+        if(pos.size()==0)
+        {
+            for(int i=0;i<2;i++)
+            {
+                criteria.getCriteria().clear();
+                criteria.andFreightModelIdEqualTo(modelId);
+                criteria.andRegionIdEqualTo(pids.get(i));
+                pos=pieceFreightPoMapper.selectByExample(example);
+                if(pos.size()>0)
+                    break;
+            }
+        }
         PieceFreightPo po=pos.get(0);
         Long freight;
         Long firstItemsPrice=po.getFirstItemsPrice();
@@ -123,22 +135,34 @@ public class FreightDao {
 
     }
 
-    public Long calWeightFreight(Long modelId,Long weight,Long rid,int unit)
+    public Long calWeightFreight(Long modelId,Long weight,Long rid,int unit,List<Long> pids)
     {
         WeightFreightPoExample example=new WeightFreightPoExample();
         WeightFreightPoExample.Criteria criteria= example.createCriteria();
         criteria.andFreightModelIdEqualTo(modelId);
         criteria.andRegionIdEqualTo(rid);
         List<WeightFreightPo> pos=weightFreightPoMapper.selectByExample(example);
+        if(pos.size()==0)
+        {
+            for(int i=0;i<2;i++)
+            {
+                criteria.getCriteria().clear();
+                criteria.andFreightModelIdEqualTo(modelId);
+                criteria.andRegionIdEqualTo(pids.get(i));
+                pos=weightFreightPoMapper.selectByExample(example);
+                if(pos.size()>0)
+                    break;
+            }
+        }
         WeightFreightPo po=pos.get(0);
         Long freight;
         //注意：首重应该也是以g为单位，因为是Long类型，常见的0.5kg首重就只能用g表示
         Long first=po.getFirstWeight();
-        Long num=(weight-first)/unit;
-        Long ten=(10000l-first)/unit;
-        Long fifty=(50000l-first)/unit;
-        Long hundred=(100000l-first)/unit;
-        Long threeHundred=(300000l-first)/unit;
+        Long num=(weight.longValue()-first.longValue())/unit;
+        Long ten=(10000l-first.longValue())/unit;
+        Long fifty=(50000l-first.longValue())/unit;
+        Long hundred=(100000l-first.longValue())/unit;
+        Long threeHundred=(300000l-first.longValue())/unit;
         Long firstWeightFreight=po.getFirstWeightFreight();
         Long tenPrice=po.getTenPrice();
         Long fiftyPrice=po.getTenPrice();
@@ -146,32 +170,32 @@ public class FreightDao {
         Long trihunPrice=po.getTrihunPrice();
         Long abovePrice=po.getAbovePrice();
 
-        if(num*unit<weight) num++;
-        if(weight<first)
+        if(num.longValue()*unit<weight.longValue()) num++;
+        if(weight.longValue()<first.longValue())
             return firstWeightFreight;
-        else if(weight<10000)
+        else if(weight.longValue()<10000)
         {
-            freight=firstWeightFreight+(num)*tenPrice;
+            freight=firstWeightFreight.longValue()+(num.longValue())*tenPrice.longValue();
             return freight;
         }
-        else if(weight<50000)
+        else if(weight.longValue()<50000)
         {
-            freight=firstWeightFreight+(ten)*tenPrice+(num-ten)*fiftyPrice;
+            freight=firstWeightFreight.longValue()+(ten.longValue())*tenPrice.longValue()+(num-ten)*fiftyPrice;
             return freight;
         }
-        else if(weight<100000)
+        else if(weight.longValue()<100000)
         {
-            freight=firstWeightFreight+(ten)*tenPrice+(fifty-ten)*fiftyPrice+(num-fifty)*hundredPrice;
+            freight=firstWeightFreight.longValue()+ten.longValue()*tenPrice.longValue()+(fifty.longValue()-ten.longValue())*fiftyPrice.longValue()+(num.longValue()-fifty.longValue())*hundredPrice.longValue();
             return freight;
         }
-        else if(weight<300000)
+        else if(weight.longValue()<300000)
         {
-            freight=firstWeightFreight+(ten)*tenPrice+(fifty-ten)*fiftyPrice+(hundred-fifty)*hundredPrice+(num-hundred)*trihunPrice;
+            freight=firstWeightFreight.longValue()+ten.longValue()*tenPrice.longValue()+(fifty.longValue()-ten.longValue())*fiftyPrice.longValue()+(hundred.longValue()-fifty.longValue())*hundredPrice.longValue()+(num.longValue()-hundred.longValue())*trihunPrice.longValue();
             return freight;
         }
         else
         {
-            freight=firstWeightFreight+(ten)*tenPrice+(fifty-ten)*fiftyPrice+(hundred-fifty)*hundredPrice+(threeHundred-hundred)*trihunPrice+(num-threeHundred)*abovePrice;
+            freight=firstWeightFreight.longValue()+(ten.longValue())*tenPrice.longValue()+(fifty.longValue()-ten.longValue())*fiftyPrice.longValue()+(hundred.longValue()-fifty.longValue())*hundredPrice.longValue()+(threeHundred.longValue()-hundred.longValue())*trihunPrice.longValue()+(num.longValue()-threeHundred.longValue())*abovePrice.longValue();
             return freight;
         }
 
@@ -225,7 +249,7 @@ public class FreightDao {
             logger.error("null");
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
-        else if(freightPo.getShopId()!=shopId)
+        else if(!freightPo.getShopId().equals(shopId))
         {
             logger.error("没有查询该模板的权限");
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
@@ -925,7 +949,7 @@ public class FreightDao {
         criteria.andFreightModelIdEqualTo(weightFreightPo.getFreightModelId());
         List<WeightFreightPo> weightFreightPos = weightFreightPoMapper.selectByExample(weightFreightPoExample);
         if (weightFreightPos.size() != 0) {
-            logger.debug("editFreightItem: have same regionId = " + weightFreightPo.getRegionId());
+            logger.info("editFreightItem: have same regionId = " + weightFreightPo.getRegionId());
             return new ReturnObject<>(ResponseCode.REGION_SAME, String.format("运费模板中该地区已经定义：" + weightFreightPo.getRegionId()));
         }
 
@@ -935,17 +959,17 @@ public class FreightDao {
             int ret=weightFreightPoMapper.updateByPrimaryKeySelective(weightFreightPo);
             if (ret == 0) {
                 //修改失败
-                logger.debug("editFreightItem: update freight fail : " + weightFreightPo.toString());
+                logger.info("editFreightItem: update freight fail : " + weightFreightPo.toString());
                 retObj = new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST, String.format("模板id不存在：" + weightFreightPo.getId()));
             } else {
                 //修改成功
-                logger.debug("editFreightItem: update role = " + weightFreightPo.toString());
+                logger.info("editFreightItem: update role = " + weightFreightPo.toString());
                 retObj = new ReturnObject<>();
             }
         }
         catch (DataAccessException e){
             // 其他数据库错误
-            logger.debug("other sql exception : " + e.getMessage());
+            logger.info("other sql exception : " + e.getMessage());
             retObj = new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR, String.format("数据库错误：%s", e.getMessage()));
         }
         return retObj;
