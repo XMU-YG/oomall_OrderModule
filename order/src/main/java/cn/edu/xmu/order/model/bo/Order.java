@@ -50,7 +50,7 @@ public class Order implements VoObject {
 
     private Long presaleId;
 
-    private Long grouponDiscount;
+    private Long grouponId;
 
     private Integer rebateNum;
 
@@ -60,9 +60,9 @@ public class Order implements VoObject {
 
     private Byte state;
 
-    private Byte substate;
+    private Byte subState;
 
-    private LocalDateTime gmtCreated;
+    private LocalDateTime gmtCreate;
 
     private LocalDateTime gmtModified;
     private List<SimpleOrderItem> simpleOrderItemList;
@@ -70,8 +70,8 @@ public class Order implements VoObject {
         this.customer=new Customer();
         this.shop=new Shop();
         this.id=po.getId();
-        this.customer.setCustomerId(po.getCustomerId());
-        this.shop.setShopId(po.getShopId());
+        this.customer.setId(po.getCustomerId());
+        this.shop.setId(po.getShopId());
         this.orderSn=po.getOrderSn();
         this.pid=po.getPid();
         this.consignee=po.getConsignee();
@@ -85,13 +85,13 @@ public class Order implements VoObject {
         this.discountPrice=po.getDiscountPrice();
         this.originPrice=po.getOriginPrice();
         this.presaleId=po.getPresaleId();
-        this.grouponDiscount=po.getGrouponDiscount();
+        this.grouponId =po.getGrouponId();
         this.rebateNum=po.getRebateNum();
         this.confirmTime=po.getConfirmTime();
         this.shipmentSn=po.getShipmentSn();
         this.state=po.getState();
-        this.substate=po.getSubstate();
-        this.gmtCreated=po.getGmtCreate();
+        this.subState =po.getSubstate();
+        this.gmtCreate =po.getGmtCreate();
         this.gmtModified=po.getGmtModified();
     }
     @Override

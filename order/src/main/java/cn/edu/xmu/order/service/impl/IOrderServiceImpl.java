@@ -107,5 +107,10 @@ public class IOrderServiceImpl implements IOrderService{
         return orderService.getOrderUser(orderId);
     }
 
+    @Override
+    public Long getOrderAmount(Long orderId) {
+        return null;
+    }
+
 
 }

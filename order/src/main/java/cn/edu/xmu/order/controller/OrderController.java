@@ -5,12 +5,9 @@ import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.*;
 import cn.edu.xmu.order.factory.CreateOrderFactory;
-import cn.edu.xmu.order.model.vo.AddressVo;
-import cn.edu.xmu.order.model.vo.OrderItemVo;
-import cn.edu.xmu.order.model.vo.StateRetVo;
+import cn.edu.xmu.order.model.vo.*;
 import cn.edu.xmu.order.service.OrderService;
 import cn.edu.xmu.order.util.OrderStatus;
-import cn.edu.xmu.order.model.vo.OrderVo;
 import cn.edu.xmu.order.util.CreateOrderService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.pagehelper.PageInfo;
@@ -57,8 +54,6 @@ public class OrderController {
      * @throws InvocationTargetException
      * @throws InstantiationException
      */
-
-
     @ApiOperation(value = "新增订单")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
@@ -77,15 +72,12 @@ public class OrderController {
             @ApiIgnore @LoginUser Long customerId,
              @Validated  @RequestBody OrderVo orderInfo,
             BindingResult bindingResult) throws JsonProcessingException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException, ClassNotFoundException {
-
-    logger.debug("in controller");
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
             return returnObject;
         }
         Object ret=null;
-        System.out.println("****");
         CreateOrderService createOrderService = createOrderFactory.createService(orderInfo);
         logger.debug("addNewOrder.  customerId: "+customerId);
         ReturnObject object= createOrderService.createOrderByCustomer(customerId,orderInfo);
@@ -97,7 +89,6 @@ public class OrderController {
             ret=Common.decorateReturnObject(object);
         }
         return ret;
-
     }
 
     /**
@@ -129,12 +120,8 @@ public class OrderController {
     })
     @Audit
     @GetMapping("orders")
-    public Object getALLSimpleOrders(@ApiIgnore @LoginUser Long customerId, @RequestParam(required = false) String orderSn, @RequestParam(required = false) Integer state, @RequestParam(required = false) String beginTime, @RequestParam(required = false) String endTime, @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer pageSize){
-
+    public Object getALLSimpleOrders(@ApiIgnore @LoginUser Long customerId, @RequestParam(required = false) String orderSn, @RequestParam(required = false) Integer state, @RequestParam(required = false) String beginTime, @RequestParam(required = false) String endTime, @RequestParam(required = false,defaultValue = "1") Integer page , @RequestParam(required = false,defaultValue = "10") Integer pageSize){
         Object ret=null;
-        page=page<=0?1:page;
-        pageSize=pageSize<=0?10:pageSize;
-
         LocalDateTime begin=null,end=null;
         if (beginTime!=null){
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -152,7 +139,6 @@ public class OrderController {
         else{
             ret=Common.decorateReturnObject(new ReturnObject<>(object));
         }
-
         return ret;
     }
 
@@ -177,10 +163,10 @@ public class OrderController {
     })
     @Audit
     @GetMapping("orders/{id}")
-    public Object getSelfOrderById(@ApiIgnore @LoginUser Long customerId, @PathVariable Long id){
+    public Object getCusOrderById(@ApiIgnore @LoginUser Long customerId, @PathVariable Long id){
         Object ret=null;
         ReturnObject object=orderService.getCusOrderById(customerId,id);
-        logger.debug("customer getOrderById: orderId : "+id+"   customerId:  "+customerId);
+        logger.debug("getCusOrderById: orderId : "+id+"   customerId:  "+customerId);
         if (object.getCode().equals(ResponseCode.OK)){
             ret=Common.decorateReturnObject(object);
         }
@@ -205,7 +191,7 @@ public class OrderController {
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(name="id", value="订单号", required = true, dataType="int", paramType="path"),
-            @ApiImplicitParam(name="vo", value="收货信息", required = true, dataType="object", paramType="body"),
+            @ApiImplicitParam(name="vo", value="收货信息", required = true, dataType="AddressVo", paramType="body"),
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
@@ -219,7 +205,6 @@ public class OrderController {
         logger.debug("modifySelfOrderAddressById:  customerId: "+customerId+"  orderId: "+orderId+"   vo:  "+vo.toString());
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
-
         if (null != returnObject) {
             return returnObject;
         }
@@ -248,14 +233,12 @@ public class OrderController {
             @ApiResponse(code = 801, message = "订单状态禁止"),
             @ApiResponse(code = 504, message = "订单号不存在"),
             @ApiResponse(code = 505, message = "该订单无权访问"),
-
     })
     @Audit
     @DeleteMapping("orders/{id}")
     public Object deleteSelfOrderById(@ApiIgnore @LoginUser Long customerId,@PathVariable(name = "id") Long orderId){
         Object ret=null;
         ReturnObject object=orderService.deleteSelfOrderById(customerId,orderId);
-        //System.out.println(object.getCode()+"  "+object.getErrmsg());
         ret=Common.decorateReturnObject(object);
         return ret;
     }
@@ -407,8 +390,6 @@ public class OrderController {
         Object ret=null;
         logger.debug("shop getOrderById: orderId : "+id+"   shopId:  "+shopId);
         ReturnObject object=orderService.getShopSelfOrder(shopId,id);
-
-        System.out.println(JacksonUtil.toJson(object.getData()));
         if (object.getCode().equals(ResponseCode.OK)){
             ret=Common.getRetObject(object);
         }
@@ -422,7 +403,7 @@ public class OrderController {
      * 卖家修改留言
      * @param shopId
      * @param orderId
-     * @param message
+     * @param messageVo
      * @return
      * @author Gang Ye
      */
@@ -431,7 +412,7 @@ public class OrderController {
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(name="shopId", value="店铺ID", required = true, dataType="int", paramType="path"),
             @ApiImplicitParam(name="id", value="订单ID", required = true, dataType="int", paramType="path"),
-            @ApiImplicitParam(name="message", value="留言", required = true, dataType="object", paramType="body"),
+            @ApiImplicitParam(name="messageVo", value="留言", required = true, dataType="MessageVo", paramType="body"),
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
@@ -440,15 +421,15 @@ public class OrderController {
     })
     @Audit
     @PutMapping("shops/{shopId}/orders/{id}")
-    public Object modifyOrderMessage(@PathVariable(name = "shopId") Long shopId,@PathVariable(name = "id") Long orderId,@RequestBody(required = true) String message){
+    public Object modifyOrderMessage(@PathVariable(name = "shopId") Long shopId,@PathVariable(name = "id") Long orderId,@RequestBody(required = true) MessageVo messageVo){
         Object ret=null;
-        System.out.println("111");
         logger.debug("shop modify message. shopId: "+shopId+"  orderId: "+orderId);
-        if (message==null){
+        if (messageVo==null){
             ret=Common.decorateReturnObject(new ReturnObject<>(ResponseCode.FIELD_NOTVALID));
         }
         else{
-            ReturnObject object=orderService.modifyOrderMessage(shopId,orderId,message);
+
+            ReturnObject object=orderService.modifyOrderMessage(shopId,orderId,messageVo.getMessage());
             ret=Common.decorateReturnObject(object);
         }
         return ret;
@@ -487,7 +468,7 @@ public class OrderController {
      * 卖家标记发货
      * @param shopId
      * @param orderId
-     * @param freightSn
+     * @param freightSnVo
      * @return
      * @author Gang Ye
      */
@@ -496,7 +477,7 @@ public class OrderController {
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(name="shopId", value="店铺ID", required = true, dataType="int", paramType="path"),
             @ApiImplicitParam(name="id", value="订单ID", required = true, dataType="int", paramType="path"),
-            @ApiImplicitParam(name="freightSn", value="运费单号", required = true, dataType="object", paramType="body"),
+            @ApiImplicitParam(name="freightSnVo", value="运费单号", required = true, dataType="FreightSnVo", paramType="body"),
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
@@ -505,13 +486,13 @@ public class OrderController {
     })
     @Audit
     @PutMapping("shops/{shopId}/orders/{id}/deliver")
-    public Object deliverShopOrder(@PathVariable(name = "shopId") Long shopId,@PathVariable(name = "id") Long orderId, @RequestBody String freightSn){
+    public Object deliverShopOrder(@PathVariable(name = "shopId") Long shopId,@PathVariable(name = "id") Long orderId, @RequestBody FreightSnVo freightSnVo){
         Object ret=null;
-        if (freightSn==null){
+        if (freightSnVo.getFreightSn()==null){
             ret=Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
         }
         else{
-            ReturnObject object=orderService.deliverShopOrder(shopId,orderId,freightSn);
+            ReturnObject object=orderService.deliverShopOrder(shopId,orderId,freightSnVo.getFreightSn());
             ret=Common.decorateReturnObject(object);
         }
         return ret;
@@ -525,7 +506,6 @@ public class OrderController {
      */
     @ApiOperation(value = "获得订单所有状态")
     @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
     })
     @ApiResponses({
             @ApiResponse(code = 0, message = "成功"),
@@ -533,8 +513,6 @@ public class OrderController {
     @Audit
     @GetMapping("orders/states")
     public Object getOrderAllStates(){
-
-        logger.debug("customer get all order states.");
         OrderStatus[] orderStatuses= OrderStatus.class.getEnumConstants();
         List<StateRetVo> stateRetVos=new ArrayList<>(orderStatuses.length);
         for (OrderStatus orderStatus:orderStatuses){

@@ -8,9 +8,7 @@ import java.util.List;
 
 public class CheapestPercentageDiscount extends BaseCouponDiscount {
 
-	public CheapestPercentageDiscount() {
-
-	}
+	public CheapestPercentageDiscount() {}
 
 	public CheapestPercentageDiscount(BaseCouponLimitation limitation, long value) {
 		super(limitation, value);
@@ -31,7 +29,7 @@ public class CheapestPercentageDiscount extends BaseCouponDiscount {
 		long discount = (long) ((1.0 * value / 100) * COrderItems.get(min).getPrice());
 
 		for (COrderItem oi : COrderItems) {
-			oi.setDiscount((long) ((1.0 * oi.getPrice() * oi.getQuantity()) / total * discount / oi.getQuantity()));
+			oi.setDiscount(oi.getPrice() - (long) ((1.0 * oi.getPrice() * oi.getQuantity()) / total * discount / oi.getQuantity()));
 		}
 	}
 }

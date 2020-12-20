@@ -8,24 +8,24 @@ import java.time.LocalDateTime;
 @Data
 public class Shop {
     //店铺信息
-    private Long shopId;
+    private Long id;
 
-    private String shopName;
+    private String name;
 
     private Byte state;
 
-    private LocalDateTime shopGmtCreate;
+    private LocalDateTime gmtCreate;
 
-    private LocalDateTime shopGmtModified;
+    private LocalDateTime gmtModified;
 
     public Shop(){
 
     }
     public Shop(ShopRetVo shopRetVo){
-        this.setShopId(shopRetVo.getId());
-        this.setShopName(shopRetVo.getName());
+        this.setId(shopRetVo.getId());
+        this.setName(shopRetVo.getName());
         this.setState(shopRetVo.getState());
-        this.setShopGmtCreate(shopRetVo.getGmtCreated());
-        this.setShopGmtModified(shopRetVo.getGmtModified());
+        this.setGmtCreate(shopRetVo.getGmtCreated());
+        this.setGmtModified(shopRetVo.getGmtModified());
     }
 }

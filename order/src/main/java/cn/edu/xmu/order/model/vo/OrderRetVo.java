@@ -4,12 +4,14 @@ import cn.edu.xmu.order.model.bo.Customer;
 import cn.edu.xmu.order.model.bo.Order;
 import cn.edu.xmu.order.model.bo.Shop;
 import cn.edu.xmu.order.model.bo.SimpleOrderItem;
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@ApiModel
 public class OrderRetVo {
     private Long id;
 
@@ -45,7 +47,7 @@ public class OrderRetVo {
 
     private Long presaleId;
 
-    private Long grouponDiscount;
+    private Long grouponId;
 
     private Integer rebateNum;
 
@@ -55,9 +57,9 @@ public class OrderRetVo {
 
     private Byte state;
 
-    private Byte substate;
+    private Byte subState;
 
-    private LocalDateTime gmtCreated;
+    private LocalDateTime gmtCreate;
 
     private LocalDateTime gmtModified;
     private List<SimpleOrderItem> orderItems;
@@ -79,13 +81,13 @@ public class OrderRetVo {
         this.discountPrice=bo.getDiscountPrice();
         this.originPrice=bo.getOriginPrice();
         this.presaleId=bo.getPresaleId();
-        this.grouponDiscount=bo.getGrouponDiscount();
+        this.grouponId =bo.getGrouponId();
         this.rebateNum=bo.getRebateNum();
         this.confirmTime=bo.getConfirmTime();
         this.shipmentSn=bo.getShipmentSn();
         this.state=bo.getState();
-        this.substate=bo.getSubstate();
-        this.gmtCreated=bo.getGmtCreated();
+        this.subState =bo.getSubState();
+        this.gmtCreate =bo.getGmtCreate();
         this.gmtModified=bo.getGmtModified();
         this.orderItems =bo.getSimpleOrderItemList();
     }

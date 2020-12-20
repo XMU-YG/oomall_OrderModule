@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class COrderItem {
+
 	private Long id;
 	private Long skuId;
 	private Long orderId;

@@ -26,6 +26,9 @@ public class SimpleOrder implements VoObject {
     private Long originPrice;
     private Long discountPrice;
     private Long freightPrice;
+    private Long grouponId;
+    private Long presaleId;
+    private String shipmentSn;
 
     /**
      * 由OrderPo构造BO
@@ -43,51 +46,11 @@ public class SimpleOrder implements VoObject {
         this.originPrice=orderPo.getOriginPrice();
         this.subState=orderPo.getSubstate();
         this.shopId=orderPo.getShopId();
+        this.presaleId=orderPo.getPresaleId();
+        this.grouponId=orderPo.getGrouponId();
+        this.shipmentSn=orderPo.getShipmentSn();
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public Long getCustomerId() {
-        return customerId;
-    }
-
-    public Long getShopId() {
-        return shopId;
-    }
-
-    public Long getPid() {
-        return pid;
-    }
-
-    public Byte getOrderType() {
-        return orderType;
-    }
-
-    public Byte getState() {
-        return state;
-    }
-
-    public Byte getSubState() {
-        return subState;
-    }
-
-    public LocalDateTime getGmtCreate() {
-        return gmtCreate;
-    }
-
-    public Long getOriginPrice() {
-        return originPrice;
-    }
-
-    public Long getDiscountPrice() {
-        return discountPrice;
-    }
-
-    public Long getFreightPrice() {
-        return freightPrice;
-    }
 
     @Override
     public SimpleOrderRetVo createVo() {

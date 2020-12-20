@@ -1,6 +1,7 @@
 package cn.edu.xmu.order.model.vo;
 
 import cn.edu.xmu.order.model.po.OrderPo;
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 import javax.validation.constraints.Digits;
@@ -12,6 +13,7 @@ import javax.validation.constraints.Size;
  * 买家修改订单地址信息Vo对象
  */
 @Data
+@ApiModel
 public class AddressVo {
     @NotBlank(message = "收货人不能为空")
     private String consignee;

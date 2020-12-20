@@ -9,9 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletResponse;
-import java.text.FieldPosition;
+import java.text.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -161,17 +160,12 @@ public class Common {
 
 
 
+
     public static Object getNullRetObj(ReturnObject<Object> returnObject, HttpServletResponse httpServletResponse) {
         ResponseCode code = returnObject.getCode();
         switch (code) {
             case RESOURCE_ID_NOTEXIST:
                 httpServletResponse.setStatus(HttpStatus.NOT_FOUND.value());
-                return ResponseUtil.fail(returnObject.getCode());
-            case FIELD_NOTVALID:
-                httpServletResponse.setStatus(400);
-                return ResponseUtil.fail(returnObject.getCode());
-            case RESOURCE_ID_OUTSCOPE:
-                httpServletResponse.setStatus(403);
                 return ResponseUtil.fail(returnObject.getCode());
             default:
                 return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
@@ -195,24 +189,13 @@ public class Common {
                 return new ResponseEntity(
                         ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg()),
                         HttpStatus.INTERNAL_SERVER_ERROR);
-            case FIELD_NOTVALID:
-                return new ResponseEntity(
-                        ResponseUtil.fail(returnObject.getCode(),returnObject.getErrmsg()),
-                        HttpStatus.BAD_REQUEST
-                );
-            case RESOURCE_ID_OUTSCOPE:
-                return new ResponseEntity(
-                        ResponseUtil.fail(returnObject.getCode(),returnObject.getErrmsg()),
-                        HttpStatus.FORBIDDEN
-                );
-
             case OK:
                 // 200: 无错误
                 Object data = returnObject.getData();
                 if (data != null){
                     return ResponseUtil.ok(data);
                 }else{
-                    return ResponseUtil.ok(returnObject.getCode());
+                    return ResponseUtil.ok();
                 }
             default:
                 return ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());

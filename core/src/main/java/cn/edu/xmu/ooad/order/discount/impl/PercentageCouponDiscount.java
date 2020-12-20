@@ -21,7 +21,7 @@ public class PercentageCouponDiscount extends BaseCouponDiscount {
 	@Override
 	public void calcAndSetDiscount(List<COrderItem> COrderItems) {
 		for (COrderItem oi : COrderItems) {
-			oi.setDiscount(value / 100 * oi.getPrice());
+			oi.setDiscount(oi.getPrice() - value / 100 * oi.getPrice());
 		}
 	}
 }

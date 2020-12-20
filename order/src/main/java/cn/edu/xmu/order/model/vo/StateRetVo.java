@@ -1,6 +1,7 @@
 package cn.edu.xmu.order.model.vo;
 
 import cn.edu.xmu.order.util.OrderStatus;
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 /**
@@ -8,6 +9,7 @@ import lombok.Data;
  * @author Gang Ye
  */
 @Data
+@ApiModel
 public class StateRetVo {
     private int code;
     private String name;

@@ -26,7 +26,7 @@ public class PriceCouponDiscount extends BaseCouponDiscount {
 		}
 
 		for (COrderItem oi : COrderItems) {
-			long discount = (long) ((1.0 * oi.getQuantity() * oi.getPrice() / total) * value / oi.getQuantity());
+			long discount = oi.getPrice() - (long) ((1.0 * oi.getQuantity() * oi.getPrice() / total) * value / oi.getQuantity());
 			oi.setDiscount(discount);
 		}
 	}

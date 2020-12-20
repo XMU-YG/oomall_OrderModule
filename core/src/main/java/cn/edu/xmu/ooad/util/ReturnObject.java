@@ -69,14 +69,4 @@ public class ReturnObject<T> {
         }
     }
 
-    public ResponseCode getCode() {
-        return this.code;
-    }
-
-
-
-    public T getData() {
-        return data;
-    }
-
 }
