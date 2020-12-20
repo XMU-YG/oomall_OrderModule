@@ -444,7 +444,7 @@ public class PaymentController {
             @ApiResponse(code=504,message = "订单不存在"),
             @ApiResponse(code=505,message = "该订单无权访问"),
     })
-    //@Audit
+    @Audit
     @GetMapping("/orders/{id}/refunds")
     public Object getOrdegetOrderRefundSelfrRefundSelf(@LoginUser @ApiIgnore @RequestParam(required =false)  Long userId,
                                      @PathVariable Long id){
@@ -478,7 +478,7 @@ public class PaymentController {
             @ApiResponse(code=504,message = "售后单不存在"),
             @ApiResponse(code=505,message = "该售后单无权访问"),
     })
-    //@Auti
+    @Audit
     @GetMapping("/aftersales/{id}/refunds")
     public Object getAftersaleRefundSelf(@LoginUser @ApiIgnore @RequestParam(required =false)  Long userId,
                                          @PathVariable Long id){
@@ -488,7 +488,6 @@ public class PaymentController {
 
         ReturnObject refund=refundService.findAftersaleRefundSelf(userId,id);
 
-        returnObject=Common.getRetObject(refund);
 
         if(refund.getCode().equals(ResponseCode.OK)){
             returnObject=Common.getListRetObject(refund);

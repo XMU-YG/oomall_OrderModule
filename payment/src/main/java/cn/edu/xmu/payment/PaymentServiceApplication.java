@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-//@EnableSwagger2
+@EnableSwagger2
 @EnableDubbo
 @EnableDiscoveryClient
 @SpringBootApplication(scanBasePackages = {"cn.edu.xmu.payment","cn.edu.xmu.ooad"})

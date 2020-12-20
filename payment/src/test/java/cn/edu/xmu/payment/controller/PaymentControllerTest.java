@@ -46,7 +46,7 @@ public class PaymentControllerTest {
         String responseString = null;
         String token = createToken(1L, 0L, 100);
         try {
-            responseString = this.mvc.perform(get("/payments/patterns").header("authorization", token))
+            responseString = this.mvc.perform(get("/payment/payments/patterns").header("authorization", token))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType("application/json;charset=UTF-8"))
                     .andReturn().getResponse().getContentAsString();
@@ -304,7 +304,7 @@ public class PaymentControllerTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":[{\"id\":1,\"amount\":0,\"actualAmount\":0,\"paymentPattern\":\"0\",\"payTime\":\"2020-12-10T19:29:50\",\"beginTime\":\"2020-12-10T19:29:50\",\"endTime\":\"2020-12-10T19:29:50\",\"orderId\":1,\"state\":0,\"gmtCreate\":\"2020-12-10T19:29:50\",\"gmtModified\":\"2020-12-10T19:29:50\",\"aftersaleId\":null},{\"id\":2,\"amount\":0,\"actualAmount\":0,\"paymentPattern\":\"0\",\"payTime\":\"2020-12-10T19:29:50\",\"beginTime\":\"2020-12-10T19:29:50\",\"endTime\":\"2020-12-10T19:29:50\",\"orderId\":1,\"state\":0,\"gmtCreate\":\"2020-12-10T19:29:50\",\"gmtModified\":\"2020-12-10T19:29:50\",\"aftersaleId\":null}]}";
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":[{\"id\":1,\"amount\":0,\"actualAmount\":0,\"paymentPattern\":\"0\",\"payTime\":\"2020-12-10T19:29:50\",\"beginTime\":\"2020-12-10T19:29:50\",\"endTime\":\"2020-12-10T19:29:50\",\"orderId\":1,\"state\":0,\"gmtCreate\":\"2020-12-10T19:29:50\",\"gmtModified\":\"2020-12-10T19:29:50\",\"aftersaleId\":1}]}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, false);
         } catch (

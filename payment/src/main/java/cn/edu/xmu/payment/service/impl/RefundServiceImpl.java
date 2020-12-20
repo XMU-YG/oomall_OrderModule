@@ -2,13 +2,16 @@ package cn.edu.xmu.payment.service.impl;
 
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
+import cn.edu.xmu.order_provider.IFreightService;
 import cn.edu.xmu.order_provider.IOrderService;
+import cn.edu.xmu.order_provider.IPaymentService;
 import cn.edu.xmu.payment.model.bo.Payment;
 import cn.edu.xmu.payment.model.po.PaymentPo;
 import cn.edu.xmu.payment.model.vo.NewRefundVo;
 import cn.edu.xmu.payment.service.PaymentService;
 import cn.edu.xmu.payment.service.RefundService;
 import cn.edu.xmu.payment.util.PaymentPatterns;
+
 import cn.edu.xmu.payment.util.RefundStates;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
@@ -19,15 +22,15 @@ import java.util.List;
 import java.util.Map;
 
 @DubboService(version ="0.0.1")
-public class RefundServiceImpl {
+public class RefundServiceImpl implements IPaymentService {
     @Autowired
     private PaymentService paymentService;
 
     @Autowired
     private RefundService refundService;
 
-    @DubboReference(version = "0.0.1",check = false)
-    private IOrderService orderService;
+  //  @DubboReference(version = "0.0.1",check = false)
+   // private IOrderService orderService;
 
 
     /**
@@ -38,6 +41,7 @@ public class RefundServiceImpl {
      * @param restPrice  预售尾款
      * @return  1:退款成功  0:无法匹配尾款支付  -1:创建退款失败  -2:预售订单支付有问题
      */
+    @Override
     public Integer preOrderRefund(Long shopId,Long customerId,Long pid,Long restPrice){
 
         //退款金额为0  退款成功  不产生退款记录
@@ -86,6 +90,7 @@ public class RefundServiceImpl {
      * @param amount
      * @return 1退款成功  0退款金额大于支付金额  -1退款创建失败  -2团购订单支付有问题
      */
+    @Override
     public Integer couponRefund(Long shopId,Long customerId,Long pid,Long amount){
         //退款金额为0  退款成功 不产生退款记录
         if(amount.equals(0))
@@ -126,6 +131,7 @@ public class RefundServiceImpl {
      * @param amount
      * @return 1退款成功 0退款金额大于支付金额 -1退款创建失败 -2 支付方面问题
      */
+    @Override
     public Integer normalRefund(Long shopId,Long customerId,Long pid,Long amount){
         //退款金额为0 退款成功 但不生成退款记录
         if(amount.equals(0))
@@ -202,6 +208,7 @@ public class RefundServiceImpl {
      * @param amount
      * @return  1退款成功 0退款金额大于支付金额 -1退款创建失败 -2 支付方面问题
      */
+    @Override
     public Integer aftersaleRefund(Long shopId,Long customerId,Long orderItemId,Integer amount){
        // Long pid= orderService.getOrderItemPid(orderItemId);
         Long pid=0L;
