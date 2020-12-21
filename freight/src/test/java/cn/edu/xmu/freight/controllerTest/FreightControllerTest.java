@@ -369,12 +369,14 @@ public class FreightControllerTest {
         String queryResponseString = this.mvc.perform(get("/shops/1/freightmodels/"+id).header("authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("$.errno").value(ResponseCode.RESOURCE_ID_OUTSCOPE))
                 .andReturn().getResponse().getContentAsString();
 
 
 
         JSONAssert.assertEquals(new String(queryResponseString), new String(responseString), true);
     }
-   
+
+
 
 }

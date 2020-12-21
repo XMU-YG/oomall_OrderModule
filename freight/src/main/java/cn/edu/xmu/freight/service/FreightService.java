@@ -205,14 +205,16 @@ public class FreightService {
         Long shopId=null;
         Long freightId=null;;
         String goodsInfoJson=null;
+        int i=0;
        ///InnerSkuFreightInfo info=null;
         for (Long id:skuIds) {
             goodsInfoJson=goodsService.getFreightInfoBySkuId(id);
             InnerSkuFreightInfo info= JacksonUtil.toObj(goodsInfoJson,InnerSkuFreightInfo.class);
-            weightSum+=info.getWeight();
+            weightSum+=info.getWeight()*vos.get(i).getCount();
             freightId=info.getFreightId();
             shopId=info.getShopId();
             models.put(freightId,shopId);
+            i++;
         }
 
         for(ItemsVo b : vos)
@@ -220,10 +222,14 @@ public class FreightService {
             counts+=b.getCount();
         }
 
-        //List<Long> pids=addressDubboService.getPidsById(rid);
-          List<Long> pids=new ArrayList<>();
+        List<Long> pids=addressDubboService.getPidsById(rid);
+          /*List<Long> pids=new ArrayList<>();
         pids.add(154L);
         pids.add(14L);
+
+           */
+
+
         /*调用商品模块的接口
         * 获得重量
         * */

@@ -17,7 +17,7 @@ public class PieceItem implements VoObject {
     private Long id;
     private Long freightModelId;
     private Long regionId;
-    private Integer firstItem;
+    private Integer firstItems;
     private Long firstItemPrice;
     private Integer additionalItems;
     private Long additionalItemsPrice;
@@ -36,8 +36,8 @@ public class PieceItem implements VoObject {
         this.regionId = regionId;
     }
 
-    public void setFirstItem(Integer firstItem) {
-        this.firstItem = firstItem;
+    public void setFirstItems(Integer firstItems) {
+        this.firstItems = firstItems;
     }
 
     public void setFirstItemPrice(Long firstItemPrice) {
@@ -72,8 +72,8 @@ public class PieceItem implements VoObject {
         return regionId;
     }
 
-    public Integer getFirstItem() {
-        return firstItem;
+    public Integer getFirstItems() {
+        return firstItems;
     }
 
     public Long getFirstItemPrice() {
@@ -99,7 +99,7 @@ public class PieceItem implements VoObject {
     public PieceItem(PieceFreightPo po) {
         this.id = po.getId();
         this.regionId = po.getRegionId();
-        this.firstItem = po.getFirstItems();
+        this.firstItems = po.getFirstItems();
         this.firstItemPrice = po.getFirstItemsPrice();
         this.additionalItems = po.getAdditionalItems();
         this.additionalItemsPrice = po.getAdditionalItemsPrice();
@@ -115,7 +115,7 @@ public class PieceItem implements VoObject {
         pieceFreightPo.setId(id);
         pieceFreightPo.setFreightModelId(freightModelId);
         pieceFreightPo.setRegionId(regionId);
-        pieceFreightPo.setFirstItems(firstItem);
+        pieceFreightPo.setFirstItems(firstItems);
         pieceFreightPo.setFirstItemsPrice(firstItemPrice);
         pieceFreightPo.setAdditionalItems(additionalItems);
         pieceFreightPo.setAdditionalItemsPrice(additionalItemsPrice);

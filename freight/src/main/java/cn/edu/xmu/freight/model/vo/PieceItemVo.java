@@ -14,7 +14,7 @@ public class PieceItemVo {
     private Integer firstItem;
 
     @ApiModelProperty(value = "规则首件运费")
-    private Long firstItemFreight;
+    private Long firstItemsPrice;
 
     @ApiModelProperty(value = "规则续件数")
     private Integer additionalItems;
@@ -30,8 +30,8 @@ public class PieceItemVo {
         this.firstItem = firstItem;
     }
 
-    public void setFirstItemFreight(Long firstItemFreight) {
-        this.firstItemFreight = firstItemFreight;
+    public void setFirstItemsPrice(Long firstItemsPrice) {
+        this.firstItemsPrice = firstItemsPrice;
     }
 
     public void setAdditionalItems(Integer additionalItems) {
@@ -46,8 +46,8 @@ public class PieceItemVo {
     {
         PieceItem pieceItem=new PieceItem();
         pieceItem.setRegionId(regionId);
-        pieceItem.setFirstItem(firstItem);
-        pieceItem.setFirstItemPrice(firstItemFreight);
+        pieceItem.setFirstItems(firstItem);
+        pieceItem.setFirstItemPrice(firstItemsPrice);
         pieceItem.setAdditionalItems(additionalItems);
         pieceItem.setAdditionalItemsPrice(additionalItemsPrice);
         return  pieceItem;

@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public class PieceFreightRetVo {
     private Long id;
     private Long regionId;
-    private Integer firstItem;
+    private Integer firstItems;
     private Long firstItemPrice;
     private Integer additionalItems;
     private Long additionalItemsPrice;
@@ -19,7 +19,7 @@ public class PieceFreightRetVo {
     public PieceFreightRetVo(PieceItem PieceItem ) {
         this.id = PieceItem.getId();
         this.regionId = PieceItem.getRegionId();
-        this.firstItem = PieceItem.getFirstItem();
+        this.firstItems = PieceItem.getFirstItems();
         this.firstItemPrice = PieceItem.getFirstItemPrice();
         this.additionalItems = PieceItem.getAdditionalItems();
         this.additionalItemsPrice = PieceItem.getAdditionalItemsPrice();

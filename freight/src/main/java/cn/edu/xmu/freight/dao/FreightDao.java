@@ -74,16 +74,20 @@ public class FreightDao {
 
 
             type=((FreightModelVo)ret.getData().createVo()).getType();
-
+            modelId=((FreightModelVo)ret.getData().createVo()).getId();
             if(type==0)
             {
                 unit=((FreightModelVo)ret.getData().createVo()).getUnit();
                 freight=calWeightFreight(modelId,weightSum,rid,unit,pids);
+                if(freight.equals(-2l))
+                    return -2l;
                 freights.add(freight);
             }
             else if(type==1)
             {
                 freight=calPieceFreight(modelId,counts,rid,pids);
+                if(freight.equals(-2l))
+                    return -2l;
                 freights.add(freight);
             }
         }
@@ -103,9 +107,12 @@ public class FreightDao {
         criteria.andFreightModelIdEqualTo(modelId);
         criteria.andRegionIdEqualTo(rid);
         List<PieceFreightPo> pos=pieceFreightPoMapper.selectByExample(example);
+        int i=0;
         if(pos.size()==0)
         {
-            for(int i=0;i<2;i++)
+            if(pids==null)
+                return -2l;
+            for(;i<2;i++)
             {
                 criteria.getCriteria().clear();
                 criteria.andFreightModelIdEqualTo(modelId);
@@ -114,18 +121,29 @@ public class FreightDao {
                 if(pos.size()>0)
                     break;
             }
+            if(i==2) //没找到
+            {
+                //判断是否有全国运费明细
+                criteria.getCriteria().clear();
+                criteria.andFreightModelIdEqualTo(modelId);
+                criteria.andRegionIdEqualTo(0l);
+                pos=pieceFreightPoMapper.selectByExample(example);
+                if(pos.size()==0)
+                    return -2l;
+            }
+
         }
         PieceFreightPo po=pos.get(0);
         Long freight;
         Long firstItemsPrice=po.getFirstItemsPrice();
         Long additionalItemsPrice=po.getAdditionalItemsPrice();
-        int firstItem=po.getFirstItems();
+        int firstItems=po.getFirstItems();
         int additionalItems=po.getAdditionalItems();
         //续件组数:num
-        Integer num=(counts-firstItem)/additionalItems;
-        if(num*additionalItems+firstItem<counts)
+        Integer num=(counts-firstItems)/additionalItems;
+        if(num*additionalItems+firstItems<counts)
             num++;
-        if(counts<firstItem)
+        if(counts<firstItems)
         return firstItemsPrice;
         else
         {
@@ -142,9 +160,12 @@ public class FreightDao {
         criteria.andFreightModelIdEqualTo(modelId);
         criteria.andRegionIdEqualTo(rid);
         List<WeightFreightPo> pos=weightFreightPoMapper.selectByExample(example);
+        int i=0;
         if(pos.size()==0)
         {
-            for(int i=0;i<2;i++)
+            if(pids==null)
+                return -2l;
+            for(;i<2;i++)
             {
                 criteria.getCriteria().clear();
                 criteria.andFreightModelIdEqualTo(modelId);
@@ -152,6 +173,16 @@ public class FreightDao {
                 pos=weightFreightPoMapper.selectByExample(example);
                 if(pos.size()>0)
                     break;
+            }
+            if(i==2) //没找到
+            {
+                //判断是否有全国运费明细
+                criteria.getCriteria().clear();
+                criteria.andFreightModelIdEqualTo(modelId);
+                criteria.andRegionIdEqualTo(0l);
+                pos=weightFreightPoMapper.selectByExample(example);
+                if(pos.size()==0)
+                    return -2l;
             }
         }
         WeightFreightPo po=pos.get(0);
@@ -170,7 +201,7 @@ public class FreightDao {
         Long trihunPrice=po.getTrihunPrice();
         Long abovePrice=po.getAbovePrice();
 
-        if(num.longValue()*unit<weight.longValue()) num++;
+        if(num.longValue()*unit+first.longValue()<weight.longValue()) num++;
         if(weight.longValue()<first.longValue())
             return firstWeightFreight;
         else if(weight.longValue()<10000)
@@ -378,6 +409,9 @@ public class FreightDao {
         FreightPo freightPo=freight.getFreightPo();
         ReturnObject<Freight> retObj=null;
         //shopid是用来干啥的？验证？或是查询？
+        FreightPo po=freightPoMapper.selectByPrimaryKey(freight.getId());
+        if(po.getName().equals(freight.getName()))
+            return new ReturnObject<>(ResponseCode.FREIGHTNAME_SAME);
         try
         {
             int ret=freightPoMapper.updateByPrimaryKeySelective(freightPo);
@@ -462,7 +496,7 @@ public class FreightDao {
             logger.error("null");
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
-        else if(freightPo.getShopId()!=shopId)
+        else if(!freightPo.getShopId().equals(shopId))
         {
             logger.error("没有查询该模板的权限");
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
@@ -577,7 +611,7 @@ public class FreightDao {
             logger.error("null");
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
-        else if(freightPo.getShopId()!=shopId)
+        else if(!freightPo.getShopId().equals(shopId))
         {
             logger.error("该运费模板不属于店铺 shopId "+shopId);
             retObj=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
@@ -742,7 +776,7 @@ public class FreightDao {
             if (freightPo == null) {
                 logger.error("null");
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-            } else if (freightPo.getShopId() != shopId) {
+            } else if (!freightPo.getShopId().equals(shopId)) {
                 logger.error("没有删除该模板的权限");
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
             } else {
@@ -784,7 +818,7 @@ public class FreightDao {
             if (freightPo == null) {
                 logger.error("null");
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-            } else if (freightPo.getShopId() != shopId) {
+            } else if (!freightPo.getShopId().equals(shopId)) {
                 logger.error("没有删除该模板的权限");
                 return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
             } else {
@@ -938,21 +972,22 @@ public class FreightDao {
         if (freightPo == null) {
             logger.error("没有该运费模板");
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-        } else if (freightPo.getShopId() != shopId) {
+        } else if (!freightPo.getShopId().equals(shopId)) {
             logger.error("没有查询该模板的权限");
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         }
 
-        WeightFreightPoExample weightFreightPoExample = new WeightFreightPoExample();
-        WeightFreightPoExample.Criteria criteria = weightFreightPoExample.createCriteria();
-        criteria.andRegionIdEqualTo(weightFreightPo.getRegionId());
-        criteria.andFreightModelIdEqualTo(weightFreightPo.getFreightModelId());
-        List<WeightFreightPo> weightFreightPos = weightFreightPoMapper.selectByExample(weightFreightPoExample);
-        if (weightFreightPos.size() != 0) {
-            logger.info("editFreightItem: have same regionId = " + weightFreightPo.getRegionId());
-            return new ReturnObject<>(ResponseCode.REGION_SAME, String.format("运费模板中该地区已经定义：" + weightFreightPo.getRegionId()));
+        if(weightFreightPo.getRegionId()!=null) {
+            WeightFreightPoExample weightFreightPoExample = new WeightFreightPoExample();
+            WeightFreightPoExample.Criteria criteria = weightFreightPoExample.createCriteria();
+            criteria.andRegionIdEqualTo(weightFreightPo.getRegionId());
+            criteria.andFreightModelIdEqualTo(weightFreightPo.getFreightModelId());
+            List<WeightFreightPo> weightFreightPos = weightFreightPoMapper.selectByExample(weightFreightPoExample);
+            if (weightFreightPos.size() != 0) {
+                logger.info("editFreightItem: have same regionId = " + weightFreightPo.getRegionId());
+                return new ReturnObject<>(ResponseCode.REGION_SAME, String.format("运费模板中该地区已经定义：" + weightFreightPo.getRegionId()));
+            }
         }
-
         ReturnObject<FreightItem> retObj=null;
         try
         {
@@ -999,21 +1034,22 @@ public class FreightDao {
         if (freightPo == null) {
             logger.error("没有该运费模板");
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST);
-        } else if (freightPo.getShopId() != shopId) {
+        } else if (!freightPo.getShopId().equals(shopId)) {
             logger.error("没有查询该模板的权限");
             return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE);
         }
 
-        PieceFreightPoExample pieceFreightPoExample = new PieceFreightPoExample();
-        PieceFreightPoExample.Criteria criteria = pieceFreightPoExample.createCriteria();
-        criteria.andRegionIdEqualTo(pieceFreightPo.getRegionId());
-        criteria.andFreightModelIdEqualTo(pieceFreightPo.getFreightModelId());
-        List<PieceFreightPo> pieceFreightPos = pieceFreightPoMapper.selectByExample(pieceFreightPoExample);
-        if (pieceFreightPos.size() != 0) {
-            logger.debug("editPieceItem: have same regionId = " + pieceFreightPo.getRegionId());
-            return new ReturnObject<>(ResponseCode.REGION_SAME, String.format("运费模板中该地区已经定义：" + pieceFreightPo.getRegionId()));
+        if(pieceFreightPo.getRegionId()!=null) {
+            PieceFreightPoExample pieceFreightPoExample = new PieceFreightPoExample();
+            PieceFreightPoExample.Criteria criteria = pieceFreightPoExample.createCriteria();
+            criteria.andRegionIdEqualTo(pieceFreightPo.getRegionId());
+            criteria.andFreightModelIdEqualTo(pieceFreightPo.getFreightModelId());
+            List<PieceFreightPo> pieceFreightPos = pieceFreightPoMapper.selectByExample(pieceFreightPoExample);
+            if (pieceFreightPos.size() != 0) {
+                logger.debug("editPieceItem: have same regionId = " + pieceFreightPo.getRegionId());
+                return new ReturnObject<>(ResponseCode.REGION_SAME, String.format("运费模板中该地区已经定义：" + pieceFreightPo.getRegionId()));
+            }
         }
-
         ReturnObject<PieceItem> retObj=null;
         try
         {

@@ -50,14 +50,32 @@ public class FreightController {
     })
     @Audit
     @PostMapping("/region/{rid}/price")
-    public Object calculateFreight(@PathVariable Long rid, @RequestBody List<ItemsVo> vos,@PathVariable Long shopId){
+    public Object calculateFreight(@PathVariable Long rid, @RequestBody List<ItemsVo> vos){
         logger.debug("calculate freight by shopId:"+rid);
         //当返回值为-1时，出错，其他情况下正常
         Long ret1=freightService.calculateFreight(rid,vos);
+        ReturnObject ret;
+        Object re;
         logger.debug("calculateFreight by: rid : "+rid);
-        if(ret1!=-1)
-            return ResponseUtil.ok(ret1);
-        return ResponseUtil.fail(ResponseCode.RESOURCE_ID_NOTEXIST);
+        //if(!ret1.equals(-1l))
+         if(ret1.equals(-1l))
+        {
+            ret=new ReturnObject(ResponseCode.RESOURCE_ID_NOTEXIST);
+            //return Common.getNullRetObj(ret,httpServletResponse);
+            return Common.decorateReturnObject(ret);
+
+            //return ResponseUtil.fail(ResponseCode.RESOURCE_ID_NOTEXIST);
+        }
+else if(ret1.equals(-2l)) {
+             ret = new ReturnObject(ResponseCode.REGION_NOT_REACH);
+            // return Common.getNullRetObj(ret, httpServletResponse);
+             return Common.decorateReturnObject(ret);
+         }
+        httpServletResponse.setStatus(HttpStatus.SC_CREATED);
+       // ret=new ReturnObject(ret1);
+        //return Common.getRetObject(ret);
+        return ResponseUtil.ok(ret1);
+
     }
 
     /**
@@ -87,8 +105,8 @@ public class FreightController {
                 ret=Common.getRetObject(object);
             }
             else
-            ret=Common.getNullRetObj(object,httpServletResponse);
-
+            //ret=Common.getNullRetObj(object,httpServletResponse);
+              ret=Common.decorateReturnObject(object);
         return ret;
     }
 
@@ -128,7 +146,8 @@ public class FreightController {
             ret=Common.getRetObject(object);
         }
         else
-            ret=Common.getNullRetObj(object,httpServletResponse);
+            //ret=Common.getNullRetObj(object,httpServletResponse);
+        ret=Common.decorateReturnObject(object);
 
         return ret;
     }
@@ -205,7 +224,8 @@ public class FreightController {
             ret=Common.getRetObject(object);
         }
         else
-            ret=Common.getNullRetObj(object,httpServletResponse);
+            //ret=Common.getNullRetObj(object,httpServletResponse);
+        ret=Common.decorateReturnObject(object);
 
         return ret;
     }
@@ -227,7 +247,7 @@ public class FreightController {
             @ApiResponse(code = 0, message = "成功"),
     })
     @Audit
-    @PostMapping("/shops/{shopId}/freight_models/{id}/default")
+    @PostMapping("/shops/{shopId}/freightmodels/{id}/default")
     public Object setDefaultModel(@PathVariable Long shopId,@PathVariable Long id,@LoginUser @ApiIgnore @RequestParam(required = false, defaultValue = "0") Long userId){
         logger.info("userId: "+userId);
         logger.debug("setDefaultModel: shopId : "+shopId+" id : "+id);
@@ -240,8 +260,8 @@ public class FreightController {
             ret=Common.getRetObject(object);
         }
         else
-            ret=Common.getNullRetObj(object,httpServletResponse);
-
+            //ret=Common.getNullRetObj(object,httpServletResponse);
+            ret=Common.decorateReturnObject(object);
         return ret;
     }
 
@@ -275,8 +295,8 @@ public class FreightController {
             ret=Common.getRetObject(object);
         }
         else
-            ret=Common.getNullRetObj(object,httpServletResponse);
-
+           // ret=Common.getNullRetObj(object,httpServletResponse);
+            ret=Common.decorateReturnObject(object);
 
         return ret;
     }
@@ -311,8 +331,8 @@ public class FreightController {
             ret=Common.getRetObject(object);
         }
         else
-            ret=Common.getNullRetObj(object,httpServletResponse);
-
+            //ret=Common.getNullRetObj(object,httpServletResponse);
+            ret=Common.decorateReturnObject(object);
 
 
         return ret;
@@ -344,7 +364,8 @@ public class FreightController {
         if (returnObject.getCode() == ResponseCode.OK) {
             ret = Common.getListRetObject(returnObject);
         } else {
-            ret=Common.getNullRetObj(returnObject,httpServletResponse);
+            //ret=Common.getNullRetObj(returnObject,httpServletResponse);
+            ret=Common.decorateReturnObject(returnObject);
             //ret = ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
             //ret=Common.decorateReturnObject(returnObject);
         }
@@ -373,11 +394,13 @@ public class FreightController {
     @GetMapping("/shops/{shopId}/freightmodels/{id}/pieceItems")
     public Object getPieceItemsById(@PathVariable(name = "shopId") Long shopId, @PathVariable(name = "id") Long id) {
         Object ret = null;
-        ReturnObject<List> returnObject = freightService.findPieceItemsById(shopId, id);
+        ReturnObject returnObject = freightService.findPieceItemsById(shopId, id);
         if (returnObject.getCode() == ResponseCode.OK) {
             ret = Common.getListRetObject(returnObject);
         } else {
-            ret = ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
+            //ret=Common.getNullRetObj(returnObject,httpServletResponse);
+            ret=Common.decorateReturnObject(returnObject);
+            //ret = ResponseUtil.fail(returnObject.getCode(), returnObject.getErrmsg());
             //ret=Common.decorateReturnObject(returnObject);
         }
         return ret;
@@ -412,7 +435,8 @@ public class FreightController {
             ret=Common.getRetObject(object);
         }
         else
-            ret=Common.getNullRetObj(object,httpServletResponse);
+            //ret=Common.getNullRetObj(object,httpServletResponse);
+        ret=Common.decorateReturnObject(object);
         return ret;
     }
 
@@ -445,7 +469,8 @@ public class FreightController {
             ret=Common.getRetObject(object);
         }
         else
-            ret=Common.getNullRetObj(object,httpServletResponse);
+            //ret=Common.getNullRetObj(object,httpServletResponse);
+            ret=Common.decorateReturnObject(object);
         return ret;
 
     }
@@ -456,7 +481,6 @@ public class FreightController {
      * @param shopId
      * @param id
      * @param vo
-     * @param bindingResult
      * @return
      */
     @ApiOperation(value = "管理员定义重量模板明细")
@@ -471,14 +495,14 @@ public class FreightController {
     })
     @Audit
     @PostMapping("/shops/{shopId}/freightmodels/{id}/weightItems")
-    public Object createWeightItem(@PathVariable(name="shopId") Long shopId, @PathVariable(name="id") Long id, @Validated @RequestBody WeightItemVo vo, BindingResult bindingResult){
+    public Object createWeightItem(@PathVariable(name="shopId") Long shopId, @PathVariable(name="id") Long id, @RequestBody WeightItemVo vo){
         logger.debug("create weightItem by id:"+id);
         //校验前端数据
-        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        /*Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
         if (null != returnObject) {
             logger.debug("validate fail");
             return returnObject;
-        }
+        }*/
         Object ret=null;
         ReturnObject object=freightService.createWeightItem(shopId,id,vo);
         logger.debug("createWeightItem by: id : "+id);
@@ -488,7 +512,8 @@ public class FreightController {
             ret=Common.getRetObject(object);
         }
         else
-            ret=Common.getNullRetObj(object,httpServletResponse);
+            //ret=Common.getNullRetObj(object,httpServletResponse);
+            ret=Common.decorateReturnObject(object);
 
 
 
@@ -533,7 +558,8 @@ public class FreightController {
             ret=Common.getRetObject(object);
         }
         else
-            ret=Common.getNullRetObj(object,httpServletResponse);
+            //ret=Common.getNullRetObj(object,httpServletResponse);
+            ret=Common.decorateReturnObject(object);
 
 
         return ret;
@@ -576,9 +602,11 @@ public class FreightController {
         if(object.getCode().equals(ResponseCode.OK))
         {
             ret=Common.getRetObject(object);
+
         }
         else
-            ret=Common.getNullRetObj(object,httpServletResponse);
+            //ret=Common.getNullRetObj(object,httpServletResponse);
+            ret=Common.decorateReturnObject(object);
 
 
 
@@ -621,11 +649,11 @@ public class FreightController {
         logger.debug("editPieceItem by: shopId : "+shopId + " id: "+id);
         if(object.getCode().equals(ResponseCode.OK))
         {
-            httpServletResponse.setStatus(HttpStatus.SC_CREATED);
             ret=Common.getRetObject(object);
         }
         else
-            ret=Common.getNullRetObj(object,httpServletResponse);
+            //ret=Common.getNullRetObj(object,httpServletResponse);
+            ret=Common.decorateReturnObject(object);
 
 
         return ret;

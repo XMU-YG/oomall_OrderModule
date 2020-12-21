@@ -5,7 +5,7 @@ management:
         include: "*"
 
 server:
-  port: 8087
+  port: 10203
   tomcat:
     threads:
       max: 1000
@@ -19,7 +19,7 @@ dubbo:
     qos-accept-foreign-ip: false
   # 配置注册中心
   registry:
-    address: nacos://47.75.67.96:8848
+    address: nacos://172.16.0.21:8848
   # 设置协议-协议由提供方指定消费方被动接受
   protocol:
     name: dubbo
