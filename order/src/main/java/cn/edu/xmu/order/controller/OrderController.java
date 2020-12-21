@@ -79,7 +79,7 @@ public class OrderController {
         }
         Object ret=null;
         CreateOrderService createOrderService = createOrderFactory.createService(orderInfo);
-        logger.debug("addNewOrder.  customerId: "+customerId);
+        logger.debug("CreateOrder.  customerId: "+customerId+"   type: "+createOrderService.getClass().getName());
         ReturnObject object= createOrderService.createOrderByCustomer(customerId,orderInfo);
 
         if (object.getCode().equals(ResponseCode.OK)){
@@ -121,18 +121,22 @@ public class OrderController {
     @Audit
     @GetMapping("orders")
     public Object getALLSimpleOrders(@ApiIgnore @LoginUser Long customerId, @RequestParam(required = false,name = "orderSn") String orderSn, @RequestParam(required = false,name = "state") Integer state, @RequestParam(required = false,name = "beginTime") String beginTime, @RequestParam(required = false,name = "endTime") String endTime, @RequestParam(required = false,defaultValue = "1") Integer page , @RequestParam(required = false,defaultValue = "10") Integer pageSize){
+        logger.debug("getAllSimpleOrders: customerId : "+customerId);
         Object ret=null;
         LocalDateTime begin=null,end=null;
-        if (beginTime!=null){
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            begin=LocalDateTime.parse(beginTime,dateTimeFormatter);
-            System.out.println(begin);
+        try{
+            if (beginTime!=null){
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                begin=LocalDateTime.parse(beginTime,dateTimeFormatter);
+            }
+            if (endTime!=null){
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                end=LocalDateTime.parse(endTime,dateTimeFormatter);
+            }
+        }catch (Exception e){
+            logger.debug("日期不合法");
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
-        if (endTime!=null){
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            end=LocalDateTime.parse(endTime,dateTimeFormatter);
-        }
-        logger.debug("getAllSimpleOrders: customerId : "+customerId);
         ReturnObject<PageInfo<VoObject>> object=orderService.getAllSimpleOrders(customerId,orderSn,state,begin,end,page,pageSize);
         if (object.getCode().equals(ResponseCode.OK)){
             ret=Common.getPageRetObject(object);
@@ -344,21 +348,21 @@ public class OrderController {
 
         logger.debug("getShopSelfSimpleOrders:  shopId:  "+shopId);
         ReturnObject<PageInfo<VoObject>> object=null;
-        page= page==null? 1:page;
-        pageSize=pageSize==null?10:pageSize;
-
         LocalDateTime begin=null,end=null;
-        if (beginTime!=null){
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            begin=LocalDateTime.parse(beginTime,dateTimeFormatter);
-        }
-        if (endTime!=null){
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            end=LocalDateTime.parse(endTime,dateTimeFormatter);
+        try{
+            if (beginTime!=null){
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                begin=LocalDateTime.parse(beginTime,dateTimeFormatter);
+            }
+            if (endTime!=null){
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                end=LocalDateTime.parse(endTime,dateTimeFormatter);
+            }
+        }catch (Exception e){
+            logger.debug("日期不合法");
+            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
         }
         object=orderService.getShopSelfSimpleOrders(shopId,customerId,orderSn,begin,end,page,pageSize);
-
-
         if (object.getCode().equals(ResponseCode.OK)){
             return Common.getPageRetObject(object);
         }
@@ -429,7 +433,6 @@ public class OrderController {
             ret=Common.decorateReturnObject(new ReturnObject<>(ResponseCode.FIELD_NOTVALID));
         }
         else{
-
             ReturnObject object=orderService.modifyOrderMessage(shopId,orderId,messageVo.getMessage());
             ret=Common.decorateReturnObject(object);
         }

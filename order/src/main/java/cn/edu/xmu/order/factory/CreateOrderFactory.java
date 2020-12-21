@@ -47,7 +47,6 @@ public  class CreateOrderFactory {
                 return applicationContext.getBean("PreOrderService", CreateOrderService.class);
             }
         }
-        System.out.println("####");
         return applicationContext.getBean("NorOrderService", CreateOrderService.class);
 
     }

@@ -163,12 +163,12 @@ public class OrderService {
             //是本人的
             ReturnObject returnObject=orderDao.deleteOrderById(orderId);
             //加库存
-            if (returnObject.getErrmsg().equals("已取消")){
-                List<SimpleOrderItem> simpleOrderItems=orderItemDao.getSimOrderItemsByOrderId(orderId);
-                for (SimpleOrderItem item:simpleOrderItems) {
-                    goodsInner.deductNorStock(item.getSkuId(),item.getQuantity());
-                }
-            }
+//            if (returnObject.getErrmsg().equals("已取消")){
+//                List<SimpleOrderItem> simpleOrderItems=orderItemDao.getSimOrderItemsByOrderId(orderId);
+//                for (SimpleOrderItem item:simpleOrderItems) {
+//                    goodsInner.deductNorStock(item.getSkuId(),item.getQuantity());
+//                }
+//            }
             return returnObject;
         }
         return check;
