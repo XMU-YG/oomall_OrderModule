@@ -43,4 +43,6 @@ public interface AftersaleService {
      * Created in 2020/12/12
      */
     public Boolean getAftersaleByOrderItemId(Long orderItemId, LocalDateTime orderCompletedTime);
+
+    public Long getAftersaleUser(Long aftersaleId);
 }

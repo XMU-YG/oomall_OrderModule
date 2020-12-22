@@ -10,17 +10,13 @@ import cn.edu.xmu.payment.dao.PaymentDao;
 import cn.edu.xmu.payment.model.bo.Payment;
 import cn.edu.xmu.payment.model.po.PaymentPo;
 import cn.edu.xmu.payment.model.vo.NewPaymentVo;
-
 import cn.edu.xmu.payment.util.PaymentPatterns;
-
-import io.swagger.models.auth.In;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.bouncycastle.cert.ocsp.RespID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service

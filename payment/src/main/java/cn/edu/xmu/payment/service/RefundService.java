@@ -277,7 +277,7 @@ public class RefundService {
 
                 //售后单属于店铺  获取顾客id 返还返点
                 if(payment.getPaymentPattern().equals(PaymentPatterns.REBATEPAY.getCode())){
-                    Long userId=aftersaleService.getAftersaleUserId(payment.getAftersaleId());
+                    Long userId=aftersaleService.getAftersaleUser(payment.getAftersaleId());
 
                     userService.reduceRebate(userId,-payment.getAmount().longValue());
                 }
