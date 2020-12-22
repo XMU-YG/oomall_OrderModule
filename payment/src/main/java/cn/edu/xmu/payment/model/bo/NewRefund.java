@@ -39,7 +39,7 @@ public class NewRefund implements VoObject{
         po.setGmtModified(gmtModified);
         return po;
     }
-//
+
     public Long getId() {
         return id;
     }

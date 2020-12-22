@@ -58,7 +58,7 @@ public class Refund implements VoObject {
         refundVo.setGmtModified(gmtModified);
         refundVo.setOrderId(orderId);
         refundVo.setAftersaleId(aftersaleId);
-//
+
         return refundVo;
     }
     @Override
