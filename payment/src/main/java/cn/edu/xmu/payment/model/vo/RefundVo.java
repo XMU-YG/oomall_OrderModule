@@ -15,7 +15,7 @@ public class RefundVo {
     private LocalDateTime gmtModified;
     private Long orderId;
     private Long aftersaleId;
-
+//
     public void setId(Long id) {
         this.id = id;
     }

@@ -108,7 +108,7 @@ public class PaymentController {
         }
         return ret;
     }
-
+//
     /**
      * 买家根据售后单号查询支付信息
      *需要用customerId验证这个订单号是不是这个用户的  **这里暂时还没加

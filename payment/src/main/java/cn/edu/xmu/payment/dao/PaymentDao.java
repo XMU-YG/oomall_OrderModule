@@ -68,7 +68,7 @@ public class PaymentDao {
         }
         return ret;
     }
-
+//
     public List<Payment> admingetAftersalePayment(Long aftersaleId){
 
         PaymentPoExample example=new PaymentPoExample();
