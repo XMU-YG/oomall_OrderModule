@@ -92,12 +92,12 @@ public class IOrderServiceImpl implements IOrderService{
     }
 
     @Override
-    public boolean haveOrder(Long shopId) {
+    public Boolean haveOrder(Long shopId) {
         return orderService.haveOrder(shopId);
     }
 
     @Override
-    public boolean orderIsDone(Long orderItemId) {
+    public Boolean orderIsDone(Long orderItemId) {
         Long orderId=orderService.getOrderItemById(orderItemId).getOrderId();
         Byte state=orderService.getOrderState(orderId);
         return state == OrderStatus.FINISHED.getCode();
@@ -116,6 +116,11 @@ public class IOrderServiceImpl implements IOrderService{
     @Override
     public Long getOrderAmount(Long orderId) {
         return orderService.getOrderAmount(orderId);
+    }
+
+    @Override
+    public Boolean ifOrderCanPay(Long orderId) {
+        return orderService.canPay(orderId);
     }
 
 
