@@ -123,7 +123,6 @@ public class PaymentService {
             retObject = paymentDao.createPayment(payment);
 
         }
-
         return retObject;
     }
 
@@ -147,7 +146,8 @@ public class PaymentService {
             ReturnObject<List> ret = new ReturnObject<>(paymentDao.findPaymentByOrder(orderId));
             return ret;
         }
-        return null;
+        ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,"服务器内部错误");
+        return returnObject;
     }
 
     /**
@@ -170,7 +170,8 @@ public class PaymentService {
             ReturnObject<List> ret = new ReturnObject<>(paymentDao.findPaymentByAftersale(aftersaleId));
             return ret;
         }
-        return null;
+        ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,"服务器内部错误");
+        return returnObject;
     }
 
     /**
@@ -193,7 +194,8 @@ public class PaymentService {
             ReturnObject<List> ret = new ReturnObject<>(paymentDao.findPaymentByOrder(orderId));
             return ret;
         }
-        return null;
+        ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,"服务器内部错误");
+        return returnObject;
     }
 
     /**
@@ -215,7 +217,8 @@ public class PaymentService {
             ReturnObject<List> ret = new ReturnObject<>(paymentDao.findPaymentByAftersale(aftersaleId));
             return ret;
         }
-        return null;
+        ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,"服务器内部错误");
+        return returnObject;
     }
 
     /**
