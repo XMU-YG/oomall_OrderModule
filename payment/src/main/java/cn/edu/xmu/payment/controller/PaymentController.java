@@ -1,6 +1,7 @@
 package cn.edu.xmu.payment.controller;
 
 import cn.edu.xmu.ooad.annotation.Audit;
+import cn.edu.xmu.ooad.annotation.Depart;
 import cn.edu.xmu.ooad.annotation.LoginUser;
 import cn.edu.xmu.ooad.model.VoObject;
 import cn.edu.xmu.ooad.util.Common;
@@ -59,7 +60,6 @@ public class PaymentController {
     @ApiResponses({
             @ApiResponse(code=0,message="成功")
     })
-   // @Audit
     @GetMapping("/payments/states")
     public Object getAllPaymentStates(){
         logger.debug("getAllPaymentStates: ");
@@ -84,7 +84,6 @@ public class PaymentController {
     @ApiResponses({
             @ApiResponse(code=0,message="成功")
     })
-    //@Audit
     @GetMapping("/payments/patterns")
     public Object getAllPaymentPattern(){
         logger.debug("getAllPaymentPattern: ");
@@ -114,7 +113,7 @@ public class PaymentController {
             @ApiResponse(code=505,message = "该订单无权访问"),
             @ApiResponse(code=805,message = "用户返点不足"),
     })
-    //@Audit
+    @Audit
     @PostMapping("/orders/{id}/payments")
     public Object createOrderPayment(@ApiIgnore @LoginUser   Long userId,
                                      @Validated @RequestBody NewPaymentVo vo, BindingResult bindingResult,
@@ -158,7 +157,7 @@ public class PaymentController {
             @ApiResponse(code=504,message = "售后单不存在"),
             @ApiResponse(code=805,message = "用户返点不足"),
     })
-    //@Audit
+    @Audit
     @PostMapping("/aftersales/{id}/payments")
     public Object createAftersalePayment(@ApiIgnore @LoginUser    Long userId,
                                      @Validated @RequestBody NewPaymentVo vo, BindingResult bindingResult,
@@ -267,12 +266,10 @@ public class PaymentController {
             @ApiResponse(code=504,message = "订单不存在"),
             @ApiResponse(code=505,message = "该订单无权访问"),
     })
-    //@Audit
+    @Audit
     @GetMapping("/orders/{id}/payments")
     public Object getOrderPaymentSelf(@ApiIgnore @LoginUser  Long userId, @PathVariable  Long id){
         Object ret=null;
-        System.out.println("userId");
-        System.out.println(userId);
 
         ReturnObject object=paymentService.findOrderPaymentSelf(userId,id);
 
@@ -300,12 +297,10 @@ public class PaymentController {
             @ApiResponse(code=504,message = "售后单不存在"),
             @ApiResponse(code=505,message = "该售后单无权访问"),
     })
-    //@Audit
+    @Audit
     @GetMapping("/aftersales/{id}/payments")
     public Object getAftersalePaymentSelf(@ApiIgnore @LoginUser   Long userId, @PathVariable  Long id){
         Object ret=null;
-        System.out.println("userId");
-        System.out.println(userId);
 
         ReturnObject object=paymentService.findAftersalePaymentSelf(userId,id);
 
@@ -335,6 +330,7 @@ public class PaymentController {
             @ApiResponse(code=504,message = "退款不存在"),
             @ApiResponse(code=505,message = "该退款无权访问")
     })
+    @Audit
     @PostMapping("/shops/{shopId}/payments/{id}/refunds")
     public Object createRefund(@LoginUser @ApiIgnore Long userId,
                                          @Validated @RequestBody NewRefundVo vo, BindingResult bindingResult,
@@ -379,7 +375,7 @@ public class PaymentController {
             @ApiResponse(code=504,message = "订单不存在"),
             @ApiResponse(code=505,message = "该订单无权访问"),
     })
-    // @Audit
+    @Audit
     @GetMapping("/shops/{shopId}/orders/{id}/refunds")
     public Object getOrderRefundShop(@PathVariable Long shopId,@PathVariable Long id){
         logger.debug("getOrderRefundShop shopid: "+shopId+" orderid"+id);
@@ -413,7 +409,7 @@ public class PaymentController {
             @ApiResponse(code=504,message = "售后单不存在"),
             @ApiResponse(code=505,message = "该售后单无权访问"),
     })
-    //@Audit
+    @Audit
     @GetMapping("/shops/{shopId}/aftersales/{id}/refunds")
     public Object getAftersaleRefundShop(@PathVariable Long shopId,@PathVariable Long id){
         logger.debug("getAftersaleRefundShop shopid: "+shopId+" afterid: "+id);
@@ -452,8 +448,6 @@ public class PaymentController {
     public Object getOrderRefundSelf(@ApiIgnore @LoginUser Long userId,
                                      @PathVariable Long id){
         logger.debug("getOrderRefund: userid: "+userId+" orderId: "+id);
-        System.out.println("userId");
-        System.out.println(userId);
 
         Object returnObject;
 
@@ -475,7 +469,7 @@ public class PaymentController {
      */
     @ApiOperation(value="买家查询自己的售后单退款信息")
     @ApiImplicitParams({
-            @ApiImplicitParam(paramType="header",dataType="String",name="authorization",value="用户token",required=true),
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "authorization", value = "Token", required = true),
             @ApiImplicitParam(paramType="path",dataType="Long",name="id",value="售后单id",required=true,example="1"),
     })
     @ApiResponses({
@@ -485,15 +479,15 @@ public class PaymentController {
     })
     @Audit
     @GetMapping("/aftersales/{id}/refunds")
-    public Object getAftersaleRefundSelf(@ApiIgnore @LoginUser Long userId,@PathVariable Long id){
+    public Object getAftersaleRefundSelf(
+            @ApiIgnore @LoginUser Long userId,
+            @ApiIgnore @Depart Long dId,
+            @PathVariable(name="id") Long id){
         logger.debug("getAftersaleRefundSelf: userid"+userId+" aftersaleId: "+id);
 
         Object returnObject;
-        System.out.println("userId");
-        System.out.println(userId);
 
         ReturnObject refund=refundService.findAftersaleRefundSelf(userId,id);
-
 
         if(refund.getCode().equals(ResponseCode.OK)){
             returnObject=Common.getListRetObject(refund);

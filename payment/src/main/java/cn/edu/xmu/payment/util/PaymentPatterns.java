@@ -5,7 +5,7 @@ package cn.edu.xmu.payment.util;
  */
 public enum PaymentPatterns {
     REBATEPAY("001","返点支付"),
-    NORMALPAY("002","正常支付");
+    NORMALPAY("002","模拟支付渠道");
 
     private String code;
     private String description;

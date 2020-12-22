@@ -10,11 +10,11 @@ import lombok.Data;
  */
 @Data
 public class PatternVo {
-    private String code;
+    private String payPattern;
     private String name;
 
     public PatternVo(PaymentPatterns paymentPatterns){
-        code=paymentPatterns.getCode();
+        payPattern=paymentPatterns.getCode();
         name=paymentPatterns.getDescription();
     }
 }
