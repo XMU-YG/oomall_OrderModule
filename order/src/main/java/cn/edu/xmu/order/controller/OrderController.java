@@ -11,6 +11,7 @@ import cn.edu.xmu.order.util.OrderStatus;
 import cn.edu.xmu.order.util.CreateOrderService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.pagehelper.PageInfo;
+import com.github.sardine.model.Bind;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,16 +127,25 @@ public class OrderController {
         LocalDateTime begin=null,end=null;
         try{
             if (beginTime!=null){
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                begin=LocalDateTime.parse(beginTime,dateTimeFormatter);
+                begin=LocalDateTime.parse(beginTime);
             }
             if (endTime!=null){
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                end=LocalDateTime.parse(endTime,dateTimeFormatter);
+                end=LocalDateTime.parse(endTime);
             }
         }catch (Exception e){
-            logger.debug("日期不合法");
-            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
+            try{
+                DateTimeFormatter dateTimeFormatter=null;
+                if (beginTime!=null){
+                    dateTimeFormatter=DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    begin=LocalDateTime.parse(beginTime,dateTimeFormatter);
+                }
+                if (endTime!=null) {
+                    dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    end = LocalDateTime.parse(endTime, dateTimeFormatter);
+                }
+            }catch (Exception e1){
+                return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
+            }
         }
         ReturnObject<PageInfo<VoObject>> object=orderService.getAllSimpleOrders(customerId,orderSn,state,begin,end,page,pageSize);
         if (object.getCode().equals(ResponseCode.OK)){
@@ -351,16 +361,25 @@ public class OrderController {
         LocalDateTime begin=null,end=null;
         try{
             if (beginTime!=null){
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                begin=LocalDateTime.parse(beginTime,dateTimeFormatter);
+                begin=LocalDateTime.parse(beginTime);
             }
             if (endTime!=null){
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                end=LocalDateTime.parse(endTime,dateTimeFormatter);
+                end=LocalDateTime.parse(endTime);
             }
         }catch (Exception e){
-            logger.debug("日期不合法");
-            return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
+            try{
+                DateTimeFormatter dateTimeFormatter=null;
+                if (beginTime!=null){
+                    dateTimeFormatter=DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    begin=LocalDateTime.parse(beginTime,dateTimeFormatter);
+                }
+                if (endTime!=null) {
+                    dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    end = LocalDateTime.parse(endTime, dateTimeFormatter);
+                }
+            }catch (Exception e1){
+                return Common.decorateReturnObject(new ReturnObject(ResponseCode.FIELD_NOTVALID));
+            }
         }
         object=orderService.getShopSelfSimpleOrders(shopId,customerId,orderSn,begin,end,page,pageSize);
         if (object.getCode().equals(ResponseCode.OK)){
@@ -426,9 +445,13 @@ public class OrderController {
     })
     @Audit
     @PutMapping("shops/{shopId}/orders/{id}")
-    public Object modifyOrderMessage(@PathVariable(name = "shopId") Long shopId,@PathVariable(name = "id") Long orderId,@RequestBody(required = true) MessageVo messageVo){
+    public Object modifyOrderMessage(@PathVariable(name = "shopId") Long shopId,@PathVariable(name = "id") Long orderId,@Validated @RequestBody(required = true) MessageVo messageVo,BindingResult bindingResult){
         Object ret=null;
         logger.debug("shop modify message. shopId: "+shopId+"  orderId: "+orderId);
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            return returnObject;
+        }
         if (messageVo==null){
             ret=Common.decorateReturnObject(new ReturnObject<>(ResponseCode.FIELD_NOTVALID));
         }
@@ -490,10 +513,12 @@ public class OrderController {
     })
     @Audit
     @PutMapping("shops/{shopId}/orders/{id}/deliver")
-    public Object deliverShopOrder(@PathVariable(name = "shopId") Long shopId,@PathVariable(name = "id") Long orderId, @RequestBody FreightSnVo freightSnVo){
+    public Object deliverShopOrder(@PathVariable(name = "shopId") Long shopId, @PathVariable(name = "id") Long orderId, @Validated @RequestBody FreightSnVo freightSnVo, BindingResult bindingResult){
         Object ret=null;
-        if (freightSnVo.getFreightSn()==null){
-            ret=Common.getNullRetObj(new ReturnObject<>(ResponseCode.FIELD_NOTVALID), httpServletResponse);
+        logger.debug("shop deliver orderId: "+orderId);
+        Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
+        if (null != returnObject) {
+            return returnObject;
         }
         else{
             ReturnObject object=orderService.deliverShopOrder(shopId,orderId,freightSnVo.getFreightSn());
