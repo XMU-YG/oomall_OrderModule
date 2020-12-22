@@ -33,6 +33,7 @@ import cn.edu.xmu.order.model.bo.*;
 import cn.edu.xmu.order.model.vo.OrderItemVo;
 import cn.edu.xmu.order.model.vo.OrderVo;
 import cn.edu.xmu.order.util.OrderStatus;
+
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -116,7 +118,7 @@ public class OrderService {
                 //构造完整Order详情
                 List<SimpleOrderItem> orderItems=orderItemDao.getSimOrderItemsByOrderId(order.getId());
                 order.setSimpleOrderItemList(orderItems);
-                Long shopId=order.getShop().getId();
+                Long shopId=1L;
                 Customer customer=JacksonUtil.toObj(otherService.findCustomerById(customerId),Customer.class);
                 ShopRetVo shopRetVo=JacksonUtil.toObj(shopService.getShopById(shopId),ShopRetVo.class);
                 assert shopRetVo != null;
@@ -215,6 +217,7 @@ public class OrderService {
                 Shop shop=new Shop(shopRetVo);
                 order.setShop(shop);
                 order.setCustomer(customer);
+                logger.debug(JacksonUtil.toJson(order));
                 return new ReturnObject<>(order);
             } else{
                 logger.debug("shop getOrderById error: don't have privilege!   orderId:  "+id+"  shopId:  "+shopId);
@@ -542,7 +545,7 @@ public class OrderService {
      * @param orderId
      */
     public void checkOrderPayState(Long orderId){
-        int state=orderDao.getOrderState(orderId);
+        Byte state=orderDao.getOrderState(orderId);
         if (state==OrderStatus.WAIT_FOR_PAID.getCode()){
             logger.debug("order is canceled by system");
             orderDao.deleteOrderById(orderId);
@@ -671,11 +674,7 @@ public class OrderService {
 
     public Byte getOrderState(Long orderId) {
         logger.debug("dubbo service: getOrderState.");
-        int state=orderDao.getOrderState(orderId);
-        if (state!=500){
-            return (byte)state;
-        }
-        return -1;
+        return orderDao.getOrderState(orderId);
     }
 
     public Long getOrderUser(Long orderId) {
@@ -689,41 +688,4 @@ public class OrderService {
         }
         return 0L;
     }
-
-    /**
-     * 内部接口 获得orderItem对应父订单id
-     * @param orderItemId
-     * @return
-     */
-    public Long getPidByItemId(Long orderItemId) {
-        OrderItem orderItem=this.getOrderItemById(orderItemId);
-        if (orderItem==null){
-            return null;
-        }else{
-            Long orderId=orderItem.getOrderId();
-            Order order=orderDao.getOrderById(orderId).getData();
-            if (order!=null){
-                return order.getPid();
-            }
-        }
-        return null;
-    }
-
-    /**
-     * 内部接口
-     * 获得订单总价
-     */
-    public Long getOrderAmount(Long orderId) {
-        Order order=orderDao.getOrderById(orderId).getData();
-        if (order!=null){
-            return order.getOriginPrice();
-        }
-        return null;
-    }
-
-    public boolean canPay(Long orderId){
-        Byte state=this.getOrderState(orderId);
-        return state == OrderStatus.WAIT_FOR_PAID.getCode();
-    }
-
 }

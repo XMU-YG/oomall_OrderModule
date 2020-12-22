@@ -21,12 +21,12 @@ dubbo:
     qos-accept-foreign-ip: false
   # 配置注册中心
   registry:
-    address: nacos://172.16.0.21:8848
+    address: nacos://47.75.67.96:8848
     #47.75.67.96:8848
   # 设置协议-协议由提供方指定消费方被动接受
   protocol:
     name: dubbo
-    port: 20990
+    port: 20889
     # 设置超时时间
   consumer:
     timeout: 4000
@@ -40,9 +40,9 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
-    initialization-mode: never
-#    schema: classpath:order-schema.sql
-#    data: classpath:order-data.sql
+    initialization-mode: always
+    schema: classpath:order-schema.sql
+    data: classpath:order-data.sql
     druid:
       #初始化时建立物理连接的个数
       initial-size: 3
@@ -102,18 +102,18 @@ pagehelper:
   helper-dialect: mysql
 
 # 配置rocketmq
-#rocketmq:
-#  # 指定namesrv地址
-#  name-server: 127.0.0.1:9876
-#  producer:
-#    #生产者group名称
-#    group: producer_group
-#    #一次发送多少数量消息
-#    max-message-size: 4096
-#    #发送消息超时时间,默认3000
-#    send-message-timeout: 3000
-#    #发送消息失败重试次数，默认2
-#    retry-times-when-send-async-failed: 2
+rocketmq:
+  # 指定namesrv地址
+  name-server: 127.0.0.1:9876
+  producer:
+    #生产者group名称
+    group: producer_group
+    #一次发送多少数量消息
+    max-message-size: 4096
+    #发送消息超时时间,默认3000
+    send-message-timeout: 3000
+    #发送消息失败重试次数，默认2
+    retry-times-when-send-async-failed: 2
 
 
 

@@ -110,12 +110,12 @@ public class IOrderServiceImpl implements IOrderService{
 
     @Override
     public Long getOrderItemPid(Long orderItemId) {
-        return orderService.getPidByItemId(orderItemId);
+        return null;
     }
 
     @Override
     public Long getOrderAmount(Long orderId) {
-        return orderService.getOrderAmount(orderId);
+        return null;
     }
 
 

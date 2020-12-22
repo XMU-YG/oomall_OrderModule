@@ -7,7 +7,7 @@ import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.order.model.bo.OrderItem;
-//import cn.edu.xmu.order.service.RocketMQService;
+import cn.edu.xmu.order.service.RocketMQService;
 import cn.edu.xmu.order_provider.IFreightService;
 import cn.edu.xmu.goodsprovider.Module.OrderGoods;
 import cn.edu.xmu.order.model.po.OrderItemPo;
@@ -15,7 +15,7 @@ import cn.edu.xmu.order.model.po.OrderPo;
 import cn.edu.xmu.order.model.vo.OrderVo;
 import cn.edu.xmu.order.model.vo.OrderItemVo;
 import cn.edu.xmu.order.service.OrderService;
-//import cn.edu.xmu.order.service.time.TimeService;
+import cn.edu.xmu.order.service.time.TimeService;
 import cn.edu.xmu.order.util.OrderStatus;
 import cn.edu.xmu.order.util.OrderType;
 import cn.edu.xmu.order.util.CreateOrderService;
@@ -38,15 +38,15 @@ import java.util.Map;
  */
 @Component("NorOrderService")
 public class NormalOrderServiceImpl implements CreateOrderService {
-//
-//    @Autowired
-//    private RocketMQService rocketMQService;
+
+    @Autowired
+    private RocketMQService rocketMQService;
 
     @Autowired
     private OrderService orderService;
 
-//    @Autowired
-//    private TimeService timeService;
+    @Autowired
+    private TimeService timeService;
 
     @DubboReference(version ="0.0.1",check = false)
     private GoodsInner goodsInner;
@@ -133,15 +133,15 @@ public class NormalOrderServiceImpl implements CreateOrderService {
         orderPo.setRebateNum(0);
 
         //计算订单优惠，注意在函数中要设置OrderGoods的discount属性
-//        orderItemList=orderService.calculateDiscount(orderItemList);
-//        for (OrderItemPo o:orderItemPos) {
-//            orderItemList.forEach(v->{
-//                if (o.getId().equals(v.getId())){
-//                    o.setDiscount(v.getDiscount());
-//                }
-//            });
-//        }
-        orderPo.setDiscountPrice(0L);
+        orderItemList=orderService.calculateDiscount(orderItemList);
+        for (OrderItemPo o:orderItemPos) {
+            orderItemList.forEach(v->{
+                if (o.getId().equals(v.getId())){
+                    o.setDiscount(v.getDiscount());
+                }
+            });
+        }
+        orderPo.setDiscountPrice(orderService.totalDiscount(orderItemList));
         //设为待支付状态
         orderPo.setState((byte) OrderStatus.WAIT_FOR_PAID.getCode());
         orderPo.setSubstate((byte) OrderStatus.NEW_ORDER.getCode());
@@ -151,7 +151,7 @@ public class NormalOrderServiceImpl implements CreateOrderService {
         //OrderPo写入数据库，返回orderId
         ReturnObject<Long> orderRet=orderService.insertOrder(orderPo);
         Long orderId=orderRet.getData();
-        //rocketMQService.sendOrderPayMessage(orderId);
+        rocketMQService.sendOrderPayMessage(orderId);
         if (orderRet.getCode().equals(ResponseCode.OK)){
             /*构造orderItems*/
             for (OrderItemPo orderItemPo:orderItemPos) {

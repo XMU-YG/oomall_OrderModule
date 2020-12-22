@@ -362,6 +362,7 @@ public class OrderDao {
             SimpleOrder simpleOrder=new SimpleOrder(po);
             ret.add(simpleOrder);
         }
+        System.out.println(ret.size());
         /**
          * ret 分页内容，其内容为bo（实现VoObject接口）对象
          * simpleOrderPoPage可以看做分页的大容器，由po构造
@@ -442,10 +443,8 @@ public class OrderDao {
                     return new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"订单无权取消，不是自己订单");
                 }
             }
-            Byte state=orderPo.getState();
-            Byte substate=orderPo.getSubstate()==null?0:orderPo.getSubstate();
-            if (state==OrderStatus.WAIT_FOR_PAID.getCode()
-                    ||(state==OrderStatus.WAIT_FOR_RECEIVE.getCode()&&substate!=OrderStatus.SHIPPED.getCode())){  //待收货 待付款都可以取消
+            if (orderPo.getState()==OrderStatus.WAIT_FOR_PAID.getCode()
+                    ||orderPo.getState()==OrderStatus.WAIT_FOR_RECEIVE.getCode()){  //待收货 待付款都可以取消
                 logger.debug("deleteShopOrder success！  orderId:  "+orderId+"   shopId:  "+shopId);
                 orderPo.setGmtModified(LocalDateTime.now());
                 orderPo.setState((byte) OrderStatus.CANCELED.getCode());//0为订单取消
@@ -576,18 +575,10 @@ public class OrderDao {
     /**
      * 获得订单状态
      * @param orderId
-     * @return 0找不到 500错误
+     * @return
      */
-    public int getOrderState(Long orderId) {
-        try{
-            Byte state=orderMapper.getStateById(orderId);
-            if (state==null){
-                state=0;
-            }
-            return state;
-        }catch (DataAccessException a){
-            return ResponseCode.INTERNAL_SERVER_ERR.getCode();
-        }
+    public Byte getOrderState(Long orderId) {
+        return orderMapper.getStateById(orderId);
     }
 
     /**
