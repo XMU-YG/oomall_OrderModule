@@ -71,7 +71,8 @@ public class PaymentService {
                   logger.debug("createOrderPayment: fail: 订单超额支付");
                   retObject=new ReturnObject<>(ResponseCode.OK,"订单超额支付");
               }else{
-
+                  if(vo.getPaymentPattern().equals(PaymentPatterns.REBATEPAY.getCode()))
+                      userService.reduceRebate(userId,vo.getPrice());
 
                   //创建bo对象
                   Payment payment=vo.createPayment();
@@ -110,6 +111,9 @@ public class PaymentService {
             logger.debug("findOrderRefundShop: fail: 该售后单无权限");
             retObject = new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE, "该售后单无权访问");
         } else if (checkBelong.equals(1)) {
+
+            if(vo.getPaymentPattern().equals(PaymentPatterns.REBATEPAY.getCode()))
+                userService.reduceRebate(userId,vo.getPrice());
 
             //创建bo对象
             Payment payment = vo.createPayment();
