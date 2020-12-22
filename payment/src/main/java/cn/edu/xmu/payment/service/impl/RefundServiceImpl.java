@@ -29,8 +29,8 @@ public class RefundServiceImpl implements IPaymentService {
     @Autowired
     private RefundService refundService;
 
-  //  @DubboReference(version = "0.0.1",check = false)
-   // private IOrderService orderService;
+   @DubboReference(version = "0.0.1",check = false)
+   private IOrderService orderService;
 
 
     /**
@@ -210,8 +210,8 @@ public class RefundServiceImpl implements IPaymentService {
      */
     @Override
     public Integer aftersaleRefund(Long shopId,Long customerId,Long orderItemId,Integer amount){
-       // Long pid= orderService.getOrderItemPid(orderItemId);
-        Long pid=0L;
+        Long pid= orderService.getOrderItemPid(orderItemId);
+        //Long pid=0L;
 
         return normalRefund(shopId,customerId,pid,amount.longValue());
     }

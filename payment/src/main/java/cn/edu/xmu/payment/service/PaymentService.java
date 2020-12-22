@@ -60,13 +60,13 @@ public class PaymentService {
           retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该订单无权访问");
       }else if(checkBelong.equals("1")){
 
-          if(!orderService.ifOrderCanPay(orderId)){
-              //if(false){
+           if(!orderService.ifOrderCanPay(orderId)){
+               //  if(false){
               logger.debug("createOrderPayment: fail: 该订单属于禁止");
               retObject=new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW,"该订单是禁止态");
           }else{
-             Long amount=orderService.getOrderAmount(orderId);
-             //Long amount=3L;
+              Long amount=orderService.getOrderAmount(orderId);
+               // Long amount=3L;
               if(amount.compareTo(vo.getPrice())==1){
                   //if(false){
                   logger.debug("createOrderPayment: fail: 订单超额支付");
@@ -134,7 +134,7 @@ public class PaymentService {
      */
     public ReturnObject findOrderPaymentShop(Long orderId, Long shopId) {
 
-         String checkBelong=orderService.checkShopOrder(shopId,orderId);
+          String checkBelong=orderService.checkShopOrder(shopId,orderId);
         // String checkBelong="1";
         System.out.println(checkBelong);
         if(checkBelong.equals("-1")){

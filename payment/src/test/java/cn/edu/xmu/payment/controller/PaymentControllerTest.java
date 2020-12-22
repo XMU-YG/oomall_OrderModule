@@ -56,7 +56,7 @@ public class PaymentControllerTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":[{\"code\":\"001\",\"name\":\"返点支付\"},{\"code\":\"002\",\"name\":\"正常支付\"}]}";
+        String expectedResponse = "{\"errno\":0,\"errmsg\":\"成功\",\"data\":[{\"payPattern\":\"001\",\"name\":\"返点支付\"},{\"payPattern\":\"002\",\"name\":\"模拟支付渠道\"}]}";
         try {
             JSONAssert.assertEquals(expectedResponse, responseString, false);
         } catch (
@@ -477,5 +477,15 @@ public class PaymentControllerTest {
             System.out.println("yse");
         }else
             System.out.println("no");
+    }
+
+
+    @Test
+    public void createToken(){
+        String responseString = null;
+        //eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlzIGlzIGEgdG9rZW4iLCJhdWQiOiJNSU5JQVBQIiwidG9rZW5JZCI6IjIwMjAxMjE0MTUyMDE4NjBDIiwiaXNzIjoiT09BRCIsImRlcGFydElkIjotMiwiZXhwIjoxNjA4NTMwNDE4LCJ1c2VySWQiOjMsImlhdCI6MTYwNzkzMDQxOH0.u_UhJ4T9IFcdi--E1Ka-w58yfQporUZfMn7McGs6w6o
+
+        String token=new JwtHelper().createToken(1L,-2l,60000000);
+        System.out.println(token);
     }
 }
