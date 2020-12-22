@@ -44,8 +44,9 @@ public class PaymentService {
      */
    public ReturnObject<VoObject> createOrderPayment(Long userId,Long orderId,NewPaymentVo vo){
        ReturnObject<VoObject> retObject=null;
+
        if(vo.getPrice().equals(0))
-           retObject=new ReturnObject<>(ResponseCode.OK,"支付成功，支付金额为0，不创建支付记录");
+           return retObject=new ReturnObject<>(ResponseCode.OK,"支付成功，支付金额为0，不创建支付记录");
 
         String checkBelong=orderService.checkUserOrder(userId,orderId);
        // String checkBelong="1";
@@ -59,15 +60,15 @@ public class PaymentService {
           retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_OUTSCOPE,"该订单无权访问");
       }else if(checkBelong.equals("1")){
 
-          //if(!orderService.ifOrderCanPay(orderId)){
-          if(false){
+          if(!orderService.ifOrderCanPay(orderId)){
+              //if(false){
               logger.debug("createOrderPayment: fail: 该订单属于禁止");
               retObject=new ReturnObject<>(ResponseCode.ORDER_STATENOTALLOW,"该订单是禁止态");
           }else{
-              // Long amount=orderService.getOrderAmount(orderId);
+             Long amount=orderService.getOrderAmount(orderId);
              //Long amount=3L;
-              //if(amount.compareTo(vo.getPrice())==1){
-              if(false){
+              if(amount.compareTo(vo.getPrice())==1){
+                  //if(false){
                   logger.debug("createOrderPayment: fail: 订单超额支付");
                   retObject=new ReturnObject<>(ResponseCode.OK,"订单超额支付");
               }else{
@@ -98,8 +99,8 @@ public class PaymentService {
     public ReturnObject<VoObject> createAftersalePayment(Long userId,Long aftersaleId,NewPaymentVo vo) {
         ReturnObject<VoObject> retObject = null;
 
-        if(vo.getPrice().equals(0))
-            retObject=new ReturnObject<>(ResponseCode.OK,"支付成功，支付金额为0，不创建支付记录");
+        if(vo.getPrice().equals(0L))
+           return retObject=new ReturnObject<>(ResponseCode.OK,"支付成功，支付金额为0，不创建支付记录");
 
         //Integer checkBelong=1;
         Integer checkBelong = aftersaleService.checkUserAftersale(userId, aftersaleId);
@@ -133,8 +134,8 @@ public class PaymentService {
      */
     public ReturnObject findOrderPaymentShop(Long orderId, Long shopId) {
 
-        String checkBelong=orderService.checkShopOrder(shopId,orderId);
-        //String checkBelong="1";
+         String checkBelong=orderService.checkShopOrder(shopId,orderId);
+        // String checkBelong="1";
         System.out.println(checkBelong);
         if(checkBelong.equals("-1")){
             ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单不存在");
@@ -249,13 +250,16 @@ public class PaymentService {
      */
     public boolean orderPayed(Long orderId,Long amount){
         List<PaymentPo> paymentPos=paymentDao.findOrderPayment(orderId);
+
         if(paymentPos==null||paymentPos.isEmpty())
             return false;
 
         Long totalAmount=0L;
         for(PaymentPo po:paymentPos){
+            System.out.println(po.getAmount());
             totalAmount=totalAmount+po.getAmount();
         }
+        System.out.println(totalAmount);
         if(amount.equals(totalAmount))
             return true;
 

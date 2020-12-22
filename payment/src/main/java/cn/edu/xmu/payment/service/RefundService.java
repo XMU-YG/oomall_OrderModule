@@ -83,9 +83,9 @@ public class RefundService {
      */
     public ReturnObject findAftersaleRefundShop(Long shopId,Long aftersaleId){
         //check=1 属于 check=0 不属于 check=-1 不存在
-          Integer checkBelong=aftersaleService.checkShopAftersale(shopId,aftersaleId);
+        Integer checkBelong=aftersaleService.checkShopAftersale(shopId,aftersaleId);
         //Integer checkBelong=-1;
-        System.out.println("checkShopAftersale"+checkBelong);
+
         if(checkBelong.equals(-1)){
             ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"售后单不存在");
             return returnObject;
@@ -169,7 +169,7 @@ public class RefundService {
 
         //若支付不存在 返回支付不存在  若退款金额大于支付金额 返回退款金额大于支付金额
         if(payment==null){
-            return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"该支付不存在");
+            return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"不存在支付");
         }else if(payment.getAmount().compareTo(vo.getAmount())==1){
             return retObject=new ReturnObject<>(ResponseCode.REFUND_MORE,"退款金额大于支付金额");
         }else{
@@ -236,8 +236,10 @@ public class RefundService {
     public ReturnObject<VoObject> createRefund(Long shopId, Long id, NewRefundVo vo) {
         ReturnObject<VoObject> retObject=null;
 
-        if(vo.getAmount().equals(0))
+        if(vo.getAmount().equals(0)){
             return retObject=new ReturnObject<>(ResponseCode.OK,"退款金额为0，退款成功，但不产生退款记录");
+
+        }
 
 
         //跟据支付id获取支付
@@ -246,7 +248,7 @@ public class RefundService {
         //若支付不存在 返回支付不存在  若退款金额大于支付金额 返回退款金额大于支付金额
         if(payment==null){
             return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"该支付不存在");
-        }else if(payment.getAmount().compareTo(vo.getAmount())==1){
+        }else if(payment.getAmount().compareTo(vo.getAmount())==-1){
             return retObject=new ReturnObject<>(ResponseCode.REFUND_MORE,"退款金额大于支付金额");
         }else{
             //判断支付是订单支付还是售后支付

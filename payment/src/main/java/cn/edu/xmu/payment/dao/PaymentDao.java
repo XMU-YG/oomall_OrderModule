@@ -143,7 +143,7 @@ public class PaymentDao {
     public List<PaymentPo> findOrderPayment(Long pid) {
         PaymentPoExample example=new PaymentPoExample();
         PaymentPoExample.Criteria criteria= example.createCriteria();
-        criteria.andAftersaleIdEqualTo(pid);
+        criteria.andOrderIdEqualTo(pid);
         List<PaymentPo> paymentPos=paymentPoMapper.selectByExample(example); //得到满足条件的po对象
         return paymentPos;
 

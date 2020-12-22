@@ -5,6 +5,7 @@ import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.JwtHelper;
 import cn.edu.xmu.payment.model.vo.NewPaymentVo;
 import cn.edu.xmu.payment.model.vo.NewRefundVo;
+import cn.edu.xmu.payment.service.PaymentService;
 import cn.edu.xmu.payment.util.PaymentPatterns;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,8 @@ public class PaymentControllerTest {
     @Autowired
     private MockMvc mvc;
 
+    @Autowired
+    private PaymentService paymentService;
 
     private final String createToken(Long userId, Long departId, int expireTime) {
         String token = new JwtHelper().createToken(userId, departId, expireTime);
@@ -467,4 +470,12 @@ public class PaymentControllerTest {
         }
     }
 
+    @Test
+    public void f(){
+
+        if(paymentService.orderPayed(1L,13L)){
+            System.out.println("yse");
+        }else
+            System.out.println("no");
+    }
 }
