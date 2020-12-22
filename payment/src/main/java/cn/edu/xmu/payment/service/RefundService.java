@@ -57,8 +57,6 @@ public class RefundService {
      * Modified at 2020/12/6
      */
     public ReturnObject findOrderRefundShop(Long shopId,Long orderId){
-
-
         //check=1 属于 check=0 不属于 check=-1 不存在
         String checkBelong=orderService.checkShopOrder(shopId,orderId);
         //String checkBelong="-1";
@@ -73,7 +71,8 @@ public class RefundService {
             ReturnObject<List> ret=new ReturnObject<>(refundDao.findRefundByOrder(orderId));
             return ret;
         }
-        return null;
+        ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,"服务器内部错误");
+        return returnObject;
     }
 
     /**
@@ -97,7 +96,8 @@ public class RefundService {
             ReturnObject<List> ret=new ReturnObject<>(refundDao.findRefundByAftersale(aftersaleId));
             return ret;
         }
-        return null;
+        ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,"服务器内部错误");
+        return returnObject;
     }
     /**
      * 买家查看自己的订单退款信息
@@ -121,7 +121,8 @@ public class RefundService {
             ReturnObject<List> ret=new ReturnObject<>(refundDao.findRefundByOrder(orderId));
             return ret;
         }
-        return null;
+        ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,"服务器内部错误");
+        return returnObject;
     }
 
     /**
@@ -145,7 +146,8 @@ public class RefundService {
             ReturnObject<List> ret=new ReturnObject<>(refundDao.findRefundByAftersale(aftersaleId));
             return ret;
         }
-        return null;
+        ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.INTERNAL_SERVER_ERR,"服务器内部错误");
+        return returnObject;
     }
 
     /**
