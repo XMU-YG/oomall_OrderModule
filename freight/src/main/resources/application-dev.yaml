@@ -3,9 +3,9 @@ spring:
   boot:
     admin:
       client:
-        url: http://localhost:8081
+        url: http://172.16.4.41:8081
   datasource:
-    url: jdbc:mysql://localhost:3306/oomall?serverTimezone=GMT%2B8
+    url: jdbc:mysql://172.16.0.95:3306/oomall?serverTimezone=GMT%2B8
     username: dbuser
     password: 123456
     druid:
@@ -20,7 +20,7 @@ spring:
     # Redis服务器连接端口
     port: 6379
     # Redis服务器连接密码
-    password: 123456
+    password:
   cloud:
     nacos:
       discovery:

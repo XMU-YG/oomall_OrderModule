@@ -10,7 +10,6 @@ import cn.edu.xmu.ooad.util.Common;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ResponseUtil;
 import cn.edu.xmu.ooad.util.ReturnObject;
-import cn.edu.xmu.freight.service.FreightService;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.*;
 import org.apache.http.HttpStatus;
@@ -66,7 +65,7 @@ public class FreightController {
 
             //return ResponseUtil.fail(ResponseCode.RESOURCE_ID_NOTEXIST);
         }
-else if(ret1.equals(-2l)) {
+         else if(ret1.equals(-2l)) {
              ret = new ReturnObject(ResponseCode.REGION_NOT_REACH);
             // return Common.getNullRetObj(ret, httpServletResponse);
              return Common.decorateReturnObject(ret);

@@ -13,7 +13,7 @@ server:
 dubbo:
   # 配置服务信息
   application:
-    name: order-service
+    name: freight-service
     # 禁用QOS同一台机器可能会有端口冲突现象
     qos-enable: false
     qos-accept-foreign-ip: false

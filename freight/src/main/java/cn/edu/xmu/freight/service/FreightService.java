@@ -178,7 +178,7 @@ public class FreightService {
         /*调用商品模块的删除与运费模板的联系*/
         ReturnObject<VoObject> ret1= freightDao.deleteModel(shopId,id);
         boolean judge= true;
-        //judge=goodsService.cleanFreightById(id);
+        judge=goodsService.cleanFreightById(id);
         if(judge)
             return ret1;
         else
