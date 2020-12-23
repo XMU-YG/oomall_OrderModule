@@ -19,11 +19,11 @@ dubbo:
   # 配置注册中心
   registry:
      address: nacos://172.16.4.54:8848
-    #address: nacos://47.75.67.96:8848
+    # address: nacos://47.75.67.96:8848
   # 设置协议-协议由提供方指定消费方被动接受
   protocol:
     name: dubbo
-    port: 20889
+    port: 20882
     # 设置超时时间
   consumer:
     timeout: 4000
@@ -37,7 +37,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
-    initialization-mode: always
+      initialization-mode: always
    # schema: classpath:schema.sql
    # data: classpath:data.sql
     druid:
