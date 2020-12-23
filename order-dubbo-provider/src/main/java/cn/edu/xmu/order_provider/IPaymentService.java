@@ -37,12 +37,12 @@ public interface IPaymentService {
     public Integer normalRefund(Long shopId,Long customerId,Long pid,Long amount);
 
     /**
-     * 售后退款
-     * @param shopId
+     * 售后创建退款
+     * @param aftersaleId
      * @param customerId
      * @param orderItemId
      * @param amount
-     * @return 1退款成功 0退款金额大于支付金额 -1退款创建失败 -2 支付方面问题
+     * @return  1退款成功 0退款金额大于支付金额 -1退款创建失败 -2 支付方面问题
      */
-    public Integer aftersaleRefund(Long shopId,Long customerId,Long orderItemId,Integer amount);
+    public Integer aftersaleRefund(Long aftersaleId,Long customerId,Long orderItemId,Integer amount);
 }
