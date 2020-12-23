@@ -409,7 +409,7 @@ public class PaymentController {
     @GetMapping("/shops/{shopId}/aftersales/{id}/refunds")
     public Object getAftersaleRefundShop(@PathVariable Long shopId,@PathVariable Long id){
         logger.debug("getAftersaleRefundShop shopid: "+shopId+" afterid: "+id);
-        System.out.println("shopId"+shopId+" aftersaleId"+id);
+        //System.out.println("shopId"+shopId+" aftersaleId"+id);
         Object returnObject=null;
 
         ReturnObject refund=refundService.findAftersaleRefundShop(shopId,id);

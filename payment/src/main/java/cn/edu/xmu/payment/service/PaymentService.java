@@ -136,7 +136,7 @@ public class PaymentService {
 
           String checkBelong=orderService.checkShopOrder(shopId,orderId);
         // String checkBelong="1";
-        System.out.println(checkBelong);
+       // System.out.println(checkBelong);
         if(checkBelong.equals("-1")){
             ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"订单不存在");
             return returnObject;

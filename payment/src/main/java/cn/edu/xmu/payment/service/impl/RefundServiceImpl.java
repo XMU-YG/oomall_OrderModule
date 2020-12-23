@@ -1,13 +1,17 @@
 package cn.edu.xmu.payment.service.impl;
 
+import cn.edu.xmu.ooad.model.VoObject;
+import cn.edu.xmu.ooad.util.JacksonUtil;
 import cn.edu.xmu.ooad.util.ResponseCode;
 import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.order_provider.IFreightService;
 import cn.edu.xmu.order_provider.IOrderService;
 import cn.edu.xmu.order_provider.IPaymentService;
+import cn.edu.xmu.payment.dao.RefundDao;
 import cn.edu.xmu.payment.mapper.PaymentPoMapper;
 import cn.edu.xmu.payment.mapper.RefundPoMapper;
 import cn.edu.xmu.payment.model.bo.Payment;
+import cn.edu.xmu.payment.model.bo.Refund;
 import cn.edu.xmu.payment.model.po.PaymentPo;
 import cn.edu.xmu.payment.model.po.RefundPo;
 import cn.edu.xmu.payment.model.vo.NewRefundVo;
@@ -34,6 +38,9 @@ public class RefundServiceImpl implements IPaymentService {
 
     @Autowired
     private RefundPoMapper refundPoMapper;
+
+    @Autowired
+    private RefundDao refundDao;
 
    @DubboReference(version = "0.0.1",check = false)
    private IOrderService orderService;
@@ -214,18 +221,23 @@ public class RefundServiceImpl implements IPaymentService {
      * @return 1成功 0 失败
      */
     @Override
-    public Integer aftersaleRefund(Long aftersaleId,Long customerId,Long orderItemId,Integer amount){
-       // System.out.println("aftersaleId"+aftersaleId+"amount"+amount);
-      RefundPo refundPo=new RefundPo();
-      refundPo.setAftersaleId(aftersaleId);
-      refundPo.setAmount(amount.longValue());
-      refundPo.setState((byte)RefundStates.REFUNDED.getCode());
+    public Integer aftersaleRefund(Long aftersaleId,Long customerId,Long orderItemId,Integer amount) {
+        System.out.println("aftersaleId" + aftersaleId + "amount" + amount);
+        RefundPo refundPo = new RefundPo();
 
-      int ret=refundPoMapper.insertSelective(refundPo);
-      if(ret==0)
-          return 0;
-      else
-          return 1;
+        long a=239900L;
+        refundPo.setAmount(a);
+        refundPo.setAftersaleId(aftersaleId);
+        refundPo.setState((byte) RefundStates.REFUNDED.getCode());
+
+        int ret = refundPoMapper.insertSelective(refundPo);
+
+        if (ret == 0)
+            return 0;
+        else
+            return 1;
     }
+
+
 
 }

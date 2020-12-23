@@ -272,8 +272,8 @@ public class RefundService {
 
             }else if(payment.getAftersaleId()!=null){//售后单支付
                 //校验售后单和店铺的关系 -1售后单不存在  0售后单不属于店铺  1售后单属于店铺
-             Integer checkBelong=aftersaleService.checkShopAftersale(shopId,payment.getAftersaleId());
-                //  String checkBelong="1";
+                  Integer checkBelong=aftersaleService.checkShopAftersale(shopId,payment.getAftersaleId());
+                //String checkBelong="1";
 
                 if(checkBelong.equals(-1)){
                     return retObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"售后单不存在");
