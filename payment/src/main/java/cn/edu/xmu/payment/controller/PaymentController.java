@@ -97,11 +97,11 @@ public class PaymentController {
     }
 
     /**
-     * 买家为订单创建支付单
+     * 买家为订单创建支付
      * @author Yuting Zhong@3333
-     * Modified at 2020.12.6
+     * Modified at 2020/12/9
      */
-    @ApiOperation(value="买家为订单创建支付",produces = "application/json")
+    @ApiOperation(value = "买家为订单创建支付",produces = "application/json")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType="header",dataType="String",name="authorization",value="用户token",required=true),
             @ApiImplicitParam(paramType="path",dataType="int",name="id",value="订单id",required=true,example="1"),
@@ -110,15 +110,13 @@ public class PaymentController {
     @ApiResponses({
             @ApiResponse(code=0,message="成功"),
             @ApiResponse(code=504,message = "订单不存在"),
-            @ApiResponse(code=505,message = "该订单无权访问"),
-            @ApiResponse(code=805,message = "用户返点不足"),
     })
     @Audit
     @PostMapping("/orders/{id}/payments")
-    public Object createOrderPayment(@ApiIgnore @LoginUser   Long userId,
-                                     @Validated @RequestBody NewPaymentVo vo, BindingResult bindingResult,
-                                     @PathVariable Long id){
-        logger.debug("insert order payment orderid: "+id);
+    public Object createOrderPayment(@ApiIgnore @LoginUser Long userId,
+                                         @Validated @RequestBody NewPaymentVo vo, BindingResult bindingResult,
+                                         @PathVariable Long id){
+        logger.debug("insert order payment: orderid: "+id);
 
         //校验前端数据
         Object returnObject = Common.processFieldErrors(bindingResult, httpServletResponse);
@@ -140,7 +138,6 @@ public class PaymentController {
 
         return retObject;
     }
-
     /**
      * 买家为售后单创建支付
      * @author Yuting Zhong@3333
@@ -155,11 +152,10 @@ public class PaymentController {
     @ApiResponses({
             @ApiResponse(code=0,message="成功"),
             @ApiResponse(code=504,message = "售后单不存在"),
-            @ApiResponse(code=805,message = "用户返点不足"),
     })
     @Audit
     @PostMapping("/aftersales/{id}/payments")
-    public Object createAftersalePayment(@ApiIgnore @LoginUser    Long userId,
+    public Object createAftersalePayment(@ApiIgnore @LoginUser Long userId,
                                      @Validated @RequestBody NewPaymentVo vo, BindingResult bindingResult,
                                      @PathVariable Long id){
         logger.debug("insert aftersale payment: orderid: "+id);
@@ -212,7 +208,7 @@ public class PaymentController {
             ret=Common.getListRetObject(returnObject);
         }
         else{
-            ret=Common.getNullRetObj(returnObject,httpServletResponse);
+            ret=Common.decorateReturnObject(returnObject);
         }
         return ret;
 
@@ -413,13 +409,14 @@ public class PaymentController {
     @GetMapping("/shops/{shopId}/aftersales/{id}/refunds")
     public Object getAftersaleRefundShop(@PathVariable Long shopId,@PathVariable Long id){
         logger.debug("getAftersaleRefundShop shopid: "+shopId+" afterid: "+id);
-
+        System.out.println("shopId"+shopId+" aftersaleId"+id);
         Object returnObject=null;
 
         ReturnObject refund=refundService.findAftersaleRefundShop(shopId,id);
 
         if(refund.getCode().equals(ResponseCode.OK)){
             returnObject=Common.getListRetObject(refund);
+            System.out.println(refund.getData());
         }else{
             returnObject=Common.decorateReturnObject(refund);
         }

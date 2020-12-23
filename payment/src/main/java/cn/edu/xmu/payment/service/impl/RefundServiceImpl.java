@@ -5,8 +5,11 @@ import cn.edu.xmu.ooad.util.ReturnObject;
 import cn.edu.xmu.order_provider.IFreightService;
 import cn.edu.xmu.order_provider.IOrderService;
 import cn.edu.xmu.order_provider.IPaymentService;
+import cn.edu.xmu.payment.mapper.PaymentPoMapper;
+import cn.edu.xmu.payment.mapper.RefundPoMapper;
 import cn.edu.xmu.payment.model.bo.Payment;
 import cn.edu.xmu.payment.model.po.PaymentPo;
+import cn.edu.xmu.payment.model.po.RefundPo;
 import cn.edu.xmu.payment.model.vo.NewRefundVo;
 import cn.edu.xmu.payment.service.PaymentService;
 import cn.edu.xmu.payment.service.RefundService;
@@ -28,6 +31,9 @@ public class RefundServiceImpl implements IPaymentService {
 
     @Autowired
     private RefundService refundService;
+
+    @Autowired
+    private RefundPoMapper refundPoMapper;
 
    @DubboReference(version = "0.0.1",check = false)
    private IOrderService orderService;
@@ -199,21 +205,27 @@ public class RefundServiceImpl implements IPaymentService {
         return 1;
     }
 
-    //售后退款
     /**
-     * 售后退款
-     * @param shopId
-     * @param customerId
-     * @param orderItemId
-     * @param amount
-     * @return  1退款成功 0退款金额大于支付金额 -1退款创建失败 -2 支付方面问题
+     * 售后订单退款
+     * @param aftersaleId 售后单id
+     * @param customerId 顾客id （不会被用到）
+     * @param orderItemId  订单明细id(不会被用到)
+     * @param amount 退款金额
+     * @return 1成功 0 失败
      */
     @Override
-    public Integer aftersaleRefund(Long shopId,Long customerId,Long orderItemId,Integer amount){
-        Long pid= orderService.getOrderItemPid(orderItemId);
-        //Long pid=0L;
+    public Integer aftersaleRefund(Long aftersaleId,Long customerId,Long orderItemId,Integer amount){
+       // System.out.println("aftersaleId"+aftersaleId+"amount"+amount);
+      RefundPo refundPo=new RefundPo();
+      refundPo.setAftersaleId(aftersaleId);
+      refundPo.setAmount(amount.longValue());
+      refundPo.setState((byte)RefundStates.REFUNDED.getCode());
 
-        return normalRefund(shopId,customerId,pid,amount.longValue());
+      int ret=refundPoMapper.insertSelective(refundPo);
+      if(ret==0)
+          return 0;
+      else
+          return 1;
     }
 
 }

@@ -64,10 +64,12 @@ public class RefundDao {
         RefundPoExample.Criteria criteria=example.createCriteria();
         criteria.andAftersaleIdEqualTo(id);
         List<RefundPo> refundPos=refundPoMapper.selectByExample(example);
+      //  System.out.println(refundPos.size());
 
         List<Refund> ret=new ArrayList<>(refundPos.size());
         for(RefundPo re:refundPos){
             Refund refund=new Refund(re);
+           // System.out.println(refund.getId());
             ret.add(refund);
         }
 

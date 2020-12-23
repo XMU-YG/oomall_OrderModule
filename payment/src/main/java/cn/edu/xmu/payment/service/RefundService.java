@@ -135,7 +135,7 @@ public class RefundService {
         //check=1 属于 check=0 不属于 check=-1 不存在
          Integer checkBelong=aftersaleService.checkUserAftersale(userId,aftersaleId);
        //  Integer checkBelong=1;
-
+        //System.out.println("aftersaleRefund"+checkBelong);
         if(checkBelong.equals(-1)){
             ReturnObject<VoObject> returnObject=new ReturnObject<>(ResponseCode.RESOURCE_ID_NOTEXIST,"售后单不存在");
             return returnObject;
@@ -240,7 +240,6 @@ public class RefundService {
             return retObject=new ReturnObject<>(ResponseCode.OK,"退款金额为0，退款成功，但不产生退款记录");
 
         }
-
 
         //跟据支付id获取支付
         Payment payment=paymentService.getPaymentById(id);

@@ -256,10 +256,10 @@ public class PaymentService {
 
         Long totalAmount=0L;
         for(PaymentPo po:paymentPos){
-            System.out.println(po.getAmount());
+            //System.out.println(po.getAmount());
             totalAmount=totalAmount+po.getAmount();
         }
-        System.out.println(totalAmount);
+        //System.out.println(totalAmount);
         if(amount.equals(totalAmount))
             return true;
 
