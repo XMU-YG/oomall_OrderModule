@@ -79,6 +79,7 @@ public enum ResponseCode {
     SHOP_ID_NOTEXIST(825,"不存在对应的shopid"),
     DEFAULTMODEL_EXISTED(826,"已经存在对应的默认模板"),
     MODEL_ID_NOTEXIST(827,"shopid不存在对应的模板id"),
+    MODEL_TYPE_DISMATCH(827,"模板ype dismatch"),
     /***************************************************
      *    商品模块错误码
      **************************************************/

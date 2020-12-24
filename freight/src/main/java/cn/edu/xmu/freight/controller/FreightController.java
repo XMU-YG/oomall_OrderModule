@@ -505,7 +505,7 @@ public class FreightController {
         Object ret=null;
         ReturnObject object=freightService.createWeightItem(shopId,id,vo);
         logger.debug("createWeightItem by: id : "+id);
-        if(object.getCode().equals(ResponseCode.OK))
+        if(object.getCode().equals(ResponseCode.OK)||object.getCode().equals(ResponseCode.MODEL_TYPE_DISMATCH))
         {
             httpServletResponse.setStatus(HttpStatus.SC_CREATED);
             ret=Common.getRetObject(object);

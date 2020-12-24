@@ -297,6 +297,9 @@ public class FreightService {
             return ro;
         }
 
+       int type=((FreightModelVo)ro.getData().createVo()).getType();
+        if(type!=0)
+            return new ReturnObject<>(ResponseCode.MODEL_TYPE_DISMATCH);
         //vo创建bo
         FreightItem freightItem=vo.createFreightItem();
         freightItem.setFreightModelId(id);
